@@ -1,5 +1,7 @@
 import { Medicine, MedicineCategory, AlternativeMedicine } from '../types/medicine';
 import { MOCK_MEDICINES, MOCK_CATEGORIES } from './mockData';
+import { apiClient } from './apiClient';
+import { ENV } from '../config/env';
 
 const SLUG_ALIASES: Record<string, string[]> = {
   'pain-relief': ['pain-relief', 'pain-fever', 'pain'],
@@ -22,41 +24,102 @@ export class MedicineService {
   private static categories: MedicineCategory[] = [...MOCK_CATEGORIES];
 
   static async getAllMedicines(): Promise<Medicine[]> {
-    await this.delay(150);
-    return [...this.medicines];
+    try {
+      const response = await apiClient.get<Medicine[]>('/medicines');
+      if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+        this.medicines = response.data;
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(100);
+      return [...this.medicines];
+    }
+    return [];
   }
 
   static async getPopularMedicines(): Promise<Medicine[]> {
-    await this.delay(150);
-    return this.medicines.filter((m) => m.isPopular);
+    try {
+      const response = await apiClient.get<Medicine[]>('/medicines/popular');
+      if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(100);
+      return this.medicines.filter((m) => m.isPopular);
+    }
+    return [];
   }
 
   static async getCategories(): Promise<MedicineCategory[]> {
-    await this.delay(100);
-    return [...this.categories];
+    try {
+      const response = await apiClient.get<MedicineCategory[]>('/categories');
+      if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+        this.categories = response.data;
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(80);
+      return [...this.categories];
+    }
+    return [];
   }
 
   static async getMedicineById(id: string): Promise<Medicine | null> {
-    await this.delay(100);
-    const found = this.medicines.find((m) => m.id === id);
-    return found ? { ...found } : null;
+    try {
+      const response = await apiClient.get<Medicine>(`/medicines/${id}`);
+      if (response.success && response.data) {
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(80);
+      const found = this.medicines.find((m) => m.id === id);
+      return found ? { ...found } : null;
+    }
+    return null;
   }
 
   static async getMedicinesByCategory(categorySlug: string): Promise<Medicine[]> {
-    await this.delay(150);
-    const validSlugs = SLUG_ALIASES[categorySlug] || [categorySlug];
-    const results = this.medicines.filter(
-      (m) =>
-        validSlugs.includes(m.categorySlug) ||
-        m.categorySlug.toLowerCase().includes(categorySlug.toLowerCase()) ||
-        categorySlug.toLowerCase().includes(m.categorySlug.toLowerCase())
-    );
-
-    // If still empty fallback to all or category title match
-    if (results.length === 0) {
-      return this.medicines.slice(0, 6);
+    try {
+      const response = await apiClient.get<Medicine[]>(`/categories/${categorySlug}/medicines`);
+      if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+        return response.data;
+      }
+    } catch {
+      // fallback
     }
-    return results;
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(100);
+      const validSlugs = SLUG_ALIASES[categorySlug] || [categorySlug];
+      const results = this.medicines.filter(
+        (m) =>
+          validSlugs.includes(m.categorySlug) ||
+          m.categorySlug.toLowerCase().includes(categorySlug.toLowerCase()) ||
+          categorySlug.toLowerCase().includes(m.categorySlug.toLowerCase())
+      );
+
+      if (results.length === 0) {
+        return this.medicines.slice(0, 6);
+      }
+      return results;
+    }
+    return [];
   }
 
   static async searchMedicines(query: string): Promise<{
@@ -65,44 +128,74 @@ export class MedicineService {
     byGenericMatches: Medicine[];
     byBrandMatches: Medicine[];
   }> {
-    await this.delay(180);
     const q = query.trim().toLowerCase();
     if (!q) {
       return { medicines: [], bySaltMatches: [], byGenericMatches: [], byBrandMatches: [] };
     }
 
-    const byBrandMatches = this.medicines.filter(
-      (m) => m.name.toLowerCase().includes(q) || m.brandName.toLowerCase().includes(q)
-    );
+    try {
+      const response = await apiClient.get<{
+        medicines: Medicine[];
+        bySaltMatches: Medicine[];
+        byGenericMatches: Medicine[];
+        byBrandMatches: Medicine[];
+      }>('/medicines/search', { q });
+      if (response.success && response.data && response.data.medicines) {
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
 
-    const byGenericMatches = this.medicines.filter(
-      (m) => m.genericName.toLowerCase().includes(q) && !byBrandMatches.includes(m)
-    );
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(120);
+      const byBrandMatches = this.medicines.filter(
+        (m) => m.name.toLowerCase().includes(q) || m.brandName.toLowerCase().includes(q)
+      );
 
-    const bySaltMatches = this.medicines.filter(
-      (m) =>
-        m.saltComposition.toLowerCase().includes(q) &&
-        !byBrandMatches.includes(m) &&
-        !byGenericMatches.includes(m)
-    );
+      const byGenericMatches = this.medicines.filter(
+        (m) => m.genericName.toLowerCase().includes(q) && !byBrandMatches.includes(m)
+      );
 
-    const combined = [...byBrandMatches, ...byGenericMatches, ...bySaltMatches];
+      const bySaltMatches = this.medicines.filter(
+        (m) =>
+          m.saltComposition.toLowerCase().includes(q) &&
+          !byBrandMatches.includes(m) &&
+          !byGenericMatches.includes(m)
+      );
 
-    return {
-      medicines: combined,
-      bySaltMatches,
-      byGenericMatches,
-      byBrandMatches,
-    };
+      const combined = [...byBrandMatches, ...byGenericMatches, ...bySaltMatches];
+
+      return {
+        medicines: combined,
+        bySaltMatches,
+        byGenericMatches,
+        byBrandMatches,
+      };
+    }
+
+    return { medicines: [], bySaltMatches: [], byGenericMatches: [], byBrandMatches: [] };
   }
 
   static async getAlternatives(medicineId: string): Promise<AlternativeMedicine[]> {
-    await this.delay(120);
-    const medicine = await this.getMedicineById(medicineId);
-    if (!medicine || !medicine.alternatives) {
-      return [];
+    try {
+      const response = await apiClient.get<AlternativeMedicine[]>(`/medicines/${medicineId}/alternatives`);
+      if (response.success && Array.isArray(response.data)) {
+        return response.data;
+      }
+    } catch {
+      // fallback
     }
-    return medicine.alternatives;
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(80);
+      const medicine = await this.getMedicineById(medicineId);
+      if (!medicine || !medicine.alternatives) {
+        return [];
+      }
+      return medicine.alternatives;
+    }
+    return [];
   }
 
   private static delay(ms: number): Promise<void> {

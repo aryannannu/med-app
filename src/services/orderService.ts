@@ -3,6 +3,8 @@ import { PharmacyOffer } from '../types/offer';
 import { Address } from '../types/user';
 import { Prescription } from '../types/prescription';
 import { MOCK_SAVED_ADDRESSES, MOCK_PHARMACIES, MOCK_MEDICINES } from './mockData';
+import { apiClient } from './apiClient';
+import { ENV } from '../config/env';
 
 export class OrderService {
   private static orders: Order[] = [
@@ -78,8 +80,8 @@ export class OrderService {
         {
           id: 't-3',
           status: 'offer_selected',
-          title: 'Offer Selected',
-          description: 'You accepted Apollo Medplus Pharmacy (Best Value)',
+          title: 'Offer Accepted',
+          description: 'Selected Apollo Pharmacy (Best Price & Fastest Delivery)',
           timestamp: Date.now() - 35 * 60 * 1000,
           isCompleted: true,
           isCurrent: false,
@@ -87,35 +89,26 @@ export class OrderService {
         {
           id: 't-4',
           status: 'preparing',
-          title: 'Pharmacy Preparing Order',
-          description: 'Pharmacist verified batch numbers & verified Rx',
+          title: 'Prescription Verified & Medicines Packed',
+          description: 'Pharmacist verified prescription and sealed tamper-proof bag',
           timestamp: Date.now() - 25 * 60 * 1000,
           isCompleted: true,
           isCurrent: false,
         },
         {
           id: 't-5',
-          status: 'packed',
-          title: 'Order Packed',
-          description: 'Tamper-evident sealed pack handed to delivery partner',
-          timestamp: Date.now() - 15 * 60 * 1000,
-          isCompleted: true,
-          isCurrent: false,
-        },
-        {
-          id: 't-6',
           status: 'out_for_delivery',
           title: 'Out for Delivery',
-          description: 'Rider Ramesh Kumar is arriving in ~12 mins',
-          timestamp: Date.now() - 8 * 60 * 1000,
+          description: 'Rider Ramesh Kumar is on the way (KA 03 HM 4812)',
+          timestamp: Date.now() - 10 * 60 * 1000,
           isCompleted: false,
           isCurrent: true,
         },
         {
-          id: 't-7',
+          id: 't-6',
           status: 'delivered',
           title: 'Delivered',
-          description: 'Order handed over safely',
+          description: 'Order delivered to doorstep',
           timestamp: 0,
           isCompleted: false,
           isCurrent: false,
@@ -123,60 +116,49 @@ export class OrderService {
       ],
     },
     {
-      id: 'ord-99',
-      orderNumber: 'DW-8812',
+      id: 'ord-102',
+      orderNumber: 'DW-8210',
       createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
       status: 'delivered',
       statusText: 'Delivered',
-      statusDescription: 'Order delivered on 16 Aug 2026',
+      statusDescription: 'Order delivered on 16 Aug 2026, 04:35 PM',
       items: [
         {
-          medicineId: MOCK_MEDICINES[5].id,
-          medicineName: MOCK_MEDICINES[5].name,
-          genericName: MOCK_MEDICINES[5].genericName,
-          packForm: MOCK_MEDICINES[5].packForm,
-          unitPrice: 46.0,
-          quantity: 2,
-          totalPrice: 92.0,
-          rxRequired: false,
-          image: MOCK_MEDICINES[5].image,
-        },
-        {
-          medicineId: MOCK_MEDICINES[7].id,
-          medicineName: MOCK_MEDICINES[7].name,
-          genericName: MOCK_MEDICINES[7].genericName,
-          packForm: MOCK_MEDICINES[7].packForm,
-          unitPrice: 114.0,
+          medicineId: MOCK_MEDICINES[2].id,
+          medicineName: MOCK_MEDICINES[2].name,
+          genericName: MOCK_MEDICINES[2].genericName,
+          packForm: MOCK_MEDICINES[2].packForm,
+          unitPrice: 165.0,
           quantity: 1,
-          totalPrice: 114.0,
+          totalPrice: 165.0,
           rxRequired: false,
-          image: MOCK_MEDICINES[7].image,
+          image: MOCK_MEDICINES[2].image,
         },
       ],
-      itemCount: 2,
+      itemCount: 1,
       selectedPharmacy: MOCK_PHARMACIES[1],
       hasRxItems: false,
-      itemSubtotal: 206.0,
-      mrpTotal: 246.0,
-      discount: 40.0,
-      deliveryFee: 30.0,
-      taxes: 4.0,
-      totalAmount: 240.0,
-      savingsTotal: 40.0,
+      itemSubtotal: 165.0,
+      mrpTotal: 195.0,
+      discount: 30.0,
+      deliveryFee: 0,
+      taxes: 0,
+      totalAmount: 165.0,
+      savingsTotal: 30.0,
       deliveryAddress: MOCK_SAVED_ADDRESSES[0],
-      deliveredAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 35 * 60 * 1000,
+      estimatedDeliveryTimestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 + 35 * 60 * 1000,
       timeline: [
         {
-          id: 't-1',
+          id: 't-201',
           status: 'request_created',
           title: 'Order Placed',
-          description: 'Order created',
+          description: 'Requirement sent to pharmacies',
           timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000,
           isCompleted: true,
           isCurrent: false,
         },
         {
-          id: 't-7',
+          id: 't-202',
           status: 'delivered',
           title: 'Delivered',
           description: 'Delivered by Wellness Forever Chemists',
@@ -189,24 +171,48 @@ export class OrderService {
   ];
 
   static async getOrders(tab: 'active' | 'completed' | 'cancelled' = 'active'): Promise<Order[]> {
-    await this.delay(200);
-    if (tab === 'active') {
-      return this.orders.filter((o) =>
-        ['request_created', 'finding_pharmacy', 'offers_received', 'offer_selected', 'preparing', 'packed', 'out_for_delivery'].includes(
-          o.status
-        )
-      );
+    try {
+      const response = await apiClient.get<Order[]>('/orders', { tab });
+      if (response.success && Array.isArray(response.data)) {
+        return response.data;
+      }
+    } catch {
+      // fallback
     }
-    if (tab === 'completed') {
-      return this.orders.filter((o) => o.status === 'delivered');
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(100);
+      if (tab === 'active') {
+        return this.orders.filter((o) =>
+          ['request_created', 'finding_pharmacy', 'offers_received', 'offer_selected', 'preparing', 'packed', 'out_for_delivery'].includes(
+            o.status
+          )
+        );
+      }
+      if (tab === 'completed') {
+        return this.orders.filter((o) => o.status === 'delivered');
+      }
+      return this.orders.filter((o) => o.status === 'cancelled');
     }
-    return this.orders.filter((o) => o.status === 'cancelled');
+    return [];
   }
 
   static async getOrderById(orderId: string): Promise<Order | null> {
-    await this.delay(150);
-    const order = this.orders.find((o) => o.id === orderId);
-    return order ? { ...order } : null;
+    try {
+      const response = await apiClient.get<Order>(`/orders/${orderId}`);
+      if (response.success && response.data) {
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(80);
+      const order = this.orders.find((o) => o.id === orderId);
+      return order ? { ...order } : null;
+    }
+    return null;
   }
 
   static async createOrderFromOffer(
@@ -215,8 +221,6 @@ export class OrderService {
     prescription?: Prescription,
     deliveryInstructions?: string
   ): Promise<Order> {
-    await this.delay(400);
-
     const orderNumber = `DW-${Math.floor(1000 + Math.random() * 9000)}`;
     const now = Date.now();
 
@@ -326,20 +330,46 @@ export class OrderService {
       timeline,
     };
 
-    this.orders.unshift(newOrder);
-    return newOrder;
+    try {
+      const response = await apiClient.post<Order>('/orders', newOrder);
+      if (response.success && response.data) {
+        this.orders.unshift(response.data);
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(200);
+      this.orders.unshift(newOrder);
+      return newOrder;
+    }
+
+    throw new Error('Could not create order');
   }
 
   static async cancelOrder(orderId: string, reason: string): Promise<Order | null> {
-    await this.delay(200);
-    const order = this.orders.find((o) => o.id === orderId);
-    if (order) {
-      order.status = 'cancelled';
-      order.statusText = 'Order Cancelled';
-      order.statusDescription = `Cancelled: ${reason}`;
-      order.cancellationReason = reason;
-      order.cancelledAt = Date.now();
-      return { ...order };
+    try {
+      const response = await apiClient.post<Order>(`/orders/${orderId}/cancel`, { reason });
+      if (response.success && response.data) {
+        return response.data;
+      }
+    } catch {
+      // fallback
+    }
+
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(150);
+      const order = this.orders.find((o) => o.id === orderId);
+      if (order) {
+        order.status = 'cancelled';
+        order.statusText = 'Order Cancelled';
+        order.statusDescription = `Cancelled: ${reason}`;
+        order.cancellationReason = reason;
+        order.cancelledAt = Date.now();
+        return { ...order };
+      }
     }
     return null;
   }

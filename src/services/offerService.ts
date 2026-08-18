@@ -2,168 +2,180 @@ import { CartItem } from '../types/cart';
 import { PharmacyOffer, OfferTag } from '../types/offer';
 import { Address } from '../types/user';
 import { MOCK_PHARMACIES } from './mockData';
+import { apiClient } from './apiClient';
+import { ENV } from '../config/env';
 
 export class OfferService {
   private static activeOffers: Map<string, PharmacyOffer[]> = new Map();
 
   static async generateOffersForCart(cartId: string, items: CartItem[], address: Address): Promise<PharmacyOffer[]> {
-    await this.delay(1200); // Simulate matching with network
-
     if (!items || items.length === 0) {
       return [];
     }
 
-    let baseMrpTotal = 0;
-    let baseItemTotal = 0;
-
-    for (const item of items) {
-      const qty = item.quantity;
-      const mrp = item.selectedVariant?.mrp ?? item.medicine.mrp;
-      const price = item.selectedVariant?.discountPrice ?? item.medicine.discountPrice;
-      baseMrpTotal += mrp * qty;
-      baseItemTotal += price * qty;
+    try {
+      const response = await apiClient.post<PharmacyOffer[]>('/offers/generate', {
+        cartId,
+        items,
+        addressId: address.id,
+      });
+      if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+        this.activeOffers.set(cartId, response.data);
+        return response.data;
+      }
+    } catch {
+      // fallback
     }
 
-    const now = Date.now();
-    const expiresAt = now + 10 * 60 * 1000; // 10 minutes validity
+    if (ENV.ENABLE_MOCK_FALLBACK) {
+      await this.delay(900);
 
-    // Generate 4 distinct competing offers
-    const offers: PharmacyOffer[] = [
-      // 1. RECOMMENDED (Optimal balance)
-      {
-        id: `off-rec-${cartId}`,
-        cartId,
-        pharmacyId: MOCK_PHARMACIES[0].id,
-        pharmacy: MOCK_PHARMACIES[0],
-        createdAt: now,
-        expiresAt,
-        isExpired: false,
-        tags: ['recommended'],
-        primaryTag: 'recommended',
-        mrpTotal: baseMrpTotal,
-        medicineSubtotal: Math.round(baseItemTotal * 0.94), // Extra 6% discount
-        discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.94),
-        deliveryFee: 0, // Free delivery promo
-        taxesAndFees: 4,
-        finalPayableAmount: Math.round(baseItemTotal * 0.94) + 4,
-        totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.94 + 4)),
-        estimatedDeliveryMinutes: 20,
-        estimatedDeliveryTimeText: '20 mins',
-        fulfillmentScore: 100,
-        allMedicinesAvailable: true,
-        itemPrices: items.map((it) => ({
-          medicineId: it.medicineId,
-          medicineName: it.medicine.name,
-          quantity: it.quantity,
-          unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.94),
-          totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.94 * it.quantity),
-          isAvailable: true,
-        })),
-        notes: 'Best combination of fast 20 min delivery, highest 4.9★ rating, and free delivery.',
-      },
+      let baseMrpTotal = 0;
+      let baseItemTotal = 0;
 
-      // 2. LOWEST PRICE (Max savings)
-      {
-        id: `off-low-${cartId}`,
-        cartId,
-        pharmacyId: MOCK_PHARMACIES[2].id,
-        pharmacy: MOCK_PHARMACIES[2],
-        createdAt: now,
-        expiresAt,
-        isExpired: false,
-        tags: ['lowest_price'],
-        primaryTag: 'lowest_price',
-        mrpTotal: baseMrpTotal,
-        medicineSubtotal: Math.round(baseItemTotal * 0.88), // Extra 12% discount
-        discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.88),
-        deliveryFee: 15,
-        taxesAndFees: 4,
-        finalPayableAmount: Math.round(baseItemTotal * 0.88) + 15 + 4,
-        totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.88 + 19)),
-        estimatedDeliveryMinutes: 35,
-        estimatedDeliveryTimeText: '35 mins',
-        fulfillmentScore: 100,
-        allMedicinesAvailable: true,
-        itemPrices: items.map((it) => ({
-          medicineId: it.medicineId,
-          medicineName: it.medicine.name,
-          quantity: it.quantity,
-          unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.88),
-          totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.88 * it.quantity),
-          isAvailable: true,
-        })),
-        notes: 'Maximum medicine discount available. Standard 35 min delivery.',
-      },
+      for (const item of items) {
+        const qty = item.quantity;
+        const mrp = item.selectedVariant?.mrp ?? item.medicine.mrp;
+        const price = item.selectedVariant?.discountPrice ?? item.medicine.discountPrice;
+        baseMrpTotal += mrp * qty;
+        baseItemTotal += price * qty;
+      }
 
-      // 3. FASTEST DELIVERY (Express ETA)
-      {
-        id: `off-fast-${cartId}`,
-        cartId,
-        pharmacyId: MOCK_PHARMACIES[1].id,
-        pharmacy: MOCK_PHARMACIES[1],
-        createdAt: now,
-        expiresAt,
-        isExpired: false,
-        tags: ['fastest_delivery'],
-        primaryTag: 'fastest_delivery',
-        mrpTotal: baseMrpTotal,
-        medicineSubtotal: Math.round(baseItemTotal * 0.98),
-        discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.98),
-        deliveryFee: 25,
-        taxesAndFees: 4,
-        finalPayableAmount: Math.round(baseItemTotal * 0.98) + 25 + 4,
-        totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.98 + 29)),
-        estimatedDeliveryMinutes: 15,
-        estimatedDeliveryTimeText: '15 mins',
-        fulfillmentScore: 100,
-        allMedicinesAvailable: true,
-        itemPrices: items.map((it) => ({
-          medicineId: it.medicineId,
-          medicineName: it.medicine.name,
-          quantity: it.quantity,
-          unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.98),
-          totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.98 * it.quantity),
-          isAvailable: true,
-        })),
-        notes: 'Closest store (1.4 km). Priority rider dispatched immediately.',
-      },
+      const now = Date.now();
+      const expiresAt = now + 10 * 60 * 1000;
 
-      // 4. BEST RATED (Super store)
-      {
-        id: `off-rated-${cartId}`,
-        cartId,
-        pharmacyId: MOCK_PHARMACIES[3].id,
-        pharmacy: MOCK_PHARMACIES[3],
-        createdAt: now,
-        expiresAt,
-        isExpired: false,
-        tags: ['best_rated'],
-        primaryTag: 'best_rated',
-        mrpTotal: baseMrpTotal,
-        medicineSubtotal: Math.round(baseItemTotal * 0.92),
-        discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.92),
-        deliveryFee: 20,
-        taxesAndFees: 4,
-        finalPayableAmount: Math.round(baseItemTotal * 0.92) + 20 + 4,
-        totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.92 + 24)),
-        estimatedDeliveryMinutes: 40,
-        estimatedDeliveryTimeText: '40 mins',
-        fulfillmentScore: 100,
-        allMedicinesAvailable: true,
-        itemPrices: items.map((it) => ({
-          medicineId: it.medicineId,
-          medicineName: it.medicine.name,
-          quantity: it.quantity,
-          unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.92),
-          totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.92 * it.quantity),
-          isAvailable: true,
-        })),
-        notes: 'NABH-accredited pharmacy with tamper-proof seal and temperature-controlled delivery.',
-      },
-    ];
+      const offers: PharmacyOffer[] = [
+        {
+          id: `off-rec-${cartId}`,
+          cartId,
+          pharmacyId: MOCK_PHARMACIES[0].id,
+          pharmacy: MOCK_PHARMACIES[0],
+          createdAt: now,
+          expiresAt,
+          isExpired: false,
+          tags: ['recommended'],
+          primaryTag: 'recommended',
+          mrpTotal: baseMrpTotal,
+          medicineSubtotal: Math.round(baseItemTotal * 0.94),
+          discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.94),
+          deliveryFee: 0,
+          taxesAndFees: 4,
+          finalPayableAmount: Math.round(baseItemTotal * 0.94) + 4,
+          totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.94 + 4)),
+          estimatedDeliveryMinutes: 20,
+          estimatedDeliveryTimeText: '20 mins',
+          fulfillmentScore: 100,
+          allMedicinesAvailable: true,
+          itemPrices: items.map((it) => ({
+            medicineId: it.medicineId,
+            medicineName: it.medicine.name,
+            quantity: it.quantity,
+            unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.94),
+            totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.94 * it.quantity),
+            isAvailable: true,
+          })),
+          notes: 'Best combination of fast 20 min delivery, highest 4.9★ rating, and free delivery.',
+        },
+        {
+          id: `off-low-${cartId}`,
+          cartId,
+          pharmacyId: MOCK_PHARMACIES[2].id,
+          pharmacy: MOCK_PHARMACIES[2],
+          createdAt: now,
+          expiresAt,
+          isExpired: false,
+          tags: ['lowest_price'],
+          primaryTag: 'lowest_price',
+          mrpTotal: baseMrpTotal,
+          medicineSubtotal: Math.round(baseItemTotal * 0.88),
+          discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.88),
+          deliveryFee: 15,
+          taxesAndFees: 4,
+          finalPayableAmount: Math.round(baseItemTotal * 0.88) + 15 + 4,
+          totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.88 + 19)),
+          estimatedDeliveryMinutes: 45,
+          estimatedDeliveryTimeText: '45 mins',
+          fulfillmentScore: 100,
+          allMedicinesAvailable: true,
+          itemPrices: items.map((it) => ({
+            medicineId: it.medicineId,
+            medicineName: it.medicine.name,
+            quantity: it.quantity,
+            unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.88),
+            totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.88 * it.quantity),
+            isAvailable: true,
+          })),
+          notes: 'Lowest total price in your area. Maximum savings on bulk prescription orders.',
+        },
+        {
+          id: `off-fast-${cartId}`,
+          cartId,
+          pharmacyId: MOCK_PHARMACIES[1].id,
+          pharmacy: MOCK_PHARMACIES[1],
+          createdAt: now,
+          expiresAt,
+          isExpired: false,
+          tags: ['fastest_delivery'],
+          primaryTag: 'fastest_delivery',
+          mrpTotal: baseMrpTotal,
+          medicineSubtotal: Math.round(baseItemTotal * 0.98),
+          discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.98),
+          deliveryFee: 25,
+          taxesAndFees: 4,
+          finalPayableAmount: Math.round(baseItemTotal * 0.98) + 25 + 4,
+          totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.98 + 29)),
+          estimatedDeliveryMinutes: 12,
+          estimatedDeliveryTimeText: '12 mins',
+          fulfillmentScore: 100,
+          allMedicinesAvailable: true,
+          itemPrices: items.map((it) => ({
+            medicineId: it.medicineId,
+            medicineName: it.medicine.name,
+            quantity: it.quantity,
+            unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.98),
+            totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.98 * it.quantity),
+            isAvailable: true,
+          })),
+          notes: 'Lightning fast 12 min emergency delivery from nearest local pharmacy (0.8 km).',
+        },
+        {
+          id: `off-rate-${cartId}`,
+          cartId,
+          pharmacyId: MOCK_PHARMACIES[3].id,
+          pharmacy: MOCK_PHARMACIES[3],
+          createdAt: now,
+          expiresAt,
+          isExpired: false,
+          tags: ['best_rated'],
+          primaryTag: 'best_rated',
+          mrpTotal: baseMrpTotal,
+          medicineSubtotal: Math.round(baseItemTotal * 0.92),
+          discountAmount: Math.round(baseMrpTotal - baseItemTotal * 0.92),
+          deliveryFee: 20,
+          taxesAndFees: 4,
+          finalPayableAmount: Math.round(baseItemTotal * 0.92) + 20 + 4,
+          totalSavings: Math.round(baseMrpTotal - (baseItemTotal * 0.92 + 24)),
+          estimatedDeliveryMinutes: 40,
+          estimatedDeliveryTimeText: '40 mins',
+          fulfillmentScore: 100,
+          allMedicinesAvailable: true,
+          itemPrices: items.map((it) => ({
+            medicineId: it.medicineId,
+            medicineName: it.medicine.name,
+            quantity: it.quantity,
+            unitPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.92),
+            totalPrice: Math.round((it.medicine.discountPrice || it.medicine.mrp) * 0.92 * it.quantity),
+            isAvailable: true,
+          })),
+          notes: 'NABH-accredited pharmacy with tamper-proof seal and temperature-controlled delivery.',
+        },
+      ];
 
-    this.activeOffers.set(cartId, offers);
-    return offers;
+      this.activeOffers.set(cartId, offers);
+      return offers;
+    }
+
+    return [];
   }
 
   static getActiveOffers(cartId: string): PharmacyOffer[] {
