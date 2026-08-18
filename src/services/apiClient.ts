@@ -1,4 +1,4 @@
-import { ENV } from '../config/env';
+import { ENV, getFullApiUrl } from '../config/env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface ApiResponse<T = any> {
@@ -11,6 +11,17 @@ export interface ApiResponse<T = any> {
 class ApiClient {
   private baseUrl: string = ENV.API_URL;
   private timeoutMs: number = ENV.API_TIMEOUT;
+
+  /**
+   * Dynamically change base URL at runtime if needed
+   */
+  setBaseUrl(url: string): void {
+    this.baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+  }
+
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
@@ -30,8 +41,16 @@ class ApiClient {
     return headers;
   }
 
+  private resolveUrl(endpoint: string): string {
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      return endpoint;
+    }
+    const clean = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    return `${this.baseUrl}${clean}`;
+  }
+
   async get<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<ApiResponse<T>> {
-    let url = `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    let url = this.resolveUrl(endpoint);
     if (params) {
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, val]) => {
@@ -47,7 +66,7 @@ class ApiClient {
   }
 
   async post<T>(endpoint: string, body?: any): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    const url = this.resolveUrl(endpoint);
     return this.request<T>(url, {
       method: 'POST',
       body: body ? JSON.stringify(body) : undefined,
@@ -55,7 +74,7 @@ class ApiClient {
   }
 
   async put<T>(endpoint: string, body?: any): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    const url = this.resolveUrl(endpoint);
     return this.request<T>(url, {
       method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
@@ -63,7 +82,7 @@ class ApiClient {
   }
 
   async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    const url = this.resolveUrl(endpoint);
     return this.request<T>(url, { method: 'DELETE' });
   }
 
