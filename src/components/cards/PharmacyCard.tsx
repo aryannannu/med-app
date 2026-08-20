@@ -30,7 +30,7 @@ export const PharmacyCard: React.FC<PharmacyCardProps> = ({
 
         <View style={styles.infoContainer}>
           <View style={styles.nameRow}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} numberOfLines={1} weight="700" style={styles.name}>
+            <AppText variant="titleMedium" color={COLORS.textPrimary} numberOfLines={1} weight="600" style={styles.name}>
               {pharmacy.name}
             </AppText>
           </View>

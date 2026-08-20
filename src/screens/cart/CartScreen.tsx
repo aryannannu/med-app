@@ -26,11 +26,18 @@ import { formatCurrency } from '../../utils/currency';
 
 export const CartScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-  const { items, summary, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { cartId, items, summary, updateQuantity, removeFromCart, clearCart } = useCart();
   const { activePrescription } = usePrescription();
   const { showToast } = useToast();
 
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+
+  // Check if cart was created inside a specific store
+  const isStoreSpecificCart = items.length > 0 && items.every((i) => i.sourcePharmacyId);
+  const storeName = isStoreSpecificCart ? items[0]?.sourcePharmacyName || 'Local Pharmacy' : null;
+
+  // Check if any item is out of stock / unavailable
+  const unavailableItems = items.filter((i) => i.medicine?.inStock === false);
 
   if (items.length === 0) {
     return (
@@ -39,7 +46,7 @@ export const CartScreen: React.FC = () => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
             Medicine Cart
           </AppText>
           <View style={{ width: 40 }} />
@@ -48,7 +55,7 @@ export const CartScreen: React.FC = () => {
         <EmptyState
           icon="cart-outline"
           title="Your Cart is Empty"
-          message="Search and add medicines or upload your doctor's prescription to receive competitive pharmacy offers."
+          message="Search medicines or upload your doctor's prescription to receive competitive pharmacy bids."
           actionText="Browse Medicines"
           onActionPress={() => navigation.navigate('Search')}
         />
@@ -56,62 +63,123 @@ export const CartScreen: React.FC = () => {
     );
   }
 
-  const handleCheckout = () => {
+  const handleProceed = () => {
+    if (unavailableItems.length > 0) {
+      showToast('Please remove unavailable items before continuing', 'warning');
+      return;
+    }
+
     if (summary.hasRxItems && !activePrescription) {
       showToast('Please attach a prescription for your Rx medicines', 'warning');
       navigation.navigate('UploadPrescription', { fromCart: true });
-    } else {
-      navigation.navigate('CheckoutReview');
+      return;
     }
+
+    if (isStoreSpecificCart) {
+      // Mode 2: Direct Store Checkout
+      navigation.navigate('CheckoutReview');
+    } else {
+      // Mode 1: Marketplace Bidding
+      navigation.navigate('FindingPharmacies', { cartId });
+    }
+  };
+
+  const handleRemoveUnavailable = () => {
+    unavailableItems.forEach((it) => removeFromCart(it.id));
+    showToast('Removed unavailable items from cart', 'info');
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={styles.backBtn}
+        >
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
-          Medicine Requirement ({summary.itemCount})
-        </AppText>
+
+        <View style={styles.headerTitleCol}>
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+            {isStoreSpecificCart ? `Cart • ${storeName}` : 'Medicine Cart'}
+          </AppText>
+          <AppText variant="caption" color={COLORS.textSecondary}>
+            {summary.itemCount} {summary.itemCount === 1 ? 'medicine' : 'medicines'} ({summary.totalQuantity} items)
+          </AppText>
+        </View>
+
         <TouchableOpacity onPress={() => clearCart()} style={styles.clearBtn}>
-          <AppText variant="caption" color={COLORS.danger} weight="700">
+          <AppText variant="caption" color={COLORS.danger} weight="600">
             Clear All
           </AppText>
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Marketplace Notice Banner */}
-        <View style={styles.marketplaceBanner}>
-          <Ionicons name="sparkles" size={18} color={COLORS.primary} style={{ marginRight: 8, marginTop: 2 }} />
-          <View style={{ flex: 1 }}>
-            <AppText variant="titleSmall" color={COLORS.primaryDark} weight="700">
-              Universal Medicine Cart
-            </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary}>
-              You don't need to choose a specific pharmacy now. After you submit, verified local pharmacies will send competing price & ETA offers.
+        {/* Universal Marketplace Cart Banner vs Store Cart */}
+        {!isStoreSpecificCart ? (
+          <View style={[styles.marketplaceBanner, SHADOWS.subtle]}>
+            <View style={styles.bannerIconCircle}>
+              <Ionicons name="sparkles" size={18} color="#FFFFFF" />
+            </View>
+            <View style={{ flex: 1, marginLeft: SPACING.md }}>
+              <AppText variant="titleSmall" color={COLORS.primary} weight="600">
+                Universal Medicine Request
+              </AppText>
+              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2, lineHeight: 18 }}>
+                You don't need to pick a pharmacy now. After you tap below, eligible local pharmacies will send you competing prices &amp; express delivery bids.
+              </AppText>
+            </View>
+          </View>
+        ) : (
+          <View style={[styles.storeBanner, SHADOWS.subtle]}>
+            <Ionicons name="storefront" size={18} color="#15803D" />
+            <AppText variant="caption" color="#15803D" weight="600" style={{ marginLeft: 6, flex: 1 }}>
+              Direct ordering from {storeName}. Your order will be fulfilled exclusively by this pharmacy.
             </AppText>
           </View>
-        </View>
+        )}
 
-        {/* Prescription Requirement Banner if applicable */}
+        {/* Unavailable items alert banner if applicable */}
+        {unavailableItems.length > 0 && (
+          <View style={[styles.unavailableBanner, SHADOWS.subtle]}>
+            <View style={styles.unavailableTopRow}>
+              <Ionicons name="alert-circle" size={20} color="#DC2626" />
+              <View style={{ flex: 1, marginLeft: SPACING.sm }}>
+                <AppText variant="titleSmall" color="#DC2626" weight="600">
+                  {unavailableItems.length} Item{unavailableItems.length > 1 ? 's' : ''} Currently Unavailable
+                </AppText>
+                <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                  Some items are out of stock at nearby pharmacies. Please remove them to proceed.
+                </AppText>
+              </View>
+            </View>
+            <TouchableOpacity onPress={handleRemoveUnavailable} style={styles.removeUnavailableBtn}>
+              <AppText variant="caption" color="#DC2626" weight="600">
+                Remove Unavailable Items
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Prescription Requirement Banner */}
         {summary.hasRxItems && (
-          <View style={[styles.rxAlertCard, !activePrescription ? styles.rxAlertWarning : styles.rxAlertSuccess]}>
+          <View style={[styles.rxAlertCard, !activePrescription ? styles.rxAlertWarning : styles.rxAlertSuccess, SHADOWS.subtle]}>
             <Ionicons
-              name={activePrescription ? 'checkmark-circle' : 'alert-circle'}
+              name={activePrescription ? 'checkmark-circle' : 'document-text'}
               size={24}
-              color={activePrescription ? COLORS.success : COLORS.rxRed}
+              color={activePrescription ? '#15803D' : '#DC2626'}
             />
             <View style={styles.rxAlertContent}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
-                {activePrescription ? 'Prescription Attached' : 'Prescription Required for 1+ Items'}
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                {activePrescription ? 'Prescription Attached' : 'Prescription Required for Rx Medicines'}
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
                 {activePrescription
                   ? `Attached: ${activePrescription.fileName}`
-                  : 'Please upload a prescription before checkout.'}
+                  : 'Your doctor prescription is needed before dispatch.'}
               </AppText>
             </View>
 
@@ -119,20 +187,20 @@ export const CartScreen: React.FC = () => {
               onPress={() => navigation.navigate('UploadPrescription', { fromCart: true })}
               style={styles.rxActionBtn}
             >
-              <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
+              <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
                 {activePrescription ? 'Change' : 'Upload'}
               </AppText>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Free Delivery Progress */}
-        <View style={styles.freeDeliveryBox}>
+        {/* Free Delivery Progress Bar */}
+        <View style={[styles.freeDeliveryBox, SHADOWS.subtle]}>
           <View style={styles.freeDeliveryHeader}>
             <Ionicons
               name="bicycle"
               size={18}
-              color={summary.isEligibleForFreeDelivery ? COLORS.success : COLORS.primary}
+              color={summary.isEligibleForFreeDelivery ? '#15803D' : COLORS.primary}
             />
             <AppText
               variant="bodySmall"
@@ -141,7 +209,7 @@ export const CartScreen: React.FC = () => {
               style={{ marginLeft: 6, flex: 1 }}
             >
               {summary.isEligibleForFreeDelivery
-                ? 'Yay! You are eligible for FREE delivery offers'
+                ? 'Yay! You unlocked FREE express delivery'
                 : `Add ${formatCurrency(summary.amountNeededForFreeDelivery)} more for free delivery`}
             </AppText>
           </View>
@@ -151,6 +219,7 @@ export const CartScreen: React.FC = () => {
                 styles.progressBarFill,
                 {
                   width: `${Math.min(100, (summary.itemTotal / summary.freeDeliveryThreshold) * 100)}%`,
+                  backgroundColor: summary.isEligibleForFreeDelivery ? '#15803D' : COLORS.primary,
                 },
               ]}
             />
@@ -159,9 +228,16 @@ export const CartScreen: React.FC = () => {
 
         {/* Medicine Cart Items List */}
         <View style={styles.itemsContainer}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.md }}>
-            Medicines ({summary.itemCount})
-          </AppText>
+          <View style={styles.itemsHeaderRow}>
+            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+              Medicines ({summary.itemCount})
+            </AppText>
+            <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+              <AppText variant="caption" color={COLORS.primary} weight="600">
+                + Add More
+              </AppText>
+            </TouchableOpacity>
+          </View>
 
           {items.map((item) => (
             <View key={item.id} style={[styles.itemCard, SHADOWS.subtle]}>
@@ -169,22 +245,25 @@ export const CartScreen: React.FC = () => {
 
               <View style={styles.itemInfo}>
                 <View style={styles.itemHeader}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" numberOfLines={1} style={{ flex: 1 }}>
-                    {item.medicine.name}
-                  </AppText>
+                  <View style={{ flex: 1, marginRight: SPACING.sm }}>
+                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
+                      {item.medicine.name}
+                    </AppText>
+                    <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1} style={{ marginTop: 1 }}>
+                      {item.medicine.saltComposition}
+                    </AppText>
+                  </View>
+
                   <TouchableOpacity
                     onPress={() => setItemToRemove(item.id)}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={styles.deleteIconBtn}
                   >
-                    <Ionicons name="trash-outline" size={18} color={COLORS.danger} />
+                    <Ionicons name="trash-outline" size={16} color={COLORS.textMuted} />
                   </TouchableOpacity>
                 </View>
 
-                <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1}>
-                  {item.medicine.saltComposition}
-                </AppText>
-
-                {item.rxRequired && <RxBadge style={{ marginTop: 4 }} />}
+                {item.rxRequired && <RxBadge style={{ marginTop: 3 }} />}
 
                 <View style={styles.itemBottomRow}>
                   <PriceDisplay
@@ -205,10 +284,10 @@ export const CartScreen: React.FC = () => {
           ))}
         </View>
 
-        {/* Bill Summary */}
+        {/* Bill Estimate Summary */}
         <View style={[styles.billCard, SHADOWS.subtle]}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.md }}>
-            Order Estimate
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
+            Price &amp; Bill Estimate
           </AppText>
 
           <View style={styles.billRow}>
@@ -221,21 +300,21 @@ export const CartScreen: React.FC = () => {
           </View>
 
           <View style={styles.billRow}>
-            <AppText variant="bodySmall" color={COLORS.secondaryDark} weight="600">
-              Total Discount Savings
+            <AppText variant="bodySmall" color="#15803D" weight="600">
+              Estimated Marketplace Savings
             </AppText>
-            <AppText variant="bodySmall" color={COLORS.secondaryDark} weight="700">
+            <AppText variant="bodySmall" color="#15803D" weight="600">
               - {formatCurrency(summary.savingsTotal)}
             </AppText>
           </View>
 
           <View style={styles.billRow}>
             <AppText variant="bodySmall" color={COLORS.textSecondary}>
-              Est. Delivery Fee
+              Delivery Partner Fee
             </AppText>
             <AppText
               variant="bodySmall"
-              color={summary.estimatedDeliveryFee === 0 ? COLORS.success : COLORS.textPrimary}
+              color={summary.estimatedDeliveryFee === 0 ? '#15803D' : COLORS.textPrimary}
               weight="600"
             >
               {summary.estimatedDeliveryFee === 0 ? 'FREE' : formatCurrency(summary.estimatedDeliveryFee)}
@@ -244,7 +323,7 @@ export const CartScreen: React.FC = () => {
 
           <View style={styles.billRow}>
             <AppText variant="bodySmall" color={COLORS.textSecondary}>
-              Handling & Packaging
+              Pharmacy Handling &amp; GST
             </AppText>
             <AppText variant="bodySmall" color={COLORS.textPrimary}>
               {formatCurrency(summary.taxesAndHandling)}
@@ -254,17 +333,22 @@ export const CartScreen: React.FC = () => {
           <View style={styles.billDivider} />
 
           <View style={styles.billRow}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
               Estimated Total
             </AppText>
-            <AppText variant="titleLarge" color={COLORS.primary} weight="800">
+            <AppText variant="titleLarge" color={COLORS.primary} weight="600">
               {formatCurrency(summary.estimatedFinalTotal)}
             </AppText>
           </View>
 
-          <AppText variant="caption" color={COLORS.textMuted} style={{ marginTop: 6 }}>
-            *Final payable amount depends on the pharmacy offer you select next.
-          </AppText>
+          <View style={styles.estimateNoticeBox}>
+            <Ionicons name="information-circle-outline" size={16} color={COLORS.primary} />
+            <AppText variant="caption" color={COLORS.textSecondary} style={{ marginLeft: 6, flex: 1, fontSize: 11 }}>
+              {isStoreSpecificCart
+                ? 'Final order bill from this store.'
+                : 'Final price will be determined when nearby pharmacies submit competitive bids.'}
+            </AppText>
+          </View>
         </View>
       </ScrollView>
 
@@ -274,27 +358,33 @@ export const CartScreen: React.FC = () => {
           <AppText variant="caption" color={COLORS.textMuted}>
             Cart Total ({summary.totalQuantity} items)
           </AppText>
-          <AppText variant="titleLarge" color={COLORS.primary} weight="800">
+          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
             {formatCurrency(summary.estimatedFinalTotal)}
           </AppText>
         </View>
 
         <View style={styles.bottomBtnCol}>
           <AppButton
-            title="PROCEED"
+            title={isStoreSpecificCart ? 'Continue to Checkout' : 'Find Best Offers'}
             variant="primary"
             size="lg"
-            onPress={handleCheckout}
-            rightIcon={<Ionicons name="arrow-forward" size={18} color={COLORS.textInverse} />}
+            onPress={handleProceed}
+            rightIcon={
+              <Ionicons
+                name={isStoreSpecificCart ? 'arrow-forward' : 'sparkles'}
+                size={18}
+                color="#FFFFFF"
+              />
+            }
           />
         </View>
       </View>
 
-      {/* Remove confirmation modal */}
+      {/* Remove Confirmation Modal */}
       <ConfirmationModal
         visible={!!itemToRemove}
         title="Remove Medicine?"
-        message="Are you sure you want to remove this item from your cart requirement?"
+        message="Are you sure you want to remove this medicine from your cart?"
         confirmText="Remove"
         cancelText="Cancel"
         isDestructive
@@ -315,7 +405,7 @@ export const CartScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#F8F8FC',
   },
   header: {
     flexDirection: 'row',
@@ -323,16 +413,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
+    borderBottomColor: '#E8E8EE',
   },
   backBtn: {
     width: 40,
     height: 40,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerTitleCol: {
+    flex: 1,
+    alignItems: 'center',
   },
   clearBtn: {
     padding: SPACING.xs,
@@ -343,19 +436,56 @@ const styles = StyleSheet.create({
   },
   marketplaceBanner: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primarySubtle,
-    borderRadius: BORDER_RADIUS.lg,
+    alignItems: 'flex-start',
+    backgroundColor: '#ECE8F7',
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.primaryMuted,
+    borderColor: '#DCD5F0',
+  },
+  bannerIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  storeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  unavailableBanner: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  unavailableTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  removeUnavailableBtn: {
+    marginTop: SPACING.sm,
+    paddingVertical: 4,
+    alignSelf: 'flex-end',
   },
   rxAlertCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
   },
   rxAlertWarning: {
@@ -363,8 +493,8 @@ const styles = StyleSheet.create({
     borderColor: '#FECACA',
   },
   rxAlertSuccess: {
-    backgroundColor: COLORS.successLight,
-    borderColor: '#A7F3D0',
+    backgroundColor: '#DCFCE7',
+    borderColor: '#BBF7D0',
   },
   rxAlertContent: {
     flex: 1,
@@ -373,17 +503,17 @@ const styles = StyleSheet.create({
   rxActionBtn: {
     paddingVertical: 6,
     paddingHorizontal: SPACING.md,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E8E8EE',
   },
   freeDeliveryBox: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: '#FFFFFF',
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E8E8EE',
     marginBottom: SPACING.lg,
   },
   freeDeliveryHeader: {
@@ -394,31 +524,36 @@ const styles = StyleSheet.create({
   progressBarBg: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: COLORS.surfaceMuted,
+    backgroundColor: '#F8F8FC',
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: COLORS.secondary,
     borderRadius: 3,
   },
   itemsContainer: {
     marginBottom: SPACING.lg,
   },
+  itemsHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
   itemCard: {
     flexDirection: 'row',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: '#FFFFFF',
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.md,
+    borderColor: '#E8E8EE',
+    marginBottom: SPACING.sm,
   },
   itemImage: {
-    width: 70,
-    height: 70,
+    width: 68,
+    height: 68,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surfaceSubtle,
+    backgroundColor: '#F8F8FC',
   },
   itemInfo: {
     flex: 1,
@@ -427,8 +562,11 @@ const styles = StyleSheet.create({
   },
   itemHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+  },
+  deleteIconBtn: {
+    padding: 2,
   },
   itemBottomRow: {
     flexDirection: 'row',
@@ -437,11 +575,11 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   billCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E8E8EE',
     marginBottom: SPACING.lg,
   },
   billRow: {
@@ -452,27 +590,35 @@ const styles = StyleSheet.create({
   },
   billDivider: {
     height: 1,
-    backgroundColor: COLORS.borderLight,
+    backgroundColor: '#E8E8EE',
     marginVertical: SPACING.sm,
+  },
+  estimateNoticeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF9FF',
+    padding: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    marginTop: SPACING.xs,
   },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: '#E8E8EE',
   },
   bottomTotalCol: {
     flex: 1,
   },
   bottomBtnCol: {
-    flex: 1.2,
+    flex: 1.4,
   },
 });

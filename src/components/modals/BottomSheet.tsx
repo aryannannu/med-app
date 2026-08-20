@@ -44,7 +44,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
               {title && (
                 <View style={styles.header}>
-                  <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                  <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                     {title}
                   </AppText>
                   <TouchableOpacity

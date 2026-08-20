@@ -90,7 +90,7 @@ export const AddEditAddressScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
           {existing ? 'Edit Address' : 'Add New Address'}
         </AppText>
         <View style={{ width: 40 }} />
@@ -102,7 +102,7 @@ export const AddEditAddressScreen: React.FC = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Label Type Selector */}
-          <AppText variant="caption" color={COLORS.textSecondary} weight="700" style={styles.sectionLabel}>
+          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionLabel}>
             ADDRESS TYPE
           </AppText>
           <View style={styles.labelRow}>
@@ -121,7 +121,7 @@ export const AddEditAddressScreen: React.FC = () => {
                 <AppText
                   variant="buttonSmall"
                   color={label === type ? COLORS.primary : COLORS.textSecondary}
-                  weight="700"
+                  weight="600"
                 >
                   {type}
                 </AppText>

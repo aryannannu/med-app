@@ -42,7 +42,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({
       <AppText
         variant="caption"
         color={selected ? COLORS.primary : COLORS.textSecondary}
-        weight={selected ? '700' : '600'}
+        weight="600"
       >
         {label}
       </AppText>
@@ -51,7 +51,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({
           <AppText
             variant="caption"
             color={selected ? '#FFFFFF' : COLORS.textSecondary}
-            weight="700"
+            weight="600"
             style={styles.badgeText}
           >
             {count}

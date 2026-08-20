@@ -29,7 +29,8 @@ import { formatCurrency } from '../../utils/currency';
 export const MedicineDetailsScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'MedicineDetails'>>();
-  const { medicineId, medicine: initialMed } = route.params;
+  const medicineId = route.params?.medicineId || 'med-1';
+  const initialMed = route.params?.medicine;
 
   const [medicine, setMedicine] = useState<Medicine | null>(initialMed || null);
   const [genericAlternatives, setGenericAlternatives] = useState<any[]>([]);
@@ -110,7 +111,7 @@ export const MedicineDetailsScreen: React.FC = () => {
               Total Price
             </AppText>
             <View style={styles.bottomPriceRow}>
-              <AppText variant="h3" color={COLORS.primary} weight="800">
+              <AppText variant="h3" color={COLORS.primary} weight="600">
                 {formatCurrency(medicine.discountPrice)}
               </AppText>
               {medicine.mrp > medicine.discountPrice && (
@@ -169,7 +170,7 @@ export const MedicineDetailsScreen: React.FC = () => {
             <AppText
               variant="caption"
               color={isOutOfStock ? COLORS.dangerDark : COLORS.successDark}
-              weight="700"
+              weight="600"
               style={{ fontSize: 10 }}
             >
               {isOutOfStock ? 'Out of Stock' : 'In Stock'}
@@ -180,11 +181,11 @@ export const MedicineDetailsScreen: React.FC = () => {
 
       {/* 2. Medicine Title & Salt Info */}
       <View style={styles.titleSection}>
-        <AppText variant="h2" color={COLORS.textPrimary} weight="800">
+        <AppText variant="h2" color={COLORS.textPrimary} weight="600">
           {medicine.name}
         </AppText>
 
-        <AppText variant="titleSmall" color={COLORS.primary} weight="700" style={{ marginTop: 2 }}>
+        <AppText variant="titleSmall" color={COLORS.primary} weight="600" style={{ marginTop: 2 }}>
           {medicine.saltComposition}
         </AppText>
 
@@ -197,14 +198,14 @@ export const MedicineDetailsScreen: React.FC = () => {
 
         {/* Price Row */}
         <View style={styles.priceRow}>
-          <AppText variant="h2" color={COLORS.primary} weight="800">
+          <AppText variant="h2" color={COLORS.primary} weight="600">
             {formatCurrency(medicine.discountPrice)}
           </AppText>
           <AppText variant="bodyMedium" color={COLORS.textMuted} style={styles.mrpText}>
             {formatCurrency(medicine.mrp)}
           </AppText>
           <View style={styles.discountPill}>
-            <AppText variant="caption" color={COLORS.successDark} weight="700">
+            <AppText variant="caption" color={COLORS.successDark} weight="600">
               {medicine.discountPercentage}% OFF
             </AppText>
           </View>
@@ -228,7 +229,7 @@ export const MedicineDetailsScreen: React.FC = () => {
 
       {/* 3. Pack Size Selector */}
       <View style={styles.sectionCard}>
-        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.sm }}>
+        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
           Pack size
         </AppText>
         <View style={styles.packSizeRow}>
@@ -244,7 +245,7 @@ export const MedicineDetailsScreen: React.FC = () => {
                 <AppText
                   variant="caption"
                   color={isSelected ? COLORS.primary : COLORS.textPrimary}
-                  weight={isSelected ? '700' : '500'}
+                  weight={isSelected ? '600' : '400'}
                 >
                   {size}
                 </AppText>
@@ -258,16 +259,16 @@ export const MedicineDetailsScreen: React.FC = () => {
       <View style={styles.deliverySellerCard}>
         <View style={styles.deliveryRow}>
           <Ionicons name="flash" size={16} color={COLORS.success} />
-          <AppText variant="bodySmall" color={COLORS.successDark} weight="700" style={{ marginLeft: 6 }}>
+          <AppText variant="bodySmall" color={COLORS.successDark} weight="600" style={{ marginLeft: 6 }}>
             Delivery in 2 hours
           </AppText>
         </View>
         <View style={styles.sellerRow}>
           <AppText variant="caption" color={COLORS.textSecondary}>
-            Sold by <AppText variant="caption" color={COLORS.textPrimary} weight="700">MedPlus Pharmacy</AppText> (★ 4.7)
+            Sold by <AppText variant="caption" color={COLORS.textPrimary} weight="600">MedPlus Pharmacy</AppText> (★ 4.7)
           </AppText>
           <TouchableOpacity onPress={() => setShowPriceCompareSheet(true)}>
-            <AppText variant="caption" color={COLORS.primary} weight="700">
+            <AppText variant="caption" color={COLORS.primary} weight="600">
               Compare Prices &gt;
             </AppText>
           </TouchableOpacity>
@@ -280,12 +281,12 @@ export const MedicineDetailsScreen: React.FC = () => {
           <View style={styles.genericAltHeader}>
             <View style={styles.sparkleRow}>
               <Ionicons name="sparkles" size={16} color={COLORS.secondary} />
-              <AppText variant="titleSmall" color={COLORS.secondaryDark} weight="800" style={{ marginLeft: 4 }}>
+              <AppText variant="titleSmall" color={COLORS.secondaryDark} weight="600" style={{ marginLeft: 4 }}>
                 Popular Alternative Available
               </AppText>
             </View>
             <View style={styles.saveBadge}>
-              <AppText variant="caption" color={COLORS.successDark} weight="700" style={{ fontSize: 10 }}>
+              <AppText variant="caption" color={COLORS.successDark} weight="600" style={{ fontSize: 10 }}>
                 SAVE UP TO 35%
               </AppText>
             </View>
@@ -302,14 +303,14 @@ export const MedicineDetailsScreen: React.FC = () => {
               resizeMode="contain"
             />
             <View style={styles.altMedInfo}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                 {genericAlternatives[0].name}
               </AppText>
               <AppText variant="caption" color={COLORS.textMuted}>
                 By {genericAlternatives[0].manufacturer}
               </AppText>
               <View style={styles.altPriceRow}>
-                <AppText variant="titleSmall" color={COLORS.primary} weight="800">
+                <AppText variant="titleSmall" color={COLORS.primary} weight="600">
                   {formatCurrency(genericAlternatives[0].mrp * 0.7)}
                 </AppText>
                 <AppText variant="caption" color={COLORS.textMuted} style={styles.mrpCross}>
@@ -326,7 +327,7 @@ export const MedicineDetailsScreen: React.FC = () => {
               style={styles.switchAltBtn}
             >
               <Ionicons name="add" size={16} color="#FFFFFF" style={{ marginRight: 2 }} />
-              <AppText variant="buttonSmall" color="#FFFFFF" weight="700">
+              <AppText variant="buttonSmall" color="#FFFFFF" weight="600">
                 ADD
               </AppText>
             </TouchableOpacity>
@@ -352,7 +353,7 @@ export const MedicineDetailsScreen: React.FC = () => {
               <AppText
                 variant="buttonSmall"
                 color={activeTab === tab.key ? COLORS.primary : COLORS.textSecondary}
-                weight={activeTab === tab.key ? '700' : '500'}
+                weight={activeTab === tab.key ? '600' : '400'}
               >
                 {tab.label}
               </AppText>
@@ -363,14 +364,14 @@ export const MedicineDetailsScreen: React.FC = () => {
         <View style={styles.tabContentCard}>
           {activeTab === 'overview' && (
             <View>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: 4 }}>
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: 4 }}>
                 About this medicine
               </AppText>
               <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ lineHeight: 20 }}>
                 {medicine.description}
               </AppText>
 
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginTop: SPACING.md, marginBottom: 4 }}>
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.md, marginBottom: 4 }}>
                 Key Benefits
               </AppText>
               {['Provides fast symptom relief', 'Clinically tested formulation', 'Trusted brand quality'].map((benefit, i) => (
@@ -382,7 +383,7 @@ export const MedicineDetailsScreen: React.FC = () => {
                 </View>
               ))}
 
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginTop: SPACING.md, marginBottom: 4 }}>
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.md, marginBottom: 4 }}>
                 Manufacturer
               </AppText>
               <AppText variant="bodySmall" color={COLORS.textSecondary}>
@@ -393,7 +394,7 @@ export const MedicineDetailsScreen: React.FC = () => {
 
           {activeTab === 'uses' && (
             <View>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: 6 }}>
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: 6 }}>
                 Primary Indications &amp; Uses
               </AppText>
               {(medicine.uses || []).map((use, i) => (
@@ -409,7 +410,7 @@ export const MedicineDetailsScreen: React.FC = () => {
 
           {activeTab === 'sideEffects' && (
             <View>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: 6 }}>
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: 6 }}>
                 Reported Side Effects
               </AppText>
               {(medicine.sideEffects || ['Mild nausea', 'Dizziness', 'Headache']).map((effect, i) => (
@@ -425,7 +426,7 @@ export const MedicineDetailsScreen: React.FC = () => {
 
           {activeTab === 'safety' && (
             <View>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: 8 }}>
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: 8 }}>
                 Safety Advice
               </AppText>
               {[
@@ -434,7 +435,7 @@ export const MedicineDetailsScreen: React.FC = () => {
                 { type: 'Driving', status: 'Caution', advice: 'May cause mild drowsiness in some patients.' },
               ].map((p, i) => (
                 <View key={i} style={styles.precautionItem}>
-                  <AppText variant="caption" color={COLORS.primary} weight="700">
+                  <AppText variant="caption" color={COLORS.primary} weight="600">
                     {p.type.toUpperCase()}: {p.status}
                   </AppText>
                   <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
@@ -449,7 +450,7 @@ export const MedicineDetailsScreen: React.FC = () => {
 
       {/* 7. Safety & Trust Guarantee Section */}
       <View style={[styles.trustCard, SHADOWS.subtle]}>
-        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.md }}>
+        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
           Why shop from Healit?
         </AppText>
 
@@ -508,12 +509,12 @@ export const MedicineDetailsScreen: React.FC = () => {
                 <Ionicons name="business" size={20} color={COLORS.primary} />
                 <View style={{ marginLeft: 8 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                       {store.name}
                     </AppText>
                     {store.bestPrice && (
                       <View style={styles.bestPriceBadge}>
-                        <AppText variant="caption" color={COLORS.successDark} weight="700" style={{ fontSize: 9 }}>
+                        <AppText variant="caption" color={COLORS.successDark} weight="600" style={{ fontSize: 9 }}>
                           BEST PRICE
                         </AppText>
                       </View>
@@ -525,7 +526,7 @@ export const MedicineDetailsScreen: React.FC = () => {
                 </View>
               </View>
 
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                 {formatCurrency(store.price)}
               </AppText>
             </View>

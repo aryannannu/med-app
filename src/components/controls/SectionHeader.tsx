@@ -22,7 +22,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   return (
     <View style={[styles.container, style]}>
       <View style={styles.titleContainer}>
-        <AppText variant="h4" color={COLORS.textPrimary} weight="700">
+        <AppText variant="h4" color={COLORS.textPrimary} weight="600">
           {title}
         </AppText>
         {subtitle && (
@@ -39,7 +39,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.actionBtn}
         >
-          <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
+          <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
             {actionText}
           </AppText>
           <Ionicons name="chevron-forward" size={14} color={COLORS.primary} style={styles.actionIcon} />

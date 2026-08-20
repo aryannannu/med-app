@@ -4,6 +4,7 @@ import { Pharmacy } from './pharmacy';
 import { PharmacyOffer } from './offer';
 import { Order } from './order';
 import { Address } from './user';
+import { WalletTransaction } from './wallet';
 
 export type AuthStackParamList = {
   Splash: undefined;
@@ -38,6 +39,26 @@ export type AppStackParamList = {
   Notifications: undefined;
   Search: { initialQuery?: string; categorySlug?: string } | undefined;
   Profile: undefined;
+
+  // Profile Module Routes
+  EditProfile: undefined;
+  Wallet: undefined;
+  AddMoney: { prefilledAmount?: number } | undefined;
+  WalletTransactionDetails: { transactionId: string; transaction: WalletTransaction };
+  PaymentMethods: undefined;
+  SavedPharmacies: undefined;
+  Appearance: undefined;
+  NotificationPreferences: undefined;
+  PrivacySecurity: undefined;
+  HelpCenter: undefined;
+  HelpArticle: { articleId: string };
+  ContactSupport: { orderId?: string } | undefined;
+  SupportChat: { orderId?: string; topic?: string } | undefined;
+  ReportIssue: { category?: string; orderId?: string } | undefined;
+  LegalDocument: { docType: 'terms' | 'privacy' | 'refund' | 'medicine_policy' };
+  DeleteAccount: undefined;
+  OrderInvoice: { orderId: string };
+  OrderConfirmation: { order: Order };
 };
 
 export type RootStackParamList = {

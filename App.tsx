@@ -22,6 +22,12 @@ import { PrescriptionProvider } from './src/store/PrescriptionContext';
 import { CartProvider } from './src/store/CartContext';
 import { OfferProvider } from './src/store/OfferContext';
 import { OrderProvider } from './src/store/OrderContext';
+import { TabBarScrollProvider } from './src/store/TabBarScrollContext';
+import { WalletProvider } from './src/store/WalletContext';
+import { PaymentMethodsProvider } from './src/store/PaymentMethodsContext';
+import { SavedPharmaciesProvider } from './src/store/SavedPharmaciesContext';
+import { ThemeProvider } from './src/store/ThemeContext';
+import { SupportProvider } from './src/store/SupportContext';
 
 // Navigation
 import { RootNavigator } from './src/navigation/RootNavigator';
@@ -48,22 +54,34 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <AddressProvider>
-              <PrescriptionProvider>
-                <CartProvider>
-                  <OfferProvider>
-                    <OrderProvider>
-                      <StatusBar style="dark" />
-                      <RootNavigator />
-                    </OrderProvider>
-                  </OfferProvider>
-                </CartProvider>
-              </PrescriptionProvider>
-            </AddressProvider>
-          </AuthProvider>
-        </ToastProvider>
+        <ThemeProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <AddressProvider>
+                <PrescriptionProvider>
+                  <CartProvider>
+                    <OfferProvider>
+                      <OrderProvider>
+                        <WalletProvider>
+                          <PaymentMethodsProvider>
+                            <SavedPharmaciesProvider>
+                              <SupportProvider>
+                                <TabBarScrollProvider>
+                                  <StatusBar style="dark" />
+                                  <RootNavigator />
+                                </TabBarScrollProvider>
+                              </SupportProvider>
+                            </SavedPharmaciesProvider>
+                          </PaymentMethodsProvider>
+                        </WalletProvider>
+                      </OrderProvider>
+                    </OfferProvider>
+                  </CartProvider>
+                </PrescriptionProvider>
+              </AddressProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

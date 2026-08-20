@@ -16,7 +16,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
   return (
     <View style={[styles.badge, style]}>
       <Ionicons name="checkmark-circle" size={14} color={COLORS.secondary} />
-      <AppText variant="caption" color={COLORS.secondaryDark} weight="700" style={styles.text}>
+      <AppText variant="caption" color={COLORS.secondaryDark} weight="600" style={styles.text}>
         {label}
       </AppText>
     </View>

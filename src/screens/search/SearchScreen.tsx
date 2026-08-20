@@ -59,7 +59,7 @@ export const SearchScreen: React.FC = () => {
     setIsLoading(true);
     setHasSearched(true);
     const results = await MedicineService.searchMedicines(searchText);
-    setSearchResults(results);
+    setSearchResults({ medicines: results, bySaltMatches: [], byGenericMatches: [], byBrandMatches: results });
     setIsLoading(false);
 
     if (searchText && !recentList.includes(searchText)) {
@@ -111,7 +111,7 @@ export const SearchScreen: React.FC = () => {
             <AppText
               variant="caption"
               color={selectedFilter === 'all' ? COLORS.primary : COLORS.textSecondary}
-              weight="700"
+              weight="600"
             >
               All Medicines
             </AppText>
@@ -124,7 +124,7 @@ export const SearchScreen: React.FC = () => {
             <AppText
               variant="caption"
               color={selectedFilter === 'otc' ? COLORS.primary : COLORS.textSecondary}
-              weight="700"
+              weight="600"
             >
               OTC (No Rx)
             </AppText>
@@ -137,7 +137,7 @@ export const SearchScreen: React.FC = () => {
             <AppText
               variant="caption"
               color={selectedFilter === 'rx' ? COLORS.primary : COLORS.textSecondary}
-              weight="700"
+              weight="600"
             >
               Rx Required
             </AppText>
@@ -154,7 +154,7 @@ export const SearchScreen: React.FC = () => {
           {recentList.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionTitleRow}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   Recent Searches
                 </AppText>
                 <TouchableOpacity onPress={() => setRecentList([])}>
@@ -186,7 +186,7 @@ export const SearchScreen: React.FC = () => {
 
           {/* Popular Suggestions */}
           <View style={styles.section}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.sm }}>
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
               Frequently Searched
             </AppText>
             <View style={styles.chipsWrap}>

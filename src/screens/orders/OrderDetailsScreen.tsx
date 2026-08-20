@@ -33,7 +33,8 @@ const CANCEL_REASONS = [
 export const OrderDetailsScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'OrderDetails'>>();
-  const { orderId, order: initialOrder } = route.params;
+  const orderId = route.params?.orderId || 'order-1';
+  const initialOrder = route.params?.order;
 
   const [order, setOrder] = useState<Order | null>(initialOrder || null);
   const [isLoading, setIsLoading] = useState(!initialOrder);
@@ -82,7 +83,7 @@ export const OrderDetailsScreen: React.FC = () => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
             Track Order
           </AppText>
           <View style={{ width: 40 }} />
@@ -93,7 +94,7 @@ export const OrderDetailsScreen: React.FC = () => {
       <View style={[styles.orderHeroBanner, SHADOWS.subtle]}>
         <View style={styles.heroTopRow}>
           <View>
-            <AppText variant="titleMedium" color="#FFFFFF" weight="800">
+            <AppText variant="titleMedium" color="#FFFFFF" weight="600">
               Order ID: #{order.orderNumber}
             </AppText>
             <AppText variant="caption" color={COLORS.primaryMuted} style={{ marginTop: 2 }}>
@@ -101,7 +102,7 @@ export const OrderDetailsScreen: React.FC = () => {
             </AppText>
           </View>
           <View style={styles.statusPillHero}>
-            <AppText variant="caption" color={COLORS.successDark} weight="800" style={{ fontSize: 10 }}>
+            <AppText variant="caption" color={COLORS.successDark} weight="600" style={{ fontSize: 10 }}>
               {order.status.toUpperCase()}
             </AppText>
           </View>
@@ -144,7 +145,7 @@ export const OrderDetailsScreen: React.FC = () => {
                   <AppText
                     variant="titleSmall"
                     color={step.isCurrent ? COLORS.primary : step.isCompleted ? COLORS.textPrimary : COLORS.textMuted}
-                    weight={step.isCurrent || step.isCompleted ? '700' : '400'}
+                    weight={step.isCurrent || step.isCompleted ? '600' : '400'}
                   >
                     {step.title}
                   </AppText>
@@ -171,7 +172,7 @@ export const OrderDetailsScreen: React.FC = () => {
           </View>
 
           <View style={styles.riderInfoCol}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
               {order.rider.name}
             </AppText>
             <AppText variant="caption" color={COLORS.textSecondary}>
@@ -201,7 +202,7 @@ export const OrderDetailsScreen: React.FC = () => {
       <View style={[styles.mapPreviewCard, SHADOWS.subtle]}>
         <View style={styles.mapHeaderRow}>
           <Ionicons name="navigate-circle" size={18} color={COLORS.primary} />
-          <AppText variant="caption" color={COLORS.primary} weight="700" style={{ marginLeft: 4 }}>
+          <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
             LIVE LOCATION • 2 MINS AWAY
           </AppText>
         </View>
@@ -227,7 +228,7 @@ export const OrderDetailsScreen: React.FC = () => {
             <Ionicons name="medical" size={18} color={COLORS.primary} />
           </View>
           <View style={{ marginLeft: 8 }}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
               {order.selectedPharmacy?.name || 'Local Verified Pharmacy'}
             </AppText>
             <AppText variant="caption" color={COLORS.textSecondary}>
@@ -246,14 +247,14 @@ export const OrderDetailsScreen: React.FC = () => {
               resizeMode="contain"
             />
             <View style={styles.orderItemInfo}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                 {item.medicineName}
               </AppText>
               <AppText variant="caption" color={COLORS.textMuted}>
                 Qty: {item.quantity} • {item.packForm}
               </AppText>
             </View>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800">
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
               {formatCurrency(item.unitPrice * item.quantity)}
             </AppText>
           </View>
@@ -262,7 +263,7 @@ export const OrderDetailsScreen: React.FC = () => {
 
       {/* 6. Payment & Delivery Breakdown */}
       <View style={[styles.billCard, SHADOWS.subtle]}>
-        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.sm }}>
+        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
           Payment Summary
         </AppText>
 
@@ -279,7 +280,7 @@ export const OrderDetailsScreen: React.FC = () => {
           <AppText variant="bodySmall" color={COLORS.success}>
             Marketplace Discount
           </AppText>
-          <AppText variant="bodySmall" color={COLORS.success} weight="700">
+          <AppText variant="bodySmall" color={COLORS.success} weight="600">
             -{formatCurrency(order.savingsTotal || 118)}
           </AppText>
         </View>
@@ -288,7 +289,7 @@ export const OrderDetailsScreen: React.FC = () => {
           <AppText variant="bodySmall" color={COLORS.textSecondary}>
             Delivery Fee
           </AppText>
-          <AppText variant="bodySmall" color={COLORS.success} weight="700">
+          <AppText variant="bodySmall" color={COLORS.success} weight="600">
             FREE
           </AppText>
         </View>
@@ -296,28 +297,36 @@ export const OrderDetailsScreen: React.FC = () => {
         <View style={styles.billDivider} />
 
         <View style={styles.billRow}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
             Paid via UPI / Online
           </AppText>
-          <AppText variant="titleLarge" color={COLORS.primary} weight="800">
+          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
             {formatCurrency(order.totalAmount)}
           </AppText>
         </View>
       </View>
 
-      {/* Actions: Reorder & Cancel */}
+      {/* Actions: Reorder, Invoice & Cancel */}
       <View style={styles.actionsFooter}>
         <AppButton
           title="Reorder All Items"
           variant="primary"
           onPress={handleReorder}
-          style={{ marginBottom: SPACING.md }}
+          style={{ marginBottom: SPACING.sm }}
           leftIcon={<Ionicons name="repeat" size={18} color="#FFFFFF" />}
+        />
+
+        <AppButton
+          title="View & Download Invoice"
+          variant="outline"
+          onPress={() => navigation.navigate('OrderInvoice', { orderId: order.id })}
+          style={{ marginBottom: SPACING.md }}
+          leftIcon={<Ionicons name="document-text-outline" size={18} color={COLORS.primary} />}
         />
 
         {order.status !== 'delivered' && order.status !== 'cancelled' && (
           <TouchableOpacity onPress={() => setCancelSheetVisible(true)} style={styles.cancelLink}>
-            <AppText variant="caption" color={COLORS.danger} weight="700">
+            <AppText variant="caption" color={COLORS.danger} weight="600">
               Cancel this Order
             </AppText>
           </TouchableOpacity>

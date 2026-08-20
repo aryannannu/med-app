@@ -60,7 +60,8 @@ const SUBCATEGORY_MAP: Record<string, string[]> = {
 export const CategoryListingScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'CategoryListing'>>();
-  const { categorySlug, categoryName } = route.params;
+  const categorySlug = route.params?.categorySlug || 'pain-relief';
+  const categoryName = route.params?.categoryName || 'Pain Relief';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('All');
@@ -82,7 +83,7 @@ export const CategoryListingScreen: React.FC = () => {
     if (categoryName) return categoryName;
     return categorySlug
       .split('-')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ');
   }, [categorySlug, categoryName]);
 
@@ -235,7 +236,7 @@ export const CategoryListingScreen: React.FC = () => {
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800" numberOfLines={1}>
+            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
               {formattedCategoryName}
             </AppText>
             <TouchableOpacity
@@ -260,7 +261,7 @@ export const CategoryListingScreen: React.FC = () => {
             >
               <Ionicons name="cart" size={20} color={COLORS.primary} />
               <View style={styles.headerBadgeCircle}>
-                <AppText variant="caption" color="#FFFFFF" weight="800" style={{ fontSize: 9 }}>
+                <AppText variant="caption" color="#FFFFFF" weight="600" style={{ fontSize: 9 }}>
                   {totalItemCount}
                 </AppText>
               </View>
@@ -303,7 +304,7 @@ export const CategoryListingScreen: React.FC = () => {
                   <AppText
                     variant="caption"
                     color={isSelected ? '#FFFFFF' : COLORS.textPrimary}
-                    weight={isSelected ? '800' : '600'}
+                    weight="600"
                   >
                     {subcat}
                   </AppText>
@@ -333,7 +334,7 @@ export const CategoryListingScreen: React.FC = () => {
               <AppText
                 variant="caption"
                 color={activeFilterCount > 0 ? COLORS.primary : COLORS.textPrimary}
-                weight="700"
+                weight="600"
                 style={{ marginLeft: 4 }}
               >
                 Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
@@ -346,7 +347,7 @@ export const CategoryListingScreen: React.FC = () => {
               style={styles.sortBtn}
             >
               <Ionicons name="swap-vertical" size={14} color={COLORS.textPrimary} />
-              <AppText variant="caption" color={COLORS.textPrimary} weight="700" style={{ marginLeft: 4 }}>
+              <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 4 }}>
                 {sortLabels[sortBy]} ˅
               </AppText>
             </TouchableOpacity>
@@ -383,7 +384,7 @@ export const CategoryListingScreen: React.FC = () => {
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="search-outline" size={48} color={COLORS.textMuted} />
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800" style={{ marginTop: SPACING.md }}>
+              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.md }}>
                 No medicines found
               </AppText>
               <AppText variant="caption" color={COLORS.textSecondary} align="center" style={{ marginTop: 4, maxWidth: 260 }}>
@@ -398,7 +399,7 @@ export const CategoryListingScreen: React.FC = () => {
                 }}
                 style={styles.resetFiltersBtn}
               >
-                <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
+                <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
                   Reset All Filters
                 </AppText>
               </TouchableOpacity>
@@ -416,17 +417,17 @@ export const CategoryListingScreen: React.FC = () => {
             <View style={styles.floatingCartLeft}>
               <View style={styles.floatingCartBadge}>
                 <Ionicons name="cart" size={16} color={COLORS.primary} />
-                <AppText variant="caption" color={COLORS.primary} weight="800" style={{ marginLeft: 4 }}>
+                <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
                   {totalItemCount} {totalItemCount === 1 ? 'Medicine' : 'Medicines'}
                 </AppText>
               </View>
-              <AppText variant="titleSmall" color="#FFFFFF" weight="800" style={{ marginLeft: SPACING.md }}>
+              <AppText variant="titleSmall" color="#FFFFFF" weight="600" style={{ marginLeft: SPACING.md }}>
                 {formatCurrency(summary.estimatedFinalTotal)}
               </AppText>
             </View>
 
             <View style={styles.floatingCartRight}>
-              <AppText variant="buttonSmall" color="#FFFFFF" weight="700">
+              <AppText variant="buttonSmall" color="#FFFFFF" weight="600">
                 View Cart
               </AppText>
               <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 4 }} />
@@ -448,11 +449,11 @@ export const CategoryListingScreen: React.FC = () => {
                 <TouchableOpacity onPress={() => setIsFilterModalVisible(false)} style={{ padding: 4 }}>
                   <Ionicons name="close" size={22} color={COLORS.textPrimary} />
                 </TouchableOpacity>
-                <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                   Filters
                 </AppText>
                 <TouchableOpacity onPress={clearAllFilters} style={{ padding: 4 }}>
-                  <AppText variant="caption" color={COLORS.primary} weight="700">
+                  <AppText variant="caption" color={COLORS.primary} weight="600">
                     Clear All
                   </AppText>
                 </TouchableOpacity>
@@ -461,7 +462,7 @@ export const CategoryListingScreen: React.FC = () => {
               <ScrollView showsVerticalScrollIndicator={false} style={styles.filterModalBody}>
                 {/* 1. Availability */}
                 <View style={styles.filterGroup}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800" style={styles.filterGroupTitle}>
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={styles.filterGroupTitle}>
                     Availability
                   </AppText>
                   <View style={styles.filterOptionsWrap}>
@@ -480,7 +481,7 @@ export const CategoryListingScreen: React.FC = () => {
                         <AppText
                           variant="caption"
                           color={tempFilters.availability === opt.id ? '#FFFFFF' : COLORS.textPrimary}
-                          weight="700"
+                          weight="600"
                         >
                           {opt.label}
                         </AppText>
@@ -491,7 +492,7 @@ export const CategoryListingScreen: React.FC = () => {
 
                 {/* 2. Prescription (Rx / OTC) */}
                 <View style={styles.filterGroup}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800" style={styles.filterGroupTitle}>
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={styles.filterGroupTitle}>
                     Prescription Type
                   </AppText>
                   <View style={styles.filterOptionsWrap}>
@@ -511,7 +512,7 @@ export const CategoryListingScreen: React.FC = () => {
                         <AppText
                           variant="caption"
                           color={tempFilters.prescription === opt.id ? '#FFFFFF' : COLORS.textPrimary}
-                          weight="700"
+                          weight="600"
                         >
                           {opt.label}
                         </AppText>
@@ -522,7 +523,7 @@ export const CategoryListingScreen: React.FC = () => {
 
                 {/* 3. Price Range */}
                 <View style={styles.filterGroup}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800" style={styles.filterGroupTitle}>
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={styles.filterGroupTitle}>
                     Price Range
                   </AppText>
                   <View style={styles.filterOptionsWrap}>
@@ -544,7 +545,7 @@ export const CategoryListingScreen: React.FC = () => {
                         <AppText
                           variant="caption"
                           color={tempFilters.priceRange === opt.id ? '#FFFFFF' : COLORS.textPrimary}
-                          weight="700"
+                          weight="600"
                         >
                           {opt.label}
                         </AppText>
@@ -555,7 +556,7 @@ export const CategoryListingScreen: React.FC = () => {
 
                 {/* 4. Minimum Discounts */}
                 <View style={styles.filterGroup}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800" style={styles.filterGroupTitle}>
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={styles.filterGroupTitle}>
                     Discounts &amp; Offers
                   </AppText>
                   <View style={styles.filterOptionsWrap}>
@@ -575,7 +576,7 @@ export const CategoryListingScreen: React.FC = () => {
                         <AppText
                           variant="caption"
                           color={tempFilters.minDiscount === opt.val ? '#FFFFFF' : COLORS.textPrimary}
-                          weight="700"
+                          weight="600"
                         >
                           {opt.label}
                         </AppText>
@@ -586,7 +587,7 @@ export const CategoryListingScreen: React.FC = () => {
 
                 {/* 5. Brand / Manufacturer */}
                 <View style={styles.filterGroup}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800" style={styles.filterGroupTitle}>
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={styles.filterGroupTitle}>
                     Top Brands
                   </AppText>
                   <View style={styles.filterOptionsWrap}>
@@ -602,7 +603,7 @@ export const CategoryListingScreen: React.FC = () => {
                         <AppText
                           variant="caption"
                           color={tempFilters.brand === b ? '#FFFFFF' : COLORS.textPrimary}
-                          weight="700"
+                          weight="600"
                         >
                           {b === 'all' ? 'All Brands' : b}
                         </AppText>
@@ -615,7 +616,7 @@ export const CategoryListingScreen: React.FC = () => {
               {/* Sticky Filter Bottom CTA */}
               <View style={styles.filterModalFooter}>
                 <TouchableOpacity activeOpacity={0.85} onPress={applyFilters} style={styles.applyFilterBtn}>
-                  <AppText variant="labelLarge" color="#FFFFFF" weight="800">
+                  <AppText variant="labelLarge" color="#FFFFFF" weight="600">
                     Apply Filters
                   </AppText>
                 </TouchableOpacity>
@@ -638,7 +639,7 @@ export const CategoryListingScreen: React.FC = () => {
           >
             <View style={styles.sortModalContent}>
               <View style={styles.sortModalHeader}>
-                <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                   Sort By
                 </AppText>
                 <TouchableOpacity onPress={() => setIsSortModalVisible(false)}>
@@ -661,7 +662,7 @@ export const CategoryListingScreen: React.FC = () => {
                     <AppText
                       variant="bodyMedium"
                       color={isSelected ? COLORS.primary : COLORS.textPrimary}
-                      weight={isSelected ? '800' : '500'}
+                      weight={isSelected ? '600' : '400'}
                     >
                       {sortLabels[key]}
                     </AppText>
@@ -848,6 +849,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: SPACING.lg,
+    zIndex: 1002,
   },
   floatingCartLeft: {
     flexDirection: 'row',

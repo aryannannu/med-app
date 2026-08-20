@@ -33,7 +33,7 @@ export const DeliveryTimeBadge: React.FC<DeliveryTimeBadgeProps> = ({
       <AppText
         variant="caption"
         color={isExpress ? COLORS.primary : COLORS.textSecondary}
-        weight="700"
+        weight="600"
         style={styles.text}
       >
         {formatDeliveryTime(minutes)}
@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 2,
-    paddingHorizontal: SPACING.xs + 2,
-    borderRadius: BORDER_RADIUS.xs,
+    paddingHorizontal: SPACING.xs + 3,
+    borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
     alignSelf: 'flex-start',
   },

@@ -74,7 +74,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       {/* Header with Order No & Status */}
       <View style={styles.header}>
         <View>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
             Order #{order.orderNumber}
           </AppText>
           <AppText variant="caption" color={COLORS.textMuted} style={styles.date}>
@@ -83,8 +83,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </View>
 
         <View style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}>
-          <Ionicons name={statusConfig.icon} size={12} color={statusConfig.color} style={{ marginRight: 4 }} />
-          <AppText variant="badge" color={statusConfig.color} weight="700">
+          <Ionicons name={statusConfig.icon} size={11} color={statusConfig.color} style={{ marginRight: 4 }} />
+          <AppText variant="badge" color={statusConfig.color} weight="600">
             {order.statusText}
           </AppText>
         </View>
@@ -95,7 +95,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       {/* Pharmacy & Items summary */}
       {order.selectedPharmacy && (
         <View style={styles.pharmacyRow}>
-          <Ionicons name="storefront-outline" size={16} color={COLORS.primary} />
+          <Ionicons name="storefront-outline" size={15} color={COLORS.primary} />
           <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" style={styles.pharmacyName}>
             {order.selectedPharmacy.name}
           </AppText>
@@ -114,7 +114,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           <AppText variant="caption" color={COLORS.textMuted}>
             Total Amount
           </AppText>
-          <AppText variant="titleMedium" color={COLORS.primary} weight="800">
+          <AppText variant="titleMedium" color={COLORS.primary} weight="600">
             {formatCurrency(order.totalAmount)}
           </AppText>
         </View>
@@ -129,8 +129,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({
               }}
               style={styles.reorderBtn}
             >
-              <Ionicons name="repeat" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />
-              <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
+              <Ionicons name="repeat" size={13} color={COLORS.primary} style={{ marginRight: 4 }} />
+              <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
                 Reorder
               </AppText>
             </TouchableOpacity>

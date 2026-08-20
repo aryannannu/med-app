@@ -79,7 +79,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
             {step === 'matching' ? 'Finding Best Offers' : 'Upload Prescription'}
           </AppText>
           <View style={{ width: 40 }} />
@@ -93,7 +93,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
             <View style={styles.rxIconCircle}>
               <Ionicons name="document-text-outline" size={48} color={COLORS.primary} />
             </View>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" style={{ marginTop: SPACING.md }}>
+            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.md }}>
               Click a photo
             </AppText>
             <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
@@ -112,7 +112,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
               style={[styles.actionBtn, SHADOWS.subtle]}
             >
               <Ionicons name="camera-outline" size={24} color={COLORS.primary} />
-              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="700" style={{ marginTop: 4 }}>
+              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 4 }}>
                 Camera
               </AppText>
             </TouchableOpacity>
@@ -123,7 +123,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
               style={[styles.actionBtn, SHADOWS.subtle]}
             >
               <Ionicons name="images-outline" size={24} color={COLORS.primary} />
-              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="700" style={{ marginTop: 4 }}>
+              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 4 }}>
                 Gallery
               </AppText>
             </TouchableOpacity>
@@ -134,7 +134,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
               style={[styles.actionBtn, SHADOWS.subtle]}
             >
               <Ionicons name="folder-outline" size={24} color={COLORS.primary} />
-              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="700" style={{ marginTop: 4 }}>
+              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 4 }}>
                 Files
               </AppText>
             </TouchableOpacity>
@@ -142,7 +142,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
 
           {/* Guide / Instructions Card */}
           <View style={[styles.guideCard, SHADOWS.subtle]}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.sm }}>
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
               Valid Prescription Guide
             </AppText>
 
@@ -201,7 +201,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
             <Ionicons name="checkmark-circle" size={56} color={COLORS.success} />
           </View>
 
-          <AppText variant="h2" color={COLORS.textPrimary} weight="800" align="center" style={{ marginTop: SPACING.md }}>
+          <AppText variant="h2" color={COLORS.textPrimary} weight="600" align="center" style={{ marginTop: SPACING.md }}>
             Prescription Uploaded!
           </AppText>
 
@@ -228,7 +228,7 @@ export const UploadPrescriptionScreen: React.FC = () => {
                 <AppText
                   variant="bodyMedium"
                   color={item.done ? COLORS.textPrimary : item.active ? COLORS.primary : COLORS.textMuted}
-                  weight={item.done || item.active ? '700' : '400'}
+                  weight={item.done || item.active ? '600' : '400'}
                   style={{ marginLeft: 12 }}
                 >
                   {item.title}

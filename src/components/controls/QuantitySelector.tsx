@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { BORDER_RADIUS } from '../../theme';
 import { AppText } from '../common/AppText';
 
 export interface QuantitySelectorProps {
@@ -11,6 +11,8 @@ export interface QuantitySelectorProps {
   minQuantity?: number;
   maxQuantity?: number;
   size?: 'sm' | 'md' | 'lg';
+  color?: string;
+  minusColor?: string;
   style?: ViewStyle;
 }
 
@@ -21,13 +23,15 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   minQuantity = 0,
   maxQuantity = 20,
   size = 'md',
+  color = '#15803D',
+  minusColor = '#DC2626',
   style,
 }) => {
-  const btnSize = size === 'sm' ? 32 : size === 'md' ? 38 : 44;
-  const iconSize = size === 'sm' ? 14 : size === 'md' ? 18 : 20;
+  const btnSize = size === 'sm' ? 26 : size === 'md' ? 32 : 38;
+  const iconSize = size === 'sm' ? 14 : size === 'md' ? 16 : 18;
 
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, size === 'sm' && styles.containerSm, { borderColor: color }, style]}>
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={onDecrement}
@@ -40,17 +44,17 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         ]}
       >
         <Ionicons
-          name={quantity === 1 && minQuantity === 0 ? 'trash-outline' : 'remove'}
+          name="remove"
           size={iconSize}
-          color={quantity === 1 && minQuantity === 0 ? COLORS.danger : COLORS.primary}
+          color={minusColor}
         />
       </TouchableOpacity>
 
       <View style={styles.countContainer}>
         <AppText
-          variant={size === 'sm' ? 'bodySmall' : size === 'md' ? 'titleMedium' : 'titleLarge'}
-          color={COLORS.textPrimary}
-          weight="700"
+          variant={size === 'sm' ? 'caption' : size === 'md' ? 'bodyMedium' : 'titleMedium'}
+          color={color}
+          weight="600"
           align="center"
         >
           {quantity}
@@ -64,12 +68,11 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         style={[
           styles.btn,
-          styles.btnPrimary,
           { width: btnSize, height: btnSize, borderRadius: btnSize / 2 },
           quantity >= maxQuantity && styles.btnDisabled,
         ]}
       >
-        <Ionicons name="add" size={iconSize} color={COLORS.textInverse} />
+        <Ionicons name="add" size={iconSize} color={color} />
       </TouchableOpacity>
     </View>
   );
@@ -79,26 +82,31 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceSubtle,
-    borderRadius: BORDER_RADIUS.full,
-    padding: 2,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    backgroundColor: '#FFFFFF',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1.5,
+    borderColor: '#15803D',
+    padding: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  containerSm: {
+    padding: 1,
   },
   btn: {
-    backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  btnPrimary: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: 'transparent',
   },
   btnDisabled: {
-    opacity: 0.4,
+    opacity: 0.3,
   },
   countContainer: {
-    minWidth: 32,
-    paddingHorizontal: SPACING.xs,
+    minWidth: 22,
+    paddingHorizontal: 3,
     alignItems: 'center',
     justifyContent: 'center',
   },

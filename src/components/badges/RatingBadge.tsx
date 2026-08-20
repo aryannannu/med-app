@@ -20,8 +20,8 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
   return (
     <View style={[styles.container, style]}>
       <View style={styles.pill}>
-        <Ionicons name="star" size={12} color="#FFFFFF" />
-        <AppText variant="caption" color="#FFFFFF" weight="700" style={styles.ratingText}>
+        <Ionicons name="star" size={11} color="#FFFFFF" />
+        <AppText variant="caption" color="#FFFFFF" weight="600" style={styles.ratingText}>
           {rating.toFixed(1)}
         </AppText>
       </View>
@@ -42,10 +42,10 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#059669', // Healthy emerald green
+    backgroundColor: '#15803D', // Modern accessible emerald
     paddingVertical: 2,
     paddingHorizontal: SPACING.xs + 2,
-    borderRadius: BORDER_RADIUS.xs,
+    borderRadius: BORDER_RADIUS.sm,
   },
   ratingText: {
     marginLeft: 3,

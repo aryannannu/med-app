@@ -42,8 +42,8 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         </View>
 
         <View style={styles.etaPill}>
-          <Ionicons name="time" size={13} color={COLORS.primary} />
-          <AppText variant="badge" color={COLORS.primary} weight="700" style={styles.etaText}>
+          <Ionicons name="flash" size={12} color={COLORS.primary} />
+          <AppText variant="badge" color={COLORS.primary} weight="600" style={styles.etaText}>
             {offer.estimatedDeliveryTimeText}
           </AppText>
         </View>
@@ -52,7 +52,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       {/* Pharmacy Info Row */}
       <View style={styles.pharmacyRow}>
         <View style={styles.pharmacyDetails}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" numberOfLines={1}>
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
             {offer.pharmacy.name}
           </AppText>
           <View style={styles.subMetaRow}>
@@ -62,7 +62,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         </View>
 
         <View style={styles.distanceBox}>
-          <Ionicons name="navigate-circle-outline" size={16} color={COLORS.textSecondary} />
+          <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
           <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.distanceText}>
             {formatDistance(offer.pharmacy.distanceKm)}
           </AppText>
@@ -99,7 +99,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           <AppText variant="caption" color={COLORS.textMuted}>
             Total Payable
           </AppText>
-          <AppText variant="titleLarge" color={COLORS.primary} weight="800">
+          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
             {formatCurrency(offer.finalPayableAmount)}
           </AppText>
         </View>
@@ -108,8 +108,8 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       {/* Savings Highlight */}
       {offer.totalSavings > 0 && (
         <View style={styles.savingsBanner}>
-          <Ionicons name="sparkles" size={14} color={COLORS.secondaryDark} />
-          <AppText variant="caption" color={COLORS.secondaryDark} weight="700" style={styles.savingsText}>
+          <Ionicons name="sparkles" size={13} color="#15803D" />
+          <AppText variant="caption" color="#15803D" weight="600" style={styles.savingsText}>
             You save {formatCurrency(offer.totalSavings)} with this pharmacy!
           </AppText>
         </View>
@@ -125,7 +125,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           <Ionicons
             name={isSelected ? 'checkmark-circle' : 'bag-check-outline'}
             size={18}
-            color={COLORS.textInverse}
+            color={isSelected ? COLORS.primary : COLORS.textInverse}
           />
         }
         style={styles.selectBtn}

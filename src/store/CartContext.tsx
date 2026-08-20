@@ -50,6 +50,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       sourcePharmacyId?: string,
       sourcePharmacyName?: string
     ) => {
+      if (!medicine || !medicine.id) return;
+
       setItems((prev) => {
         const existingIndex = prev.findIndex(
           (it) => it.medicineId === medicine.id && it.selectedVariant?.id === variant?.id
@@ -84,12 +86,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const updateQuantity = useCallback(
-    (cartItemId: string, quantity: number) => {
+    (idOrMedicineId: string, quantity: number) => {
       setItems((prev) => {
         if (quantity <= 0) {
-          return prev.filter((it) => it.id !== cartItemId);
+          return prev.filter((it) => it.id !== idOrMedicineId && it.medicineId !== idOrMedicineId);
         }
-        return prev.map((it) => (it.id === cartItemId ? { ...it, quantity } : it));
+        return prev.map((it) =>
+          it.id === idOrMedicineId || it.medicineId === idOrMedicineId
+            ? { ...it, quantity }
+            : it
+        );
       });
 
       triggerInvalidation();
@@ -98,8 +104,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const removeFromCart = useCallback(
-    (cartItemId: string) => {
-      setItems((prev) => prev.filter((it) => it.id !== cartItemId));
+    (idOrMedicineId: string) => {
+      setItems((prev) =>
+        prev.filter((it) => it.id !== idOrMedicineId && it.medicineId !== idOrMedicineId)
+      );
       triggerInvalidation();
     },
     [triggerInvalidation]

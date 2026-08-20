@@ -28,7 +28,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         <Ionicons name="alert-circle" size={40} color={COLORS.danger} />
       </View>
 
-      <AppText variant="h3" color={COLORS.textPrimary} weight="700" align="center" style={styles.title}>
+      <AppText variant="h3" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
         {title}
       </AppText>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { BottomTabParamList, AppStackParamList } from '../types/navigation';
 import { HomeScreen } from '../screens/home/HomeScreen';
@@ -10,6 +10,7 @@ import { COLORS, SPACING, BORDER_RADIUS } from '../theme';
 import { AppText } from '../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrders } from '../store/OrderContext';
+import { useTabBarScroll } from '../store/TabBarScrollContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -35,27 +36,111 @@ const FloatingLiquidGlassTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const rootNav = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { activeOrders } = useOrders();
+  const { collapseAnim } = useTabBarScroll();
+
+  // Dynamic Animated Values based on scroll
+  const barHeight = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [64, 48],
+  });
+
+  const horizontalMargin = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [16, 36],
+  });
+
+  const labelOpacity = collapseAnim.interpolate({
+    inputRange: [0, 0.4, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const labelMaxWidth = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [72, 0],
+  });
+
+  const labelMarginLeft = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [6, 0],
+  });
+
+  const pillPaddingHorizontal = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [14, 10],
+  });
+
+  const pillPaddingVertical = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [8, 6],
+  });
+
+  const scanFabTop = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-58, -50],
+  });
+
+  const scanFabLabelOpacity = collapseAnim.interpolate({
+    inputRange: [0, 0.4, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const scanFabLabelMaxWidth = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [46, 0],
+  });
+
+  const scanFabPaddingHorizontal = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [14, 10],
+  });
 
   return (
-    <View style={styles.floatingContainer} pointerEvents="box-none">
+    <Animated.View
+      style={[
+        styles.floatingContainer,
+        {
+          left: horizontalMargin,
+          right: horizontalMargin,
+        },
+      ]}
+      pointerEvents="box-none"
+    >
       {/* 1. SEPARATE FLOATING SCAN CTA (Bottom Right Floating Action Button) */}
-      <TouchableOpacity
-        activeOpacity={0.88}
-        onPress={() => rootNav.navigate('UploadPrescription', { fromCart: false })}
-        style={styles.floatingScanFab}
-      >
-        <View style={styles.scanFabCircle}>
-          <Ionicons name="scan" size={22} color="#FFFFFF" />
-        </View>
-        <AppText variant="caption" color="#FFFFFF" weight="800" style={styles.scanFabLabel}>
-          Scan
-        </AppText>
-      </TouchableOpacity>
+      <Animated.View style={{ position: 'absolute', right: 4, top: scanFabTop, zIndex: 1000 }}>
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={() => rootNav.navigate('UploadPrescription', { fromCart: false })}
+        >
+          <Animated.View
+            style={[
+              styles.floatingScanFab,
+              {
+                paddingHorizontal: scanFabPaddingHorizontal,
+              },
+            ]}
+          >
+            <View style={styles.scanFabCircle}>
+              <Ionicons name="scan" size={20} color="#FFFFFF" />
+            </View>
+            <Animated.View
+              style={{
+                maxWidth: scanFabLabelMaxWidth,
+                opacity: scanFabLabelOpacity,
+                overflow: 'hidden',
+              }}
+            >
+              <AppText variant="caption" color="#FFFFFF" weight="600" style={styles.scanFabLabel}>
+                Scan
+              </AppText>
+            </Animated.View>
+          </Animated.View>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* 2. MAIN LIQUID GLASS NAVIGATION BAR (Equal, Symmetric 3-Item Spacing) */}
       <View style={styles.capsuleShadowWrapper}>
         <BlurView intensity={Platform.OS === 'ios' ? 75 : 95} tint="light" style={styles.blurCapsule}>
-          <View style={styles.glassInnerContent}>
+          <Animated.View style={[styles.glassInnerContent, { height: barHeight }]}>
             {state.routes.map((route, index) => {
               const isFocused = state.index === index;
               const config = TAB_CONFIG.find((c) => c.name === route.name);
@@ -85,39 +170,57 @@ const FloatingLiquidGlassTabBar: React.FC<BottomTabBarProps> = ({
                   activeOpacity={0.8}
                   style={styles.tabItemWrapper}
                 >
-                  <View style={[styles.tabItemPill, isFocused && styles.tabItemPillActive]}>
+                  <Animated.View
+                    style={[
+                      styles.tabItemPill,
+                      isFocused && styles.tabItemPillActive,
+                      {
+                        paddingHorizontal: pillPaddingHorizontal,
+                        paddingVertical: pillPaddingVertical,
+                      },
+                    ]}
+                  >
                     <View style={styles.iconWrapper}>
                       <Ionicons
                         name={isFocused ? config.activeIcon : config.inactiveIcon}
-                        size={20}
+                        size={19}
                         color={isFocused ? '#FFFFFF' : '#64748B'}
                       />
                       {showBadge && (
                         <View style={styles.badgePill}>
-                          <AppText variant="caption" color="#FFFFFF" weight="800" style={styles.badgeText}>
+                          <AppText variant="caption" color="#FFFFFF" weight="600" style={styles.badgeText}>
                             {activeOrders.length}
                           </AppText>
                         </View>
                       )}
                     </View>
 
-                    <AppText
-                      variant="bodySmall"
-                      color={isFocused ? '#FFFFFF' : '#64748B'}
-                      weight={isFocused ? '800' : '600'}
-                      style={styles.tabLabel}
-                      numberOfLines={1}
+                    <Animated.View
+                      style={{
+                        maxWidth: labelMaxWidth,
+                        opacity: labelOpacity,
+                        marginLeft: labelMarginLeft,
+                        overflow: 'hidden',
+                      }}
                     >
-                      {config.label}
-                    </AppText>
-                  </View>
+                      <AppText
+                        variant="bodySmall"
+                        color={isFocused ? '#FFFFFF' : '#64748B'}
+                        weight="600"
+                        style={styles.tabLabel}
+                        numberOfLines={1}
+                      >
+                        {config.label}
+                      </AppText>
+                    </Animated.View>
+                  </Animated.View>
                 </TouchableOpacity>
               );
             })}
-          </View>
+          </Animated.View>
         </BlurView>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -148,20 +251,14 @@ const styles = StyleSheet.create({
   floatingContainer: {
     position: 'absolute',
     bottom: Platform.OS === 'android' ? 14 : 22,
-    left: 16,
-    right: 16,
     zIndex: 999,
   },
   // Floating Scan CTA Button on Bottom Right
   floatingScanFab: {
-    position: 'absolute',
-    right: 4,
-    top: -62,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#3A2986',
-    paddingVertical: 9,
-    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 24,
     borderWidth: 2,
     borderColor: '#FFFFFF',
@@ -170,16 +267,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 10,
-    zIndex: 1000,
   },
   scanFabCircle: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 6,
   },
   scanFabLabel: {
     fontSize: 12,
     letterSpacing: 0.3,
+    marginLeft: 5,
   },
 
   // Main Liquid Glass Capsule
@@ -204,22 +300,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: 4,
     paddingHorizontal: 8,
-    height: 66,
   },
   tabItemWrapper: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
   },
   tabItemPill: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
     borderRadius: 22,
     width: '100%',
   },
@@ -238,7 +331,6 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 12,
-    marginLeft: 6,
   },
   badgePill: {
     position: 'absolute',

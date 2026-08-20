@@ -62,8 +62,8 @@ export const OfferTagBadge: React.FC<OfferTagBadgeProps> = ({ tag, style }) => {
         style,
       ]}
     >
-      <Ionicons name={config.icon} size={12} color={config.color} style={styles.icon} />
-      <AppText variant="badge" color={config.color} weight="800" style={styles.text}>
+      <Ionicons name={config.icon} size={11} color={config.color} style={styles.icon} />
+      <AppText variant="badge" color={config.color} weight="600" style={styles.text}>
         {config.label}
       </AppText>
     </View>
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 3,
     paddingHorizontal: SPACING.xs + 3,
-    borderRadius: BORDER_RADIUS.xs,
+    borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
     alignSelf: 'flex-start',
   },

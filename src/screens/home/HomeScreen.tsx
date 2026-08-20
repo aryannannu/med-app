@@ -8,6 +8,7 @@ import {
   RefreshControl,
   SafeAreaView,
   Platform,
+  Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,6 +28,7 @@ import { useAddress } from '../../store/AddressContext';
 import { useOrders } from '../../store/OrderContext';
 import { useAuth } from '../../store/AuthContext';
 import { useToast } from '../../store/ToastContext';
+import { useTabBarScroll } from '../../store/TabBarScrollContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatDistance, formatDeliveryTime } from '../../utils/formatters';
 
@@ -188,6 +190,13 @@ export const HomeScreen: React.FC = () => {
   const { activeOrders } = useOrders();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { onScroll, collapseAnim } = useTabBarScroll();
+
+  // Floating Cart sits dynamically 12px above the floating tab bar
+  const floatingCartBottom = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Platform.OS === 'android' ? 88 : 96, Platform.OS === 'android' ? 72 : 80],
+  });
 
   const loadData = useCallback(async () => {
     try {
@@ -229,6 +238,7 @@ export const HomeScreen: React.FC = () => {
 
   // Standard Medicine Card matching reference anatomy with perfect alignment
   const renderMedicineCard = (med: Medicine, storeAttribution?: string) => {
+    if (!med || !med.id) return null;
     return (
       <MedicineCard
         key={med.id}
@@ -252,6 +262,7 @@ export const HomeScreen: React.FC = () => {
 
   // Standard Pharmacy Card Component
   const renderPharmacyCard = (pharmacy: Pharmacy) => {
+    if (!pharmacy || !pharmacy.id) return null;
     return (
       <TouchableOpacity
         key={pharmacy.id}
@@ -263,13 +274,13 @@ export const HomeScreen: React.FC = () => {
 
         <View style={styles.pharmacyDetails}>
           <View style={styles.pharmacyNameRow}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" numberOfLines={1} style={{ flex: 1 }}>
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1} style={{ flex: 1 }}>
               {pharmacy.name}
             </AppText>
             {pharmacy.isVerified && (
               <View style={styles.verifiedTag}>
                 <Ionicons name="checkmark-circle" size={12} color={COLORS.primary} />
-                <AppText variant="caption" color={COLORS.primary} weight="700" style={{ fontSize: 10, marginLeft: 2 }}>
+                <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 10, marginLeft: 2 }}>
                   ✓ Verified
                 </AppText>
               </View>
@@ -277,7 +288,7 @@ export const HomeScreen: React.FC = () => {
           </View>
 
           <View style={styles.pharmacyMetaRow}>
-            <AppText variant="caption" color="#15803D" weight="700">
+            <AppText variant="caption" color="#15803D" weight="600">
               {pharmacy.rating} ★
             </AppText>
             <AppText variant="caption" color={COLORS.textMuted} style={{ marginHorizontal: 4 }}>
@@ -289,13 +300,13 @@ export const HomeScreen: React.FC = () => {
             <AppText variant="caption" color={COLORS.textMuted} style={{ marginHorizontal: 4 }}>
               •
             </AppText>
-            <AppText variant="caption" color={COLORS.primary} weight="700">
+            <AppText variant="caption" color={COLORS.primary} weight="600">
               {formatDeliveryTime(pharmacy.estimatedDeliveryTimeMinutes)}
             </AppText>
             <AppText variant="caption" color={COLORS.textMuted} style={{ marginHorizontal: 4 }}>
               •
             </AppText>
-            <AppText variant="caption" color={pharmacy.isOpenNow ? '#15803D' : '#DC2626'} weight="700">
+            <AppText variant="caption" color={pharmacy.isOpenNow ? '#15803D' : '#DC2626'} weight="600">
               {pharmacy.isOpenNow ? 'Open Now' : 'Closed'}
             </AppText>
           </View>
@@ -326,7 +337,7 @@ export const HomeScreen: React.FC = () => {
           >
             <View style={styles.locationRow}>
               <Ionicons name="location-sharp" size={16} color={COLORS.primary} />
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800" style={styles.locationLabel}>
+              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.locationLabel}>
                 {selectedAddress?.label || 'Home'}
               </AppText>
               <Ionicons name="chevron-down" size={14} color={COLORS.textPrimary} style={{ marginLeft: 2 }} />
@@ -334,7 +345,7 @@ export const HomeScreen: React.FC = () => {
               {/* Delivery ETA badge */}
               <View style={styles.headerEtaPill}>
                 <Ionicons name="flash" size={11} color="#FFFFFF" style={{ marginRight: 2 }} />
-                <AppText variant="caption" color="#FFFFFF" weight="800" style={styles.headerEtaText}>
+                <AppText variant="caption" color="#FFFFFF" weight="600" style={styles.headerEtaText}>
                   10–15 MINS
                 </AppText>
               </View>
@@ -367,6 +378,8 @@ export const HomeScreen: React.FC = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -397,7 +410,7 @@ export const HomeScreen: React.FC = () => {
               <AppText
                 variant="bodySmall"
                 color={activeMode === 'medicines' ? '#FFFFFF' : COLORS.textSecondary}
-                weight="800"
+                weight="600"
               >
                 Search by Medicine
               </AppText>
@@ -420,7 +433,7 @@ export const HomeScreen: React.FC = () => {
               <AppText
                 variant="bodySmall"
                 color={activeMode === 'stores' ? '#FFFFFF' : COLORS.textSecondary}
-                weight="800"
+                weight="600"
               >
                 Search by Store
               </AppText>
@@ -467,7 +480,7 @@ export const HomeScreen: React.FC = () => {
               </View>
               <View style={{ flex: 1, marginLeft: SPACING.md }}>
                 <View style={styles.activeOrderHeader}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800">
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                     Your order is on the way
                   </AppText>
                   <View style={styles.activePulseDot} />
@@ -476,7 +489,7 @@ export const HomeScreen: React.FC = () => {
                   {activeOrder.items.length} medicines • Arriving in 10–15 min
                 </AppText>
               </View>
-              <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
+              <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
                 Track →
               </AppText>
             </TouchableOpacity>
@@ -492,11 +505,11 @@ export const HomeScreen: React.FC = () => {
                 <View style={{ flex: 1, paddingRight: SPACING.sm }}>
                   <View style={styles.heroPill}>
                     <Ionicons name="flash" size={12} color="#FFFFFF" style={{ marginRight: 3 }} />
-                    <AppText variant="caption" color="#FFFFFF" weight="800" style={{ fontSize: 10 }}>
+                    <AppText variant="caption" color="#FFFFFF" weight="600" style={{ fontSize: 10 }}>
                       HYPERLOCAL DISPATCH
                     </AppText>
                   </View>
-                  <AppText variant="headingSmall" color="#FFFFFF" weight="800" style={{ marginTop: 6 }}>
+                  <AppText variant="headingSmall" color="#FFFFFF" weight="600" style={{ marginTop: 6 }}>
                     Medicines in 10–15 Min
                   </AppText>
                   <AppText variant="caption" color="#E8E8EE" style={{ marginTop: 2 }}>
@@ -509,7 +522,7 @@ export const HomeScreen: React.FC = () => {
                     style={styles.heroUploadBtn}
                   >
                     <Ionicons name="document-text-outline" size={15} color={COLORS.primary} style={{ marginRight: 4 }} />
-                    <AppText variant="caption" color={COLORS.primary} weight="800">
+                    <AppText variant="caption" color={COLORS.primary} weight="600">
                       Upload Prescription
                     </AppText>
                   </TouchableOpacity>
@@ -524,7 +537,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Shop by health need
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -549,7 +562,7 @@ export const HomeScreen: React.FC = () => {
                       <View style={[styles.healthNeedIconCircle, { backgroundColor: '#FFFFFF' }]}>
                         <Ionicons name={need.icon as any} size={20} color={need.color} />
                       </View>
-                      <AppText variant="caption" color={COLORS.textPrimary} weight="700" align="center" style={{ marginTop: 6 }}>
+                      <AppText variant="caption" color={COLORS.textPrimary} weight="600" align="center" style={{ marginTop: 6 }}>
                         {need.name}
                       </AppText>
                     </TouchableOpacity>
@@ -561,7 +574,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Shop by category
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -576,7 +589,7 @@ export const HomeScreen: React.FC = () => {
                       })
                     }
                   >
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="700">
+                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
                       View All →
                     </AppText>
                   </TouchableOpacity>
@@ -610,7 +623,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Medicines available near you
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -618,7 +631,7 @@ export const HomeScreen: React.FC = () => {
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="700">
+                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
                       View All →
                     </AppText>
                   </TouchableOpacity>
@@ -633,7 +646,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Popular near you
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -641,7 +654,7 @@ export const HomeScreen: React.FC = () => {
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="700">
+                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
                       View All →
                     </AppText>
                   </TouchableOpacity>
@@ -656,7 +669,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Top discounts
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -664,7 +677,7 @@ export const HomeScreen: React.FC = () => {
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="700">
+                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
                       View All →
                     </AppText>
                   </TouchableOpacity>
@@ -679,11 +692,11 @@ export const HomeScreen: React.FC = () => {
               <View style={[styles.rxCtaCard, SHADOWS.subtle]}>
                 <View style={styles.rxCtaContent}>
                   <View style={styles.rxPill}>
-                    <AppText variant="caption" color="#FFFFFF" weight="800" style={{ fontSize: 9 }}>
+                    <AppText variant="caption" color="#FFFFFF" weight="600" style={{ fontSize: 9 }}>
                       QUICK ORDER
                     </AppText>
                   </View>
-                  <AppText variant="titleMedium" color={COLORS.primary} weight="800" style={{ marginTop: 4 }}>
+                  <AppText variant="titleMedium" color={COLORS.primary} weight="600" style={{ marginTop: 4 }}>
                     Have a prescription?
                   </AppText>
                   <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
@@ -696,7 +709,7 @@ export const HomeScreen: React.FC = () => {
                     style={styles.rxUploadCtaBtn}
                   >
                     <Ionicons name="camera-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <AppText variant="buttonSmall" color="#FFFFFF" weight="700">
+                    <AppText variant="buttonSmall" color="#FFFFFF" weight="600">
                       Upload Prescription
                     </AppText>
                   </TouchableOpacity>
@@ -711,7 +724,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Shop by medicine type
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -735,11 +748,11 @@ export const HomeScreen: React.FC = () => {
                       <View style={styles.typeIconCircle}>
                         <Ionicons name={type.icon as any} size={24} color={COLORS.primary} />
                       </View>
-                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" align="center" numberOfLines={1} style={{ marginTop: 6 }}>
+                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" align="center" numberOfLines={1} style={{ marginTop: 6 }}>
                         {type.name}
                       </AppText>
                       <View style={styles.typeCountBadge}>
-                        <AppText variant="caption" color={COLORS.primary} weight="700" style={{ fontSize: 10 }}>
+                        <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 10 }}>
                           {type.count}
                         </AppText>
                       </View>
@@ -752,7 +765,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Shop by brand
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -774,7 +787,7 @@ export const HomeScreen: React.FC = () => {
                       style={[styles.brandCard, SHADOWS.subtle]}
                     >
                       <Image source={{ uri: brand.logo }} style={styles.brandLogo} resizeMode="contain" />
-                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginTop: 6 }}>
+                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 6 }}>
                         {brand.name}
                       </AppText>
                       <AppText variant="caption" color={COLORS.textMuted} style={{ marginTop: 2 }}>
@@ -789,7 +802,7 @@ export const HomeScreen: React.FC = () => {
               <View style={[styles.sectionContainer, { marginBottom: SPACING.xxl }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Trusted pharmacies fulfilling orders
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -797,7 +810,7 @@ export const HomeScreen: React.FC = () => {
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => setActiveMode('stores')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="700">
+                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
                       View All →
                     </AppText>
                   </TouchableOpacity>
@@ -818,11 +831,11 @@ export const HomeScreen: React.FC = () => {
                 <View style={{ flex: 1, paddingRight: SPACING.sm }}>
                   <View style={styles.storeHeroPill}>
                     <Ionicons name="business" size={12} color="#FFFFFF" style={{ marginRight: 3 }} />
-                    <AppText variant="caption" color="#FFFFFF" weight="800" style={{ fontSize: 10 }}>
+                    <AppText variant="caption" color="#FFFFFF" weight="600" style={{ fontSize: 10 }}>
                       LOCAL PHARMACY NETWORK
                     </AppText>
                   </View>
-                  <AppText variant="headingSmall" color="#FFFFFF" weight="800" style={{ marginTop: 6 }}>
+                  <AppText variant="headingSmall" color="#FFFFFF" weight="600" style={{ marginTop: 6 }}>
                     Order from Nearby Stores
                   </AppText>
                   <AppText variant="caption" color="#E8E8EE" style={{ marginTop: 2 }}>
@@ -839,7 +852,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Store deals &amp; exclusive offers
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -857,18 +870,18 @@ export const HomeScreen: React.FC = () => {
                       style={[styles.storeDealCard, { backgroundColor: deal.bg }, SHADOWS.subtle]}
                     >
                       <View style={[styles.storeDealBadge, { backgroundColor: deal.color }]}>
-                        <AppText variant="caption" color="#FFFFFF" weight="800" style={{ fontSize: 10 }}>
+                        <AppText variant="caption" color="#FFFFFF" weight="600" style={{ fontSize: 10 }}>
                           {deal.badge}
                         </AppText>
                       </View>
-                      <AppText variant="titleSmall" color={deal.color} weight="800" style={{ marginTop: SPACING.sm }}>
+                      <AppText variant="titleSmall" color={deal.color} weight="600" style={{ marginTop: SPACING.sm }}>
                         {deal.title}
                       </AppText>
                       <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 4 }}>
                         🏪 {deal.pharmacyName}
                       </AppText>
                       <View style={styles.storeDealActionRow}>
-                        <AppText variant="caption" color={deal.color} weight="700">
+                        <AppText variant="caption" color={deal.color} weight="600">
                           Visit Store →
                         </AppText>
                       </View>
@@ -881,7 +894,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Pharmacies near you ({nearbyPharmacies.length})
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -897,7 +910,7 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Browse stores by specialization
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -921,7 +934,7 @@ export const HomeScreen: React.FC = () => {
                       <View style={[styles.storeCatIconCircle, { backgroundColor: '#ECE8F7' }]}>
                         <Ionicons name={cat.icon as any} size={24} color={COLORS.primary} />
                       </View>
-                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginTop: 8 }}>
+                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 8 }}>
                         {cat.name}
                       </AppText>
                       <AppText variant="caption" color={COLORS.textMuted} style={{ marginTop: 2 }}>
@@ -936,7 +949,7 @@ export const HomeScreen: React.FC = () => {
               <View style={[styles.sectionContainer, { marginBottom: SPACING.xxl }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
                       Available in nearby stores
                     </AppText>
                     <AppText variant="caption" color={COLORS.textSecondary}>
@@ -957,33 +970,35 @@ export const HomeScreen: React.FC = () => {
         </ScrollView>
 
         {/* =========================================================================
-            19. FLOATING CART (Appears ONLY when items in cart > 0)
+            19. FLOATING CART (Always positioned 12px above bottom nav bar)
            ========================================================================= */}
         {totalItemCount > 0 && (
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('Cart')}
-            style={[styles.floatingCart, SHADOWS.modal]}
-          >
-            <View style={styles.floatingCartLeft}>
-              <View style={styles.floatingCartBadge}>
-                <Ionicons name="cart" size={16} color={COLORS.primary} />
-                <AppText variant="caption" color={COLORS.primary} weight="800" style={{ marginLeft: 4 }}>
-                  {totalItemCount} {totalItemCount === 1 ? 'Medicine' : 'Medicines'}
+          <Animated.View style={[styles.floatingCart, { bottom: floatingCartBottom }, SHADOWS.modal]}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate('Cart')}
+              style={styles.floatingCartInner}
+            >
+              <View style={styles.floatingCartLeft}>
+                <View style={styles.floatingCartBadge}>
+                  <Ionicons name="cart" size={16} color={COLORS.primary} />
+                  <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
+                    {totalItemCount} {totalItemCount === 1 ? 'Medicine' : 'Medicines'}
+                  </AppText>
+                </View>
+                <AppText variant="titleSmall" color="#FFFFFF" weight="600" style={{ marginLeft: SPACING.md }}>
+                  {formatCurrency(summary.estimatedFinalTotal)}
                 </AppText>
               </View>
-              <AppText variant="titleSmall" color="#FFFFFF" weight="800" style={{ marginLeft: SPACING.md }}>
-                {formatCurrency(summary.estimatedFinalTotal)}
-              </AppText>
-            </View>
 
-            <View style={styles.floatingCartRight}>
-              <AppText variant="buttonSmall" color="#FFFFFF" weight="700">
-                View Cart
-              </AppText>
-              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 4 }} />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.floatingCartRight}>
+                <AppText variant="buttonSmall" color="#FFFFFF" weight="600">
+                  View Cart
+                </AppText>
+                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 4 }} />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
         )}
       </View>
     </SafeAreaView>
@@ -1531,17 +1546,19 @@ const styles = StyleSheet.create({
   },
   floatingCart: {
     position: 'absolute',
-    bottom: Platform.OS === 'android' ? 88 : 98,
     left: SPACING.md,
     right: SPACING.md,
     backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.xl,
+    zIndex: 1005,
+  },
+  floatingCartInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: SPACING.lg,
-    zIndex: 998,
+    width: '100%',
   },
   floatingCartLeft: {
     flexDirection: 'row',

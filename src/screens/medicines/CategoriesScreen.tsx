@@ -7,6 +7,7 @@ import {
   TextInput,
   SafeAreaView,
   Platform,
+  Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,6 +17,7 @@ import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useAddress } from '../../store/AddressContext';
 import { useCart } from '../../store/CartContext';
+import { useTabBarScroll } from '../../store/TabBarScrollContext';
 import { formatCurrency } from '../../utils/currency';
 
 interface CategoryItem {
@@ -127,6 +129,13 @@ export const CategoriesScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { selectedAddress } = useAddress();
   const { summary, totalItemCount } = useCart();
+  const { onScroll, collapseAnim } = useTabBarScroll();
+
+  // Floating Cart sits dynamically 12px above the floating tab bar
+  const floatingCartBottom = collapseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Platform.OS === 'android' ? 88 : 96, Platform.OS === 'android' ? 72 : 80],
+  });
 
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return ALL_CATEGORIES;
@@ -144,7 +153,7 @@ export const CategoriesScreen: React.FC = () => {
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
+            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
               Categories
             </AppText>
             <TouchableOpacity
@@ -184,8 +193,10 @@ export const CategoriesScreen: React.FC = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
         >
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800" style={{ marginBottom: SPACING.md }}>
+          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
             All Health Categories ({filteredCategories.length})
           </AppText>
 
@@ -207,7 +218,7 @@ export const CategoriesScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.categoryInfo}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" numberOfLines={1}>
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
                     {cat.name}
                   </AppText>
                   <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginTop: 2, fontSize: 11 }}>
@@ -234,30 +245,32 @@ export const CategoriesScreen: React.FC = () => {
 
         {/* Floating Cart Indicator */}
         {totalItemCount > 0 && (
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('Cart')}
-            style={[styles.floatingCart, SHADOWS.modal]}
-          >
-            <View style={styles.floatingCartLeft}>
-              <View style={styles.floatingCartBadge}>
-                <Ionicons name="cart" size={16} color={COLORS.primary} />
-                <AppText variant="caption" color={COLORS.primary} weight="800" style={{ marginLeft: 4 }}>
-                  {totalItemCount} {totalItemCount === 1 ? 'Medicine' : 'Medicines'}
+          <Animated.View style={[styles.floatingCart, { bottom: floatingCartBottom }, SHADOWS.modal]}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate('Cart')}
+              style={styles.floatingCartInner}
+            >
+              <View style={styles.floatingCartLeft}>
+                <View style={styles.floatingCartBadge}>
+                  <Ionicons name="cart" size={16} color={COLORS.primary} />
+                  <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
+                    {totalItemCount} {totalItemCount === 1 ? 'Medicine' : 'Medicines'}
+                  </AppText>
+                </View>
+                <AppText variant="titleSmall" color="#FFFFFF" weight="600" style={{ marginLeft: SPACING.md }}>
+                  {formatCurrency(summary.estimatedFinalTotal)}
                 </AppText>
               </View>
-              <AppText variant="titleSmall" color="#FFFFFF" weight="800" style={{ marginLeft: SPACING.md }}>
-                {formatCurrency(summary.estimatedFinalTotal)}
-              </AppText>
-            </View>
 
-            <View style={styles.floatingCartRight}>
-              <AppText variant="buttonSmall" color="#FFFFFF" weight="700">
-                View Cart
-              </AppText>
-              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 4 }} />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.floatingCartRight}>
+                <AppText variant="buttonSmall" color="#FFFFFF" weight="600">
+                  View Cart
+                </AppText>
+                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 4 }} />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
         )}
       </View>
     </SafeAreaView>
@@ -354,17 +367,19 @@ const styles = StyleSheet.create({
   },
   floatingCart: {
     position: 'absolute',
-    bottom: Platform.OS === 'android' ? 88 : 98,
     left: SPACING.md,
     right: SPACING.md,
     backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.xl,
+    zIndex: 1005,
+  },
+  floatingCartInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: SPACING.lg,
-    zIndex: 998,
+    width: '100%',
   },
   floatingCartLeft: {
     flexDirection: 'row',

@@ -20,7 +20,7 @@ export const RxBadge: React.FC<RxBadgeProps> = ({ size = 'sm', style }) => {
       <AppText
         variant="badge"
         color={COLORS.rxRed}
-        weight="800"
+        weight="600"
         style={size === 'sm' ? styles.textSm : styles.textMd}
       >
         Rx Required
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.rxRedLight,
     borderColor: '#FECACA',
     borderWidth: 1,
-    borderRadius: BORDER_RADIUS.xs,
+    borderRadius: BORDER_RADIUS.sm,
     alignSelf: 'flex-start',
     alignItems: 'center',
     justifyContent: 'center',

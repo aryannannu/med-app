@@ -44,11 +44,11 @@ export const NotificationsScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
           Notifications
         </AppText>
         <TouchableOpacity onPress={markAllRead} style={styles.readAllBtn}>
-          <AppText variant="caption" color={COLORS.primary} weight="700">
+          <AppText variant="caption" color={COLORS.primary} weight="600">
             Mark Read
           </AppText>
         </TouchableOpacity>
@@ -86,7 +86,7 @@ export const NotificationsScreen: React.FC = () => {
 
                 <View style={styles.contentCol}>
                   <View style={styles.titleRow}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ flex: 1 }}>
+                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ flex: 1 }}>
                       {notif.title}
                     </AppText>
                     {!notif.isRead && <View style={styles.unreadDot} />}

@@ -48,7 +48,7 @@ export const MedicineListItem: React.FC<MedicineListItemProps> = ({
 
       <View style={styles.listContent}>
         <View style={styles.headerRow}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} numberOfLines={1} weight="700" style={styles.medName}>
+          <AppText variant="titleMedium" color={COLORS.textPrimary} numberOfLines={1} weight="600" style={styles.medName}>
             {medicine.name}
           </AppText>
         </View>
@@ -66,7 +66,7 @@ export const MedicineListItem: React.FC<MedicineListItemProps> = ({
 
           {isOutOfStock ? (
             <View style={styles.outOfStockPill}>
-              <AppText variant="caption" color={COLORS.danger} weight="700">
+              <AppText variant="caption" color={COLORS.danger} weight="600">
                 Unavailable
               </AppText>
             </View>
@@ -75,7 +75,7 @@ export const MedicineListItem: React.FC<MedicineListItemProps> = ({
               quantity={cartQuantity}
               onIncrement={onIncrement || (() => {})}
               onDecrement={onDecrement || (() => {})}
-              size="md"
+              size="sm"
             />
           ) : (
             <TouchableOpacity
@@ -83,8 +83,8 @@ export const MedicineListItem: React.FC<MedicineListItemProps> = ({
               onPress={onAddToCart}
               style={styles.listAddBtn}
             >
-              <Ionicons name="cart-outline" size={16} color={COLORS.primary} style={{ marginRight: 4 }} />
-              <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
+              <Ionicons name="add" size={16} color="#15803D" style={{ marginRight: 2 }} />
+              <AppText variant="buttonSmall" color="#15803D" weight="600">
                 ADD
               </AppText>
             </TouchableOpacity>
@@ -102,20 +102,22 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E8E8EE',
     marginBottom: SPACING.md,
   },
   listImageWrapper: {
     position: 'relative',
-    width: 90,
-    height: 90,
+    width: 84,
+    height: 84,
     borderRadius: BORDER_RADIUS.md,
     overflow: 'hidden',
     backgroundColor: COLORS.surfaceSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   listImage: {
-    width: '100%',
-    height: '100%',
+    width: '85%',
+    height: '85%',
   },
   listRxBadge: {
     position: 'absolute',
@@ -151,18 +153,19 @@ const styles = StyleSheet.create({
   listAddBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.xs,
+    justifyContent: 'center',
+    paddingVertical: 5,
     paddingHorizontal: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1.5,
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primarySubtle,
-    minHeight: 38,
+    borderColor: '#15803D',
+    backgroundColor: '#FFFFFF',
+    minHeight: 32,
   },
   outOfStockPill: {
     backgroundColor: COLORS.dangerLight,
-    paddingHorizontal: SPACING.xs,
+    paddingHorizontal: SPACING.xs + 2,
     paddingVertical: 3,
-    borderRadius: BORDER_RADIUS.xs,
+    borderRadius: BORDER_RADIUS.sm,
   },
 });

@@ -29,17 +29,18 @@ export const FONT_FAMILY = {
     web: "'Lexend Deca', sans-serif",
     default: 'LexendDeca_600SemiBold',
   }),
+  // Mapped to SemiBold to ensure cohesive semi-bold hierarchy across the app without harsh bolding
   bold: Platform.select({
     web: "'Lexend Deca', sans-serif",
-    default: 'LexendDeca_700Bold',
+    default: 'LexendDeca_600SemiBold',
   }),
   extrabold: Platform.select({
     web: "'Lexend Deca', sans-serif",
-    default: 'LexendDeca_800ExtraBold',
+    default: 'LexendDeca_600SemiBold',
   }),
   black: Platform.select({
     web: "'Lexend Deca', sans-serif",
-    default: 'LexendDeca_900Black',
+    default: 'LexendDeca_600SemiBold',
   }),
 };
 
@@ -66,9 +67,9 @@ export const FONT_WEIGHTS = {
   regular: '400' as const,
   medium: '500' as const,
   semibold: '600' as const,
-  bold: '700' as const,
-  extrabold: '800' as const,
-  black: '900' as const,
+  bold: '600' as const,
+  extrabold: '600' as const,
+  black: '600' as const,
 };
 
 export const LINE_HEIGHTS = {
@@ -90,40 +91,40 @@ export const LINE_HEIGHTS = {
 } as const;
 
 export const TYPOGRAPHY: Record<string, TextStyle> = {
-  // 1. Display Large (34px / 42px / ExtraBold 800)
+  // 1. Display Large (34px / 42px / SemiBold 600)
   displayLarge: {
-    fontFamily: FONT_FAMILY.extrabold,
-    fontWeight: '800',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.displayLarge,
     lineHeight: LINE_HEIGHTS.displayLarge,
-    letterSpacing: -0.5,
-  },
-
-  // 2. Display Medium (28px / 36px / ExtraBold 800)
-  displayMedium: {
-    fontFamily: FONT_FAMILY.extrabold,
-    fontWeight: '800',
-    fontSize: FONT_SIZES.displayMedium,
-    lineHeight: LINE_HEIGHTS.displayMedium,
     letterSpacing: -0.4,
   },
 
-  // 3. Heading Large (24px / 32px / Bold 700)
-  headingLarge: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
-    fontSize: FONT_SIZES.headingLarge,
-    lineHeight: LINE_HEIGHTS.headingLarge,
+  // 2. Display Medium (28px / 36px / SemiBold 600)
+  displayMedium: {
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
+    fontSize: FONT_SIZES.displayMedium,
+    lineHeight: LINE_HEIGHTS.displayMedium,
     letterSpacing: -0.3,
   },
 
-  // 4. Heading Medium (20px / 28px / Bold 700)
+  // 3. Heading Large (24px / 32px / SemiBold 600)
+  headingLarge: {
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
+    fontSize: FONT_SIZES.headingLarge,
+    lineHeight: LINE_HEIGHTS.headingLarge,
+    letterSpacing: -0.2,
+  },
+
+  // 4. Heading Medium (20px / 28px / SemiBold 600)
   headingMedium: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.headingMedium,
     lineHeight: LINE_HEIGHTS.headingMedium,
-    letterSpacing: -0.2,
+    letterSpacing: -0.1,
   },
 
   // 5. Heading Small (18px / 26px / SemiBold 600)
@@ -132,13 +133,12 @@ export const TYPOGRAPHY: Record<string, TextStyle> = {
     fontWeight: '600',
     fontSize: FONT_SIZES.headingSmall,
     lineHeight: LINE_HEIGHTS.headingSmall,
-    letterSpacing: -0.1,
   },
 
-  // 6. Title Large (18px / 26px / Bold 700)
+  // 6. Title Large (18px / 26px / SemiBold 600)
   titleLarge: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.titleLarge,
     lineHeight: LINE_HEIGHTS.titleLarge,
   },
@@ -151,10 +151,10 @@ export const TYPOGRAPHY: Record<string, TextStyle> = {
     lineHeight: LINE_HEIGHTS.titleMedium,
   },
 
-  // 8. Title Small (15px / 22px / SemiBold 600)
+  // 8. Title Small (15px / 22px / Medium 500)
   titleSmall: {
-    fontFamily: FONT_FAMILY.semibold,
-    fontWeight: '600',
+    fontFamily: FONT_FAMILY.medium,
+    fontWeight: '500',
     fontSize: FONT_SIZES.titleSmall,
     lineHeight: LINE_HEIGHTS.titleSmall,
   },
@@ -183,52 +183,52 @@ export const TYPOGRAPHY: Record<string, TextStyle> = {
     lineHeight: LINE_HEIGHTS.bodySmall,
   },
 
-  // 12. Label Large (15px / 22px / Bold 700)
+  // 12. Label Large (15px / 22px / SemiBold 600)
   labelLarge: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.labelLarge,
     lineHeight: LINE_HEIGHTS.labelLarge,
   },
 
-  // 13. Label Medium (13px / 18px / SemiBold 600)
+  // 13. Label Medium (13px / 18px / Medium 500)
   labelMedium: {
-    fontFamily: FONT_FAMILY.semibold,
-    fontWeight: '600',
+    fontFamily: FONT_FAMILY.medium,
+    fontWeight: '500',
     fontSize: FONT_SIZES.labelMedium,
     lineHeight: LINE_HEIGHTS.labelMedium,
   },
 
-  // 14. Label Small (11px / 15px / SemiBold 600)
+  // 14. Label Small (11px / 15px / Medium 500)
   labelSmall: {
-    fontFamily: FONT_FAMILY.semibold,
-    fontWeight: '600',
+    fontFamily: FONT_FAMILY.medium,
+    fontWeight: '500',
     fontSize: FONT_SIZES.labelSmall,
     lineHeight: LINE_HEIGHTS.labelSmall,
   },
 
-  // Backward compatibility aliases
+  // Backward compatibility aliases & components
   display: {
-    fontFamily: FONT_FAMILY.extrabold,
-    fontWeight: '800',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.displayLarge,
     lineHeight: LINE_HEIGHTS.displayLarge,
   },
   h1: {
-    fontFamily: FONT_FAMILY.extrabold,
-    fontWeight: '800',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.displayMedium,
     lineHeight: LINE_HEIGHTS.displayMedium,
   },
   h2: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.headingLarge,
     lineHeight: LINE_HEIGHTS.headingLarge,
   },
   h3: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.headingMedium,
     lineHeight: LINE_HEIGHTS.headingMedium,
   },
@@ -239,33 +239,57 @@ export const TYPOGRAPHY: Record<string, TextStyle> = {
     lineHeight: LINE_HEIGHTS.headingSmall,
   },
   caption: {
+    fontFamily: FONT_FAMILY.regular,
+    fontWeight: '400',
+    fontSize: FONT_SIZES.caption,
+    lineHeight: LINE_HEIGHTS.caption,
+  },
+  captionMedium: {
     fontFamily: FONT_FAMILY.medium,
     fontWeight: '500',
     fontSize: FONT_SIZES.caption,
     lineHeight: LINE_HEIGHTS.caption,
   },
   captionBold: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.caption,
     lineHeight: LINE_HEIGHTS.caption,
   },
+  captionSemibold: {
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
+    fontSize: FONT_SIZES.caption,
+    lineHeight: LINE_HEIGHTS.caption,
+  },
+  badge: {
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
+    fontSize: FONT_SIZES.labelSmall,
+    lineHeight: LINE_HEIGHTS.labelSmall,
+  },
   buttonLarge: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.labelLarge,
     lineHeight: LINE_HEIGHTS.labelLarge,
   },
   buttonMedium: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
     fontSize: FONT_SIZES.bodyMedium,
     lineHeight: LINE_HEIGHTS.bodyMedium,
   },
   buttonSmall: {
-    fontFamily: FONT_FAMILY.bold,
-    fontWeight: '700',
+    fontFamily: FONT_FAMILY.medium,
+    fontWeight: '500',
     fontSize: FONT_SIZES.labelMedium,
     lineHeight: LINE_HEIGHTS.labelMedium,
+  },
+  button: {
+    fontFamily: FONT_FAMILY.semibold,
+    fontWeight: '600',
+    fontSize: FONT_SIZES.labelLarge,
+    lineHeight: LINE_HEIGHTS.labelLarge,
   },
 };

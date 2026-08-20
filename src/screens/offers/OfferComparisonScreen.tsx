@@ -1,29 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   ScrollView,
   StyleSheet,
+  SafeAreaView,
   TouchableOpacity,
+  Modal,
+  Image,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../types/navigation';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
-import { AppScreen } from '../../components/layout/AppScreen';
 import { AppText } from '../../components/common/AppText';
 import { AppButton } from '../../components/common/AppButton';
 import { EmptyState } from '../../components/feedback/EmptyState';
-import { ConfirmationModal } from '../../components/modals/ConfirmationModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useOffers } from '../../store/OfferContext';
-import { useAddress } from '../../store/AddressContext';
-import { usePrescription } from '../../store/PrescriptionContext';
-import { useOrders } from '../../store/OrderContext';
 import { useCart } from '../../store/CartContext';
 import { useToast } from '../../store/ToastContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatTimeRemaining } from '../../utils/formatters';
 import { PharmacyOffer } from '../../types/offer';
+import { OfferService } from '../../services/offerService';
+
+type SortOption = 'best_overall' | 'lowest_price' | 'fastest_delivery' | 'nearest' | 'highest_rated';
 
 export const OfferComparisonScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -33,424 +34,803 @@ export const OfferComparisonScreen: React.FC = () => {
     offers,
     selectedOffer,
     selectOffer,
-    activeFilter,
-    setActiveFilter,
-    filteredOffers,
     timeRemainingSeconds,
     isOffersExpired,
     startFindingPharmacies,
   } = useOffers();
 
-  const { selectedAddress } = useAddress();
-  const { activePrescription } = usePrescription();
-  const { createOrder } = useOrders();
-  const { items, summary, clearCart } = useCart();
+  const { items, summary } = useCart();
   const { showToast } = useToast();
 
-  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-  const [placingOrder, setPlacingOrder] = useState(false);
+  // Sorting & Filtering State
+  const [selectedSort, setSelectedSort] = useState<SortOption>('best_overall');
+  const [filterCompleteOnly, setFilterCompleteOnly] = useState(false);
+  const [filterUnder15Min, setFilterUnder15Min] = useState(false);
+  const [filterFourStar, setFilterFourStar] = useState(false);
+  const [filterFreeDelivery, setFilterFreeDelivery] = useState(false);
 
-  const handleSelectOffer = (offer: PharmacyOffer) => {
+  // Modals
+  const [inspectingOffer, setInspectingOffer] = useState<PharmacyOffer | null>(null);
+  const [partialOfferPending, setPartialOfferPending] = useState<PharmacyOffer | null>(null);
+  const [newOfferBannerVisible, setNewOfferBannerVisible] = useState(false);
+
+  // If user lands directly on OfferComparison or after reload, ensure offers exist
+  useEffect(() => {
+    if (offers.length === 0) {
+      startFindingPharmacies(route.params?.cartId || 'cart-current', items, null);
+    }
+  }, [offers.length, route.params?.cartId, items, startFindingPharmacies]);
+
+  // Simulated live offer arrival banner after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setNewOfferBannerVisible(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const sourceList = useMemo(() => {
+    return offers.length > 0 ? offers : OfferService.getMockOffersSync(route.params?.cartId || 'cart-current', items);
+  }, [offers, route.params?.cartId, items]);
+
+  // Sorted & Filtered Offers
+  const processedOffers = useMemo(() => {
+    let list = [...sourceList];
+
+    // Filters
+    if (filterCompleteOnly) {
+      list = list.filter((o) => o.allMedicinesAvailable);
+    }
+    if (filterUnder15Min) {
+      list = list.filter((o) => o.estimatedDeliveryMinutes <= 15);
+    }
+    if (filterFourStar) {
+      list = list.filter((o) => o.pharmacy.rating >= 4.5);
+    }
+    if (filterFreeDelivery) {
+      list = list.filter((o) => o.deliveryFee === 0);
+    }
+
+    // Sort
+    switch (selectedSort) {
+      case 'lowest_price':
+        list.sort((a, b) => a.finalPayableAmount - b.finalPayableAmount);
+        break;
+      case 'fastest_delivery':
+        list.sort((a, b) => a.estimatedDeliveryMinutes - b.estimatedDeliveryMinutes);
+        break;
+      case 'nearest':
+        list.sort((a, b) => a.pharmacy.distanceKm - b.pharmacy.distanceKm);
+        break;
+      case 'highest_rated':
+        list.sort((a, b) => b.pharmacy.rating - a.pharmacy.rating);
+        break;
+      case 'best_overall':
+      default:
+        list.sort((a, b) => (b.allMedicinesAvailable ? 1 : 0) - (a.allMedicinesAvailable ? 1 : 0));
+        break;
+    }
+
+    return list;
+  }, [offers, selectedSort, filterCompleteOnly, filterUnder15Min, filterFourStar, filterFreeDelivery, route.params?.cartId, items]);
+
+  const handleChoosePharmacy = (offer: PharmacyOffer) => {
     selectOffer(offer);
+
+    if (!offer.allMedicinesAvailable) {
+      // Partial fulfillment case
+      setPartialOfferPending(offer);
+    } else {
+      // Direct checkout
+      navigation.navigate('CheckoutReview');
+    }
   };
 
-  const handleProceedWithOffer = (offer: PharmacyOffer) => {
-    selectOffer(offer);
-    setConfirmModalVisible(true);
-  };
-
-  const handleConfirmOrder = async () => {
-    if (!selectedOffer || !selectedAddress) return;
-
-    setPlacingOrder(true);
-    try {
-      const order = await createOrder(
-        selectedOffer,
-        selectedAddress,
-        activePrescription || undefined
-      );
-
-      setConfirmModalVisible(false);
-      clearCart();
-      showToast('Order confirmed successfully!', 'success');
-      navigation.navigate('OrderDetails', { orderId: order.id, order });
-    } catch (e) {
-      showToast('Failed to place order. Please try again.', 'error');
-    } finally {
-      setPlacingOrder(false);
+  const handleConfirmPartial = () => {
+    if (partialOfferPending) {
+      setPartialOfferPending(null);
+      navigation.navigate('CheckoutReview');
     }
   };
 
   return (
-    <AppScreen
-      scrollable
-      header={
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
-            Compare Vendors
+    <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Cart')}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={styles.backBtn}
+        >
+          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+        </TouchableOpacity>
+
+        <View style={styles.headerTitleCol}>
+          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+            Compare Pharmacy Offers
           </AppText>
-          <View style={{ width: 40 }} />
+          <AppText variant="caption" color={COLORS.textSecondary}>
+            {offers.length} verified pharmacies responded
+          </AppText>
         </View>
-      }
-      footer={
-        selectedOffer ? (
-          <View style={[styles.bottomBar, SHADOWS.card]}>
-            <View style={styles.bottomOfferInfo}>
-              <AppText variant="caption" color={COLORS.textMuted}>
-                Selected: <AppText variant="caption" color={COLORS.textPrimary} weight="700">{selectedOffer.pharmacy.name}</AppText>
-              </AppText>
-              <View style={styles.bottomPriceRow}>
-                <AppText variant="h3" color={COLORS.primary} weight="800">
-                  {formatCurrency(selectedOffer.finalPayableAmount)}
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('HelpArticle', { articleId: 'art-1' })}
+          style={styles.helpBtn}
+        >
+          <Ionicons name="help-circle-outline" size={22} color={COLORS.primary} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Top Countdown & Status Bar */}
+        <View style={styles.topStatusRow}>
+          <View style={styles.liveIndicator}>
+            <View style={styles.greenPulseDot} />
+            <AppText variant="caption" color="#15803D" weight="600">
+              Live Bids Active
+            </AppText>
+          </View>
+
+          <View style={[styles.timerPill, isOffersExpired && styles.timerPillExpired]}>
+            <Ionicons name="time-outline" size={14} color={isOffersExpired ? '#DC2626' : COLORS.primary} />
+            <AppText
+              variant="caption"
+              color={isOffersExpired ? '#DC2626' : COLORS.primary}
+              weight="600"
+              style={{ marginLeft: 4 }}
+            >
+              {isOffersExpired ? 'Offer Window Ended' : `Bids expire in ${formatTimeRemaining(timeRemainingSeconds)}`}
+            </AppText>
+          </View>
+        </View>
+
+        {/* Real-Time Offer Arrival Notification */}
+        {newOfferBannerVisible && (
+          <View style={[styles.newOfferToast, SHADOWS.subtle]}>
+            <Ionicons name="flash" size={16} color="#15803D" />
+            <AppText variant="caption" color="#15803D" weight="600" style={{ marginLeft: 6, flex: 1 }}>
+              Apollo Pharmacy updated their delivery bid: 10-12 mins express!
+            </AppText>
+            <TouchableOpacity onPress={() => setNewOfferBannerVisible(false)}>
+              <Ionicons name="close" size={16} color="#15803D" />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Sorting Segment Controls */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.sortScrollContainer}
+        >
+          {[
+            { id: 'best_overall', label: 'Best Overall', icon: 'sparkles' },
+            { id: 'lowest_price', label: 'Cheapest Price', icon: 'pricetag-outline' },
+            { id: 'fastest_delivery', label: 'Fastest ETA', icon: 'flash-outline' },
+            { id: 'nearest', label: 'Nearest Store', icon: 'location-outline' },
+            { id: 'highest_rated', label: 'Highest Rated', icon: 'star-outline' },
+          ].map((s) => {
+            const isSelected = selectedSort === s.id;
+            return (
+              <TouchableOpacity
+                key={s.id}
+                onPress={() => setSelectedSort(s.id as SortOption)}
+                style={[styles.sortPill, isSelected && styles.sortPillActive]}
+              >
+                <Ionicons
+                  name={s.icon as any}
+                  size={14}
+                  color={isSelected ? '#FFFFFF' : COLORS.textSecondary}
+                  style={{ marginRight: 4 }}
+                />
+                <AppText
+                  variant="caption"
+                  color={isSelected ? '#FFFFFF' : COLORS.textPrimary}
+                  weight="600"
+                >
+                  {s.label}
                 </AppText>
-                {selectedOffer.totalSavings > 0 && (
-                  <View style={styles.saveBadgeBottom}>
-                    <AppText variant="caption" color={COLORS.successDark} weight="700" style={{ fontSize: 10 }}>
-                      Save {formatCurrency(selectedOffer.totalSavings)}
-                    </AppText>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* Quick Filter Chips */}
+        <View style={styles.filterChipsRow}>
+          <TouchableOpacity
+            onPress={() => setFilterCompleteOnly(!filterCompleteOnly)}
+            style={[styles.filterChip, filterCompleteOnly && styles.filterChipActive]}
+          >
+            <Ionicons
+              name={filterCompleteOnly ? 'checkmark-circle' : 'add-circle-outline'}
+              size={14}
+              color={filterCompleteOnly ? '#15803D' : COLORS.textSecondary}
+            />
+            <AppText
+              variant="caption"
+              color={filterCompleteOnly ? '#15803D' : COLORS.textSecondary}
+              weight="600"
+              style={{ marginLeft: 4 }}
+            >
+              Complete Cart ({summary.itemCount}/{summary.itemCount})
+            </AppText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setFilterUnder15Min(!filterUnder15Min)}
+            style={[styles.filterChip, filterUnder15Min && styles.filterChipActive]}
+          >
+            <AppText
+              variant="caption"
+              color={filterUnder15Min ? '#15803D' : COLORS.textSecondary}
+              weight="600"
+            >
+              ⚡ Under 15 mins
+            </AppText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setFilterFreeDelivery(!filterFreeDelivery)}
+            style={[styles.filterChip, filterFreeDelivery && styles.filterChipActive]}
+          >
+            <AppText
+              variant="caption"
+              color={filterFreeDelivery ? '#15803D' : COLORS.textSecondary}
+              weight="600"
+            >
+              Free Delivery
+            </AppText>
+          </TouchableOpacity>
+        </View>
+
+        {/* Offers List */}
+        {processedOffers.length === 0 && (
+          <View style={[styles.filterNoticeBanner, SHADOWS.subtle]}>
+            <Ionicons name="information-circle" size={18} color={COLORS.primary} />
+            <AppText variant="caption" color={COLORS.textPrimary} style={{ marginLeft: 6, flex: 1 }}>
+              No bids matched all selected filters. Showing all {sourceList.length} available pharmacy bids below.
+            </AppText>
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedSort('best_overall');
+                setFilterCompleteOnly(false);
+                setFilterUnder15Min(false);
+                setFilterFourStar(false);
+                setFilterFreeDelivery(false);
+              }}
+              style={styles.resetFiltersPill}
+            >
+              <AppText variant="caption" color={COLORS.primary} weight="600">
+                Reset
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.offersContainer}>
+          {(processedOffers.length > 0 ? processedOffers : sourceList).map((offer) => {
+              const isSelected = selectedOffer?.id === offer.id;
+              const totalItems = offer.itemPrices?.length || items.length || 4;
+              const availableItems = offer.itemPrices?.filter((i) => i.isAvailable).length || totalItems;
+              const isComplete = offer.allMedicinesAvailable;
+
+              return (
+                <View
+                  key={offer.id}
+                  style={[
+                    styles.offerCard,
+                    isSelected && styles.offerCardSelected,
+                    SHADOWS.card,
+                  ]}
+                >
+                  {/* Factual Tag Header */}
+                  <View style={styles.cardHeaderRow}>
+                    <View style={styles.storeDetails}>
+                      <View style={styles.storeNameRow}>
+                        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
+                          {offer.pharmacy.name}
+                        </AppText>
+                        {offer.pharmacy.isVerified && (
+                          <Ionicons name="checkmark-circle" size={16} color="#15803D" style={{ marginLeft: 4 }} />
+                        )}
+                      </View>
+
+                      <View style={styles.storeMetaRow}>
+                        <Ionicons name="star" size={12} color="#F59E0B" />
+                        <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 2 }}>
+                          {offer.pharmacy.rating}
+                        </AppText>
+                        <AppText variant="caption" color={COLORS.textMuted}>
+                          •
+                        </AppText>
+                        <AppText variant="caption" color={COLORS.textSecondary}>
+                          {offer.pharmacy.distanceKm} km away
+                        </AppText>
+                      </View>
+                    </View>
+
+                    {/* ETA Badge */}
+                    <View style={styles.etaBadge}>
+                      <Ionicons name="flash" size={12} color="#15803D" />
+                      <AppText variant="caption" color="#15803D" weight="600" style={{ marginLeft: 3 }}>
+                        {offer.estimatedDeliveryMinutes} mins
+                      </AppText>
+                    </View>
                   </View>
-                )}
+
+                  <View style={styles.cardDivider} />
+
+                  {/* Mid Row: Medicine Fulfillment & Pricing */}
+                  <View style={styles.cardMidRow}>
+                    {/* Fulfillment Status */}
+                    <View>
+                      <View style={[styles.fulfillmentTag, { backgroundColor: isComplete ? '#DCFCE7' : '#FEF3C7' }]}>
+                        <Ionicons
+                          name={isComplete ? 'checkmark-circle' : 'alert-circle'}
+                          size={14}
+                          color={isComplete ? '#15803D' : '#D97706'}
+                        />
+                        <AppText
+                          variant="caption"
+                          color={isComplete ? '#15803D' : '#D97706'}
+                          weight="600"
+                          style={{ marginLeft: 4, fontSize: 11 }}
+                        >
+                          {isComplete
+                            ? `All ${totalItems} Medicines Available`
+                            : `${availableItems} of ${totalItems} Available`}
+                        </AppText>
+                      </View>
+
+                      <TouchableOpacity
+                        onPress={() => setInspectingOffer(offer)}
+                        style={styles.quoteDetailsLink}
+                      >
+                        <AppText variant="caption" color={COLORS.primary} weight="600">
+                          View itemized quote &gt;
+                        </AppText>
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Price & Savings */}
+                    <View style={styles.priceContainer}>
+                      <AppText variant="h3" color={COLORS.textPrimary} weight="600">
+                        {formatCurrency(offer.finalPayableAmount)}
+                      </AppText>
+                      {offer.totalSavings > 0 && (
+                        <View style={styles.savingsTag}>
+                          <AppText variant="caption" color="#15803D" weight="600" style={{ fontSize: 10 }}>
+                            Save {formatCurrency(offer.totalSavings)}
+                          </AppText>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Bottom Action CTA */}
+                  <AppButton
+                    title="Choose Pharmacy"
+                    variant="primary"
+                    size="md"
+                    onPress={() => handleChoosePharmacy(offer)}
+                    rightIcon={<Ionicons name="arrow-forward" size={16} color="#FFFFFF" />}
+                    style={styles.choosePharmacyBtn}
+                  />
+                </View>
+              );
+            })}
+          </View>
+      </ScrollView>
+
+      {/* Offer Details Itemized Modal */}
+      <Modal visible={!!inspectingOffer} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, SHADOWS.modal]}>
+            <View style={styles.modalHeader}>
+              <View>
+                <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+                  {inspectingOffer?.pharmacy.name}
+                </AppText>
+                <AppText variant="caption" color={COLORS.textSecondary}>
+                  {inspectingOffer?.pharmacy.address.line1} • DL: {inspectingOffer?.pharmacy.licenseNumber}
+                </AppText>
               </View>
+              <TouchableOpacity onPress={() => setInspectingOffer(null)}>
+                <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+              </TouchableOpacity>
             </View>
 
+            <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.modalSectionTitle}>
+                DISPENSED MEDICINE QUOTES
+              </AppText>
+
+              {inspectingOffer?.itemPrices.map((item, i) => (
+                <View key={i} style={styles.modalItemRow}>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
+                      {item.medicineName}
+                    </AppText>
+                    <AppText variant="caption" color={COLORS.textMuted}>
+                      Qty: {item.quantity} • Batch stock confirmed
+                    </AppText>
+                  </View>
+                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                    {formatCurrency(item.totalPrice)}
+                  </AppText>
+                </View>
+              ))}
+
+              <View style={styles.modalDivider} />
+
+              <View style={styles.modalBillRow}>
+                <AppText variant="caption" color={COLORS.textSecondary}>
+                  Medicine Subtotal
+                </AppText>
+                <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+                  {formatCurrency(inspectingOffer?.medicineSubtotal || 0)}
+                </AppText>
+              </View>
+
+              <View style={styles.modalBillRow}>
+                <AppText variant="caption" color="#15803D">
+                  Store Discount
+                </AppText>
+                <AppText variant="caption" color="#15803D" weight="600">
+                  - {formatCurrency(inspectingOffer?.discountAmount || 0)}
+                </AppText>
+              </View>
+
+              <View style={styles.modalBillRow}>
+                <AppText variant="caption" color={COLORS.textSecondary}>
+                  Express Delivery ({inspectingOffer?.estimatedDeliveryMinutes} min)
+                </AppText>
+                <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+                  {inspectingOffer?.deliveryFee === 0 ? 'FREE' : formatCurrency(inspectingOffer?.deliveryFee || 0)}
+                </AppText>
+              </View>
+
+              <View style={[styles.modalBillRow, { marginTop: SPACING.xs }]}>
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                  Final Payable Amount
+                </AppText>
+                <AppText variant="titleMedium" color={COLORS.primary} weight="600">
+                  {formatCurrency(inspectingOffer?.finalPayableAmount || 0)}
+                </AppText>
+              </View>
+            </ScrollView>
+
             <AppButton
-              title="Continue with Selected"
+              title="Choose This Pharmacy"
               variant="primary"
-              onPress={() => setConfirmModalVisible(true)}
-              style={styles.continueBtn}
-              fullWidth={false}
-              rightIcon={<Ionicons name="arrow-forward" size={18} color="#FFFFFF" />}
+              size="lg"
+              onPress={() => {
+                const offer = inspectingOffer;
+                setInspectingOffer(null);
+                if (offer) handleChoosePharmacy(offer);
+              }}
+              style={{ marginTop: SPACING.lg }}
             />
           </View>
-        ) : undefined
-      }
-    >
-      {/* Top Banner: Pharmacy Count & Subtitle */}
-      <View style={styles.topBanner}>
-        <View>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="800">
-            {offers.length || 4} Pharmacies Found
-          </AppText>
-          <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
-            Smart results based on distance, price &amp; availability
-          </AppText>
         </View>
+      </Modal>
 
-        {/* Live Countdown Timer */}
-        <View style={styles.timerPill}>
-          <Ionicons name="time-outline" size={14} color={isOffersExpired ? COLORS.danger : COLORS.primary} />
-          <AppText
-            variant="caption"
-            color={isOffersExpired ? COLORS.danger : COLORS.primary}
-            weight="700"
-            style={{ marginLeft: 4 }}
-          >
-            {isOffersExpired ? 'Expired' : formatTimeRemaining(timeRemainingSeconds)}
-          </AppText>
+      {/* Partial Fulfillment Resolution Modal */}
+      <Modal visible={!!partialOfferPending} transparent animationType="fade">
+        <View style={styles.modalOverlayCenter}>
+          <View style={[styles.partialModalCard, SHADOWS.modal]}>
+            <View style={styles.partialIconCircle}>
+              <Ionicons name="alert-circle" size={32} color="#D97706" />
+            </View>
+            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.sm }}>
+              Partial Cart Fulfillment
+            </AppText>
+            <AppText variant="bodySmall" color={COLORS.textSecondary} align="center" style={{ marginTop: SPACING.xs, lineHeight: 20 }}>
+              {partialOfferPending?.pharmacy.name} has{' '}
+              <AppText variant="bodySmall" weight="600" color="#15803D">
+                {partialOfferPending?.itemPrices.filter((i) => i.isAvailable).length} of {items.length} medicines
+              </AppText>{' '}
+              in stock. 1 item is unavailable at this pharmacy.
+            </AppText>
+
+            <View style={styles.partialActionsCol}>
+              <AppButton
+                title="Continue with Available Items"
+                variant="primary"
+                size="md"
+                onPress={handleConfirmPartial}
+                style={{ width: '100%' }}
+              />
+              <AppButton
+                title="Choose Another Pharmacy"
+                variant="outline"
+                size="md"
+                onPress={() => setPartialOfferPending(null)}
+                style={{ width: '100%', marginTop: SPACING.xs }}
+              />
+            </View>
+          </View>
         </View>
-      </View>
-
-      {/* Filter Tabs matching Image 3 Step 7: Cheapest | Fastest | Best Rated | All */}
-      <View style={styles.filterTabsRow}>
-        {[
-          { key: 'all', label: 'Best Match' },
-          { key: 'lowest_price', label: 'Cheapest' },
-          { key: 'fastest_delivery', label: 'Fastest' },
-          { key: 'best_rated', label: 'Best Rated' },
-        ].map((tab) => {
-          const isActive = activeFilter === tab.key;
-          return (
-            <TouchableOpacity
-              key={tab.key}
-              activeOpacity={0.8}
-              onPress={() => setActiveFilter(tab.key as any)}
-              style={[styles.filterTabBtn, isActive && styles.filterTabBtnActive]}
-            >
-              <AppText
-                variant="caption"
-                color={isActive ? COLORS.primary : COLORS.textSecondary}
-                weight={isActive ? '700' : '500'}
-              >
-                {tab.label}
-              </AppText>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* Offers List */}
-      {filteredOffers.length === 0 ? (
-        <EmptyState
-          icon="pricetags-outline"
-          title="No Matching Offers"
-          message="Try selecting 'Best Match' to view all available pharmacy offers."
-          actionText="Show All Offers"
-          onActionPress={() => setActiveFilter('all')}
-        />
-      ) : (
-        filteredOffers.map((offer) => {
-          const isSelected = selectedOffer?.id === offer.id;
-          const totalItems = offer.itemPrices?.length || items.length || 8;
-          const availableItems = offer.itemPrices?.filter((i) => i.isAvailable).length || totalItems;
-
-          return (
-            <TouchableOpacity
-              key={offer.id}
-              activeOpacity={0.9}
-              onPress={() => handleSelectOffer(offer)}
-              style={[
-                styles.offerCard,
-                isSelected && styles.offerCardSelected,
-                SHADOWS.subtle,
-              ]}
-            >
-              {/* Top Row: Store Info & Badge */}
-              <View style={styles.cardTopRow}>
-                <View style={styles.storeInfoRow}>
-                  <View style={styles.storeLogoBox}>
-                    <Ionicons name="medical" size={20} color={COLORS.primary} />
-                  </View>
-                  <View style={{ marginLeft: SPACING.sm }}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
-                      {offer.pharmacy.name}
-                    </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
-                      ★ {offer.pharmacy.rating} • {offer.pharmacy.distanceKm} km • {offer.estimatedDeliveryMinutes} mins
-                    </AppText>
-                  </View>
-                </View>
-
-                {/* Offer Category Tag */}
-                <View style={styles.offerTagBadge}>
-                  <AppText variant="caption" color={COLORS.successDark} weight="700" style={{ fontSize: 9 }}>
-                    {offer.tags.includes('recommended')
-                      ? 'BEST MATCH'
-                      : offer.tags.includes('lowest_price')
-                      ? 'CHEAPEST'
-                      : offer.tags.includes('fastest_delivery')
-                      ? 'FASTEST'
-                      : 'BEST RATED'}
-                  </AppText>
-                </View>
-              </View>
-
-              {/* Middle Row: Availability & Price */}
-              <View style={styles.cardMidRow}>
-                <View style={styles.availabilityRow}>
-                  <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
-                  <AppText variant="bodySmall" color={COLORS.successDark} weight="700" style={{ marginLeft: 4 }}>
-                    {availableItems}/{totalItems} Medicines Available
-                  </AppText>
-                </View>
-
-                <View style={styles.priceCol}>
-                  <AppText variant="h3" color={COLORS.textPrimary} weight="800">
-                    {formatCurrency(offer.finalPayableAmount)}
-                  </AppText>
-                  {offer.totalSavings > 0 && (
-                    <AppText variant="caption" color={COLORS.success} weight="700">
-                      You Save {formatCurrency(offer.totalSavings)}
-                    </AppText>
-                  )}
-                </View>
-              </View>
-
-              {/* Bottom Action Row */}
-              <View style={styles.cardBottomRow}>
-                <TouchableOpacity
-                  onPress={() => handleSelectOffer(offer)}
-                  style={styles.detailsLink}
-                >
-                  <AppText variant="caption" color={COLORS.primary} weight="700">
-                    View Quote Details &gt;
-                  </AppText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => handleProceedWithOffer(offer)}
-                  style={[styles.selectBtn, isSelected && styles.selectBtnActive]}
-                >
-                  <AppText
-                    variant="buttonSmall"
-                    color={isSelected ? '#FFFFFF' : COLORS.primary}
-                    weight="700"
-                  >
-                    {isSelected ? 'Selected ✓' : 'Select'}
-                  </AppText>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          );
-        })
-      )}
-
-      {/* Confirmation Modal */}
-      {selectedOffer && (
-        <ConfirmationModal
-          visible={confirmModalVisible}
-          title={`Order from ${selectedOffer.pharmacy.name}?`}
-          message={`Total amount: ${formatCurrency(selectedOffer.finalPayableAmount)}\nDelivery to: ${selectedAddress?.streetAddress || 'Saved Address'}\nEstimated Time: ${selectedOffer.estimatedDeliveryMinutes} mins`}
-          confirmText="Confirm & Place Order"
-          cancelText="Change Pharmacy"
-          onConfirm={handleConfirmOrder}
-          onCancel={() => setConfirmModalVisible(false)}
-        />
-      )}
-    </AppScreen>
+      </Modal>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F8F8FC',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: '#E8E8EE',
   },
   backBtn: {
     width: 40,
     height: 40,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  topBanner: {
+  headerTitleCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  helpBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollContent: {
+    padding: SPACING.lg,
+    paddingBottom: 80,
+  },
+  topStatusRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  liveIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  greenPulseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#15803D',
+    marginRight: 6,
   },
   timerPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.primarySubtle,
+    backgroundColor: '#ECE8F7',
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
-    borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1,
-    borderColor: COLORS.primaryMuted,
+    borderRadius: BORDER_RADIUS.full,
   },
-  filterTabsRow: {
+  timerPillExpired: {
+    backgroundColor: '#FEF2F2',
+  },
+  newOfferToast: {
     flexDirection: 'row',
-    backgroundColor: COLORS.surfaceSubtle,
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 8,
+    paddingHorizontal: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
-    padding: 3,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  sortScrollContainer: {
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  sortPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 7,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
+  },
+  sortPillActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  filterChipsRow: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
     marginBottom: SPACING.lg,
   },
-  filterTabBtn: {
-    flex: 1,
-    paddingVertical: 8,
+  filterChip: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 5,
     borderRadius: BORDER_RADIUS.sm,
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
   },
-  filterTabBtnActive: {
-    backgroundColor: COLORS.surface,
-    ...SHADOWS.subtle,
+  filterChipActive: {
+    backgroundColor: '#DCFCE7',
+    borderColor: '#15803D',
+  },
+  offersContainer: {
+    gap: SPACING.md,
   },
   offerCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1.5,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.md,
+    borderColor: '#E8E8EE',
   },
   offerCardSelected: {
     borderColor: COLORS.primary,
-    backgroundColor: COLORS.primarySubtle,
+    backgroundColor: '#FAF9FF',
   },
-  cardTopRow: {
+  cardHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  storeInfoRow: {
+  storeDetails: {
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
+  storeNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
   },
-  storeLogoBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.primarySubtle,
+  storeMetaRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 4,
+    marginTop: 2,
   },
-  offerTagBadge: {
+  etaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  cardDivider: {
+    height: 1,
+    backgroundColor: '#E8E8EE',
+    marginVertical: SPACING.md,
+  },
+  cardMidRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  fulfillmentTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  quoteDetailsLink: {
+    marginTop: 4,
+    paddingVertical: 2,
+  },
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
+  savingsTag: {
     backgroundColor: '#DCFCE7',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
-  },
-  cardMidRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginVertical: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: COLORS.borderLight,
-  },
-  availabilityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  priceCol: {
-    alignItems: 'flex-end',
-  },
-  cardBottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  detailsLink: {
-    paddingVertical: 4,
-  },
-  selectBtn: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: 6,
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
-  },
-  selectBtnActive: {
-    backgroundColor: COLORS.primary,
-  },
-  bottomBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    backgroundColor: COLORS.surface,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  bottomOfferInfo: {
-    flex: 1,
-  },
-  bottomPriceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginTop: 2,
   },
-  saveBadgeBottom: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 3,
-    marginLeft: 6,
+  choosePharmacyBtn: {
+    width: '100%',
   },
-  continueBtn: {
-    minWidth: 180,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8EE',
+  },
+  modalSectionTitle: {
+    fontSize: 10,
+    letterSpacing: 0.5,
+    marginVertical: SPACING.sm,
+  },
+  modalItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: '#E8E8EE',
+    marginVertical: SPACING.sm,
+  },
+  modalBillRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 2,
+  },
+  modalOverlayCenter: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.xl,
+  },
+  partialModalCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: SPACING.xl,
+    alignItems: 'center',
+  },
+  partialIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  partialActionsCol: {
+    width: '100%',
+    marginTop: SPACING.lg,
+    gap: SPACING.xs,
+  },
+  filterNoticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECE8F7',
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#DCD5F0',
+  },
+  resetFiltersPill: {
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.sm,
+    backgroundColor: '#FFFFFF',
+    borderRadius: BORDER_RADIUS.full,
+    marginLeft: SPACING.xs,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
 });

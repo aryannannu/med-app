@@ -31,7 +31,7 @@ export const LocationPermissionScreen: React.FC = () => {
             <Ionicons name="location" size={60} color={COLORS.primary} />
           </View>
 
-          <AppText variant="h1" color={COLORS.textPrimary} weight="800" align="center" style={styles.title}>
+          <AppText variant="h1" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
             Find Nearby Pharmacies
           </AppText>
 
@@ -42,7 +42,7 @@ export const LocationPermissionScreen: React.FC = () => {
           <View style={styles.trustCard}>
             <Ionicons name="shield-checkmark" size={24} color={COLORS.secondary} style={styles.trustIcon} />
             <View style={styles.trustTextContainer}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                 100% Privacy Protected
               </AppText>
               <AppText variant="caption" color={COLORS.textSecondary}>

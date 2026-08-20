@@ -57,7 +57,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 />
               </View>
 
-              <AppText variant="titleLarge" color={COLORS.textPrimary} weight="700" align="center" style={styles.title}>
+              <AppText variant="titleLarge" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
                 {title}
               </AppText>
 

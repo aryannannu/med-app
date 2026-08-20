@@ -47,22 +47,22 @@ export const AddressCard: React.FC<AddressCardProps> = ({
             size={14}
             color={COLORS.primary}
           />
-          <AppText variant="caption" color={COLORS.primary} weight="700" style={{ marginLeft: 4 }}>
+          <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
             {address.label.toUpperCase()}
           </AppText>
         </View>
 
         {isSelected && (
           <View style={styles.selectedBadge}>
-            <Ionicons name="checkmark-circle" size={16} color={COLORS.secondary} />
-            <AppText variant="caption" color={COLORS.secondaryDark} weight="700" style={{ marginLeft: 3 }}>
+            <Ionicons name="checkmark-circle" size={15} color={COLORS.primary} />
+            <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 3 }}>
               Selected
             </AppText>
           </View>
         )}
       </View>
 
-      <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" style={styles.recipientName}>
+      <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.recipientName}>
         {address.recipientName}
       </AppText>
 
@@ -83,7 +83,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
         <View style={styles.actionsRow}>
           <TouchableOpacity onPress={onEdit} style={styles.editBtn}>
             <Ionicons name="pencil-outline" size={14} color={COLORS.primary} />
-            <AppText variant="buttonSmall" color={COLORS.primary} weight="700" style={{ marginLeft: 4 }}>
+            <AppText variant="buttonSmall" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
               Edit Address
             </AppText>
           </TouchableOpacity>

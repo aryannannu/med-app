@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,25 +16,48 @@ import { AppText } from '../../components/common/AppText';
 import { AppInput } from '../../components/common/AppInput';
 import { AppButton } from '../../components/common/AppButton';
 import { RxBadge } from '../../components/badges/RxBadge';
-import { PriceDisplay } from '../../components/controls/PriceDisplay';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../../store/CartContext';
 import { useAddress } from '../../store/AddressContext';
 import { usePrescription } from '../../store/PrescriptionContext';
+import { useOffers } from '../../store/OfferContext';
+import { useOrders } from '../../store/OrderContext';
+import { useWallet } from '../../store/WalletContext';
 import { useToast } from '../../store/ToastContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatPhoneNumber } from '../../utils/formatters';
+import { PharmacyOffer } from '../../types/offer';
+
+type PaymentMode = 'upi' | 'card' | 'cod';
 
 export const CheckoutReviewScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-  const { cartId, items, summary } = useCart();
+  const { items, summary, clearCart } = useCart();
   const { selectedAddress } = useAddress();
   const { activePrescription } = usePrescription();
+  const { selectedOffer } = useOffers();
+  const { createOrder } = useOrders();
+  const { balance: walletBalance, deductMoney } = useWallet();
   const { showToast } = useToast();
 
-  const [deliveryInstructions, setDeliveryInstructions] = useState('Please call before delivery');
+  const [deliveryInstructions, setDeliveryInstructions] = useState('Please ring bell & leave at door');
+  const [useWalletBalance, setUseWalletBalance] = useState(false);
+  const [selectedPaymentMode, setSelectedPaymentMode] = useState<PaymentMode>('upi');
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const handleRequestOffers = () => {
+  // Selected Pharmacy details from chosen offer
+  const pharmacy = selectedOffer?.pharmacy;
+  const storeName = pharmacy?.name || items[0]?.sourcePharmacyName || 'Apollo Pharmacy 24x7';
+  const deliveryEta = selectedOffer?.estimatedDeliveryMinutes || 12;
+
+  // Financial calculations
+  const baseOrderTotal = selectedOffer ? selectedOffer.finalPayableAmount : summary.estimatedFinalTotal;
+  const walletDeduction = useWalletBalance ? Math.min(walletBalance, baseOrderTotal) : 0;
+  const finalPayableAmount = Math.max(0, baseOrderTotal - walletDeduction);
+
+  const handlePlaceOrder = async () => {
+    if (isPlacingOrder) return; // Double-tap protection
+
     if (!selectedAddress) {
       showToast('Please select a delivery address', 'warning');
       navigation.navigate('AddressSelection', { isSelectingForCheckout: true });
@@ -41,86 +65,165 @@ export const CheckoutReviewScreen: React.FC = () => {
     }
 
     if (summary.hasRxItems && !activePrescription) {
-      showToast('Please upload a prescription for Rx medicines', 'warning');
+      showToast('Please upload prescription for Rx medicines', 'warning');
       navigation.navigate('UploadPrescription', { fromCart: true });
       return;
     }
 
-    // Launch Finding Pharmacies screen
-    navigation.navigate('FindingPharmacies', { cartId });
+    setIsPlacingOrder(true);
+
+    try {
+      // Create fallback offer if checking out from store mode directly
+      const offerToUse: PharmacyOffer = selectedOffer || {
+        id: `off-direct-${Date.now()}`,
+        cartId: 'direct-cart',
+        pharmacyId: items[0]?.sourcePharmacyId || 'pharm-1',
+        pharmacy: {
+          id: items[0]?.sourcePharmacyId || 'pharm-1',
+          name: storeName,
+          logo: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=160&auto=format&fit=crop&q=80',
+          rating: 4.8,
+          reviewCount: 342,
+          distanceKm: 1.2,
+          address: {
+            line1: 'SCF 14, Main Market',
+            line2: 'Sector 22',
+            city: 'Chandigarh',
+            pincode: '160022',
+          },
+          isVerified: true,
+          licenseNumber: 'DL-CH-2024-48192',
+          estimatedDeliveryTimeMinutes: 12,
+          openingTime: '00:00',
+          closingTime: '23:59',
+          isOpenNow: true,
+          phone: '+91 98140 12345',
+          deliveryFee: 0,
+        },
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 600000,
+        isExpired: false,
+        tags: ['recommended'],
+        medicineSubtotal: summary.itemTotal,
+        mrpTotal: summary.mrpTotal,
+        discountAmount: summary.savingsTotal,
+        deliveryFee: summary.estimatedDeliveryFee,
+        taxesAndFees: summary.taxesAndHandling,
+        finalPayableAmount: summary.estimatedFinalTotal,
+        totalSavings: summary.savingsTotal,
+        estimatedDeliveryMinutes: 12,
+        estimatedDeliveryTimeText: '10–15 mins',
+        fulfillmentScore: 100,
+        allMedicinesAvailable: true,
+        itemPrices: items.map((it) => ({
+          medicineId: it.medicineId,
+          medicineName: it.medicine.name,
+          quantity: it.quantity,
+          unitPrice: it.selectedVariant?.discountPrice ?? it.medicine.discountPrice,
+          totalPrice: (it.selectedVariant?.discountPrice ?? it.medicine.discountPrice) * it.quantity,
+          isAvailable: true,
+        })),
+      };
+
+      const order = await createOrder(
+        offerToUse,
+        selectedAddress,
+        activePrescription || undefined,
+        deliveryInstructions
+      );
+
+      // Deduct from wallet if applied
+      if (walletDeduction > 0) {
+        await deductMoney(walletDeduction, order.id);
+      }
+
+      clearCart();
+      showToast('Order placed successfully!', 'success');
+
+      // Navigate to Order Confirmation screen
+      navigation.navigate('OrderConfirmation', { order });
+    } catch (e) {
+      showToast('Failed to place order. Please try again.', 'error');
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={styles.backBtn}
+        >
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
-          Review Order Request
+        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+          Order Review &amp; Payment
         </AppText>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Step Indicator */}
-        <View style={styles.stepIndicator}>
-          <View style={styles.stepItemActive}>
-            <View style={styles.stepCircleActive}>
-              <AppText variant="caption" color="#FFFFFF" weight="700">1</AppText>
-            </View>
-            <AppText variant="caption" color={COLORS.primary} weight="700">Review</AppText>
+        {/* Step Progress Tracker */}
+        <View style={styles.stepProgressRow}>
+          <View style={styles.stepDoneCol}>
+            <Ionicons name="checkmark-circle" size={16} color="#15803D" />
+            <AppText variant="caption" color="#15803D" weight="600" style={{ fontSize: 10 }}>
+              1. Cart
+            </AppText>
           </View>
-
-          <View style={styles.stepLine} />
-
-          <View style={styles.stepItemPending}>
-            <View style={styles.stepCirclePending}>
-              <AppText variant="caption" color={COLORS.textMuted} weight="700">2</AppText>
-            </View>
-            <AppText variant="caption" color={COLORS.textMuted}>Get Offers</AppText>
+          <View style={[styles.stepLine, { backgroundColor: '#15803D' }]} />
+          <View style={styles.stepDoneCol}>
+            <Ionicons name="checkmark-circle" size={16} color="#15803D" />
+            <AppText variant="caption" color="#15803D" weight="600" style={{ fontSize: 10 }}>
+              2. Vendor Offer
+            </AppText>
           </View>
-
-          <View style={styles.stepLine} />
-
-          <View style={styles.stepItemPending}>
-            <View style={styles.stepCirclePending}>
-              <AppText variant="caption" color={COLORS.textMuted} weight="700">3</AppText>
+          <View style={[styles.stepLine, { backgroundColor: COLORS.primary }]} />
+          <View style={styles.stepDoneCol}>
+            <View style={styles.activeStepCircle}>
+              <AppText variant="caption" color="#FFFFFF" weight="600" style={{ fontSize: 10 }}>
+                3
+              </AppText>
             </View>
-            <AppText variant="caption" color={COLORS.textMuted}>Confirm</AppText>
+            <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 10 }}>
+              Checkout
+            </AppText>
           </View>
         </View>
 
-        {/* Delivery Address Card */}
+        {/* Section 1: Delivery Address */}
         <View style={[styles.sectionCard, SHADOWS.subtle]}>
-          <View style={styles.cardHeaderRow}>
-            <View style={styles.cardTitleRow}>
+          <View style={styles.sectionHeaderRow}>
+            <View style={styles.sectionTitleRow}>
               <Ionicons name="location" size={18} color={COLORS.primary} />
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginLeft: 6 }}>
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                 Delivery Address
               </AppText>
             </View>
-
             <TouchableOpacity
               onPress={() => navigation.navigate('AddressSelection', { isSelectingForCheckout: true })}
             >
-              <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
+              <AppText variant="caption" color={COLORS.primary} weight="600">
                 Change
               </AppText>
             </TouchableOpacity>
           </View>
 
           {selectedAddress ? (
-            <View style={styles.addressInfo}>
-              <View style={styles.labelPill}>
-                <AppText variant="badge" color={COLORS.primary} weight="700">
+            <View style={styles.addressBox}>
+              <View style={styles.addressLabelPill}>
+                <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 10 }}>
                   {selectedAddress.label.toUpperCase()}
                 </AppText>
               </View>
-              <AppText variant="bodyMedium" color={COLORS.textPrimary} weight="700" style={{ marginTop: 4 }}>
-                {selectedAddress.recipientName} ({formatPhoneNumber(selectedAddress.phone)})
+              <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 2 }}>
+                {selectedAddress.recipientName} • {formatPhoneNumber(selectedAddress.phone)}
               </AppText>
-              <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
                 {selectedAddress.houseFlatNumber}, {selectedAddress.streetAddress}, {selectedAddress.city} - {selectedAddress.pincode}
               </AppText>
             </View>
@@ -135,73 +238,53 @@ export const CheckoutReviewScreen: React.FC = () => {
           )}
         </View>
 
-        {/* Prescription Attachment Card */}
-        {summary.hasRxItems && (
-          <View style={[styles.sectionCard, SHADOWS.subtle]}>
-            <View style={styles.cardHeaderRow}>
-              <View style={styles.cardTitleRow}>
-                <Ionicons name="document-text" size={18} color={COLORS.secondary} />
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginLeft: 6 }}>
-                  Attached Prescription
-                </AppText>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => navigation.navigate('UploadPrescription', { fromCart: true })}
-              >
-                <AppText variant="buttonSmall" color={COLORS.primary} weight="700">
-                  {activePrescription ? 'Change' : 'Upload'}
+        {/* Section 2: Selected Dispensing Pharmacy */}
+        <View style={[styles.sectionCard, SHADOWS.subtle]}>
+          <View style={styles.sectionHeaderRow}>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="storefront" size={18} color="#15803D" />
+              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+                Dispensing Pharmacy
+              </AppText>
+            </View>
+            {selectedOffer && (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <AppText variant="caption" color={COLORS.primary} weight="600">
+                  Change
                 </AppText>
               </TouchableOpacity>
-            </View>
-
-            {activePrescription ? (
-              <View style={styles.rxAttachedRow}>
-                <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
-                <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-                  <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
-                    {activePrescription.fileName}
-                  </AppText>
-                  <AppText variant="caption" color={COLORS.textMuted}>
-                    Verified by pharmacist team
-                  </AppText>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.rxMissingAlert}>
-                <Ionicons name="alert-circle" size={18} color={COLORS.rxRed} />
-                <AppText variant="caption" color={COLORS.rxRed} weight="600" style={{ marginLeft: 6, flex: 1 }}>
-                  Prescription required for Rx medicines. Tap upload above.
-                </AppText>
-              </View>
             )}
           </View>
-        )}
 
-        {/* Delivery Instructions */}
-        <View style={[styles.sectionCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.xs }}>
-            Delivery Instructions
-          </AppText>
-          <AppInput
-            placeholder="e.g. Leave at security, Ring doorbell"
-            value={deliveryInstructions}
-            onChangeText={setDeliveryInstructions}
-            containerStyle={{ marginBottom: 0 }}
-          />
+          <View style={styles.pharmacySummaryRow}>
+            <View style={styles.pharmacyIconBox}>
+              <Ionicons name="medical" size={20} color={COLORS.primary} />
+            </View>
+            <View style={{ flex: 1, marginLeft: SPACING.sm }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <AppText variant="bodyMedium" color={COLORS.textPrimary} weight="600">
+                  {storeName}
+                </AppText>
+                <Ionicons name="checkmark-circle" size={14} color="#15803D" style={{ marginLeft: 4 }} />
+              </View>
+              <AppText variant="caption" color={COLORS.textSecondary}>
+                Express delivery in {deliveryEta} mins • Licensed Retailer
+              </AppText>
+            </View>
+          </View>
         </View>
 
-        {/* Items Summary Breakdown */}
+        {/* Section 3: Medicine Requirement Summary */}
         <View style={[styles.sectionCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" style={{ marginBottom: SPACING.md }}>
-            Medicines in Request ({summary.totalQuantity} items)
+          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+            Medicines in Order ({summary.totalQuantity} items)
           </AppText>
 
           {items.map((item) => (
             <View key={item.id} style={styles.itemRow}>
               <Image source={{ uri: item.medicine.image }} style={styles.itemThumb} resizeMode="cover" />
               <View style={styles.itemDetails}>
-                <AppText variant="bodyMedium" color={COLORS.textPrimary} weight="700" numberOfLines={1}>
+                <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
                   {item.medicine.name}
                 </AppText>
                 <AppText variant="caption" color={COLORS.textMuted}>
@@ -209,23 +292,229 @@ export const CheckoutReviewScreen: React.FC = () => {
                 </AppText>
                 {item.rxRequired && <RxBadge style={{ marginTop: 2 }} />}
               </View>
-              <AppText variant="titleSmall" color={COLORS.primary} weight="700">
+              <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
                 {formatCurrency((item.selectedVariant?.discountPrice ?? item.medicine.discountPrice) * item.quantity)}
               </AppText>
             </View>
           ))}
         </View>
+
+        {/* Section 4: Attached Prescription */}
+        {summary.hasRxItems && (
+          <View style={[styles.sectionCard, SHADOWS.subtle]}>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="document-text" size={18} color={COLORS.primary} />
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+                  Attached Prescription
+                </AppText>
+              </View>
+              <TouchableOpacity onPress={() => navigation.navigate('UploadPrescription', { fromCart: true })}>
+                <AppText variant="caption" color={COLORS.primary} weight="600">
+                  {activePrescription ? 'Change' : 'Upload'}
+                </AppText>
+              </TouchableOpacity>
+            </View>
+
+            {activePrescription ? (
+              <View style={styles.rxAttachedBox}>
+                <Ionicons name="checkmark-circle" size={18} color="#15803D" />
+                <AppText variant="caption" color="#15803D" weight="600" style={{ marginLeft: 6, flex: 1 }}>
+                  {activePrescription.fileName} (Verified)
+                </AppText>
+              </View>
+            ) : (
+              <View style={styles.rxMissingBox}>
+                <Ionicons name="alert-circle" size={18} color="#DC2626" />
+                <AppText variant="caption" color="#DC2626" weight="600" style={{ marginLeft: 6, flex: 1 }}>
+                  Prescription required for Rx medicines.
+                </AppText>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Section 5: HEALIT Wallet Balance Application */}
+        <View style={[styles.sectionCard, SHADOWS.subtle]}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setUseWalletBalance(!useWalletBalance)}
+            style={styles.walletToggleRow}
+          >
+            <View style={styles.walletLeftCol}>
+              <View style={styles.walletIconCircle}>
+                <Ionicons name="wallet" size={18} color={COLORS.primary} />
+              </View>
+              <View style={{ marginLeft: SPACING.sm }}>
+                <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
+                  HEALIT Wallet
+                </AppText>
+                <AppText variant="caption" color={COLORS.textSecondary}>
+                  {formatCurrency(walletBalance)} available
+                </AppText>
+              </View>
+            </View>
+
+            <Ionicons
+              name={useWalletBalance ? 'checkbox' : 'square-outline'}
+              size={22}
+              color={useWalletBalance ? COLORS.primary : COLORS.textMuted}
+            />
+          </TouchableOpacity>
+
+          {useWalletBalance && (
+            <View style={styles.walletAppliedAlert}>
+              <Ionicons name="checkmark-circle" size={14} color="#15803D" />
+              <AppText variant="caption" color="#15803D" weight="600" style={{ marginLeft: 4 }}>
+                {formatCurrency(walletDeduction)} applied from wallet
+              </AppText>
+            </View>
+          )}
+        </View>
+
+        {/* Section 6: Payment Method Picker */}
+        {finalPayableAmount > 0 && (
+          <View style={[styles.sectionCard, SHADOWS.subtle]}>
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+              Select Payment Method
+            </AppText>
+
+            {[
+              { id: 'upi', label: 'UPI (Google Pay / PhonePe / Paytm / BHIM)', icon: 'flash-outline' },
+              { id: 'card', label: 'Credit / Debit Card', icon: 'card-outline' },
+              { id: 'cod', label: 'Cash on Delivery (Pay at Doorstep)', icon: 'cash-outline' },
+            ].map((method) => {
+              const isSelected = selectedPaymentMode === method.id;
+              return (
+                <TouchableOpacity
+                  key={method.id}
+                  onPress={() => setSelectedPaymentMode(method.id as PaymentMode)}
+                  style={[styles.paymentMethodRow, isSelected && styles.paymentMethodSelected]}
+                >
+                  <Ionicons
+                    name={isSelected ? 'radio-button-on' : 'radio-button-off'}
+                    size={18}
+                    color={isSelected ? COLORS.primary : COLORS.textMuted}
+                  />
+                  <AppText
+                    variant="bodySmall"
+                    color={COLORS.textPrimary}
+                    weight={isSelected ? '600' : '400'}
+                    style={{ marginLeft: SPACING.sm, flex: 1 }}
+                  >
+                    {method.label}
+                  </AppText>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Delivery Instructions Input */}
+        <View style={[styles.sectionCard, SHADOWS.subtle]}>
+          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.xs }}>
+            Delivery Instructions
+          </AppText>
+          <AppInput
+            placeholder="e.g. Call upon arrival, leave at doorstep"
+            value={deliveryInstructions}
+            onChangeText={setDeliveryInstructions}
+            containerStyle={{ marginBottom: 0 }}
+          />
+        </View>
+
+        {/* Section 7: Final Bill Summary */}
+        <View style={[styles.sectionCard, SHADOWS.subtle]}>
+          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+            Payment Summary
+          </AppText>
+
+          <View style={styles.billRow}>
+            <AppText variant="caption" color={COLORS.textSecondary}>
+              Medicine Subtotal
+            </AppText>
+            <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+              {formatCurrency(selectedOffer ? selectedOffer.medicineSubtotal : summary.itemTotal)}
+            </AppText>
+          </View>
+
+          <View style={styles.billRow}>
+            <AppText variant="caption" color="#15803D">
+              Store &amp; Bid Discount
+            </AppText>
+            <AppText variant="caption" color="#15803D" weight="600">
+              - {formatCurrency(selectedOffer ? selectedOffer.discountAmount : summary.savingsTotal)}
+            </AppText>
+          </View>
+
+          <View style={styles.billRow}>
+            <AppText variant="caption" color={COLORS.textSecondary}>
+              Express Delivery Fee ({deliveryEta} mins)
+            </AppText>
+            <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+              {(selectedOffer?.deliveryFee ?? summary.estimatedDeliveryFee) === 0
+                ? 'FREE'
+                : formatCurrency(selectedOffer?.deliveryFee ?? summary.estimatedDeliveryFee)}
+            </AppText>
+          </View>
+
+          {useWalletBalance && walletDeduction > 0 && (
+            <View style={styles.billRow}>
+              <AppText variant="caption" color={COLORS.primary} weight="600">
+                HEALIT Wallet Applied
+              </AppText>
+              <AppText variant="caption" color={COLORS.primary} weight="600">
+                - {formatCurrency(walletDeduction)}
+              </AppText>
+            </View>
+          )}
+
+          <View style={styles.billDivider} />
+
+          <View style={styles.billRow}>
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              Final Amount Payable
+            </AppText>
+            <AppText variant="titleLarge" color={COLORS.primary} weight="600">
+              {formatCurrency(finalPayableAmount)}
+            </AppText>
+          </View>
+        </View>
       </ScrollView>
 
-      {/* Primary Bottom Action */}
+      {/* Primary Sticky Bottom CTA */}
       <View style={[styles.bottomBar, SHADOWS.modal]}>
-        <AppButton
-          title="REQUEST PHARMACY OFFERS"
-          variant="primary"
-          size="lg"
-          onPress={handleRequestOffers}
-          rightIcon={<Ionicons name="sparkles" size={18} color={COLORS.textInverse} />}
-        />
+        <View style={styles.bottomTotalCol}>
+          <AppText variant="caption" color={COLORS.textMuted}>
+            Final Payable
+          </AppText>
+          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
+            {formatCurrency(finalPayableAmount)}
+          </AppText>
+        </View>
+
+        <View style={styles.bottomBtnCol}>
+          <AppButton
+            title={
+              isPlacingOrder
+                ? 'Processing...'
+                : finalPayableAmount === 0
+                ? 'Place Order (Wallet)'
+                : `Pay ${formatCurrency(finalPayableAmount)} & Place Order`
+            }
+            variant="primary"
+            size="lg"
+            disabled={isPlacingOrder}
+            onPress={handlePlaceOrder}
+            rightIcon={
+              isPlacingOrder ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Ionicons name="lock-closed" size={16} color="#FFFFFF" />
+              )
+            }
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -234,7 +523,7 @@ export const CheckoutReviewScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#F8F8FC',
   },
   header: {
     flexDirection: 'row',
@@ -242,131 +531,186 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
+    borderBottomColor: '#E8E8EE',
   },
   backBtn: {
     width: 40,
     height: 40,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: 100,
+    paddingBottom: 110,
   },
-  stepIndicator: {
+  stepProgressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    marginBottom: SPACING.lg,
+    borderRadius: BORDER_RADIUS.xl,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
   },
-  stepItemActive: {
+  stepDoneCol: {
     alignItems: 'center',
+    gap: 2,
   },
-  stepItemPending: {
-    alignItems: 'center',
-  },
-  stepCircleActive: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+  activeStepCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 2,
-  },
-  stepCirclePending: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: COLORS.surfaceSubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
   },
   stepLine: {
     height: 2,
     flex: 1,
-    backgroundColor: COLORS.border,
-    marginHorizontal: SPACING.sm,
-    marginBottom: 16,
+    marginHorizontal: SPACING.xs,
   },
   sectionCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.lg,
+    borderColor: '#E8E8EE',
+    marginBottom: SPACING.md,
   },
-  cardHeaderRow: {
+  sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: SPACING.sm,
   },
-  cardTitleRow: {
+  sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  addressInfo: {
-    marginTop: 4,
+  addressBox: {
+    marginTop: 2,
   },
-  labelPill: {
-    backgroundColor: COLORS.primarySubtle,
-    paddingVertical: 2,
+  addressLabelPill: {
+    backgroundColor: '#ECE8F7',
     paddingHorizontal: 6,
-    borderRadius: BORDER_RADIUS.xs,
+    paddingVertical: 2,
+    borderRadius: 4,
     alignSelf: 'flex-start',
   },
-  rxAttachedRow: {
+  pharmacySummaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.successLight,
-    padding: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
     marginTop: 4,
   },
-  rxMissingAlert: {
+  pharmacyIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#ECE8F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+    borderTopWidth: 1,
+    borderTopColor: '#F8F8FC',
+  },
+  itemThumb: {
+    width: 40,
+    height: 40,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: '#F8F8FC',
+  },
+  itemDetails: {
+    flex: 1,
+    marginLeft: SPACING.sm,
+  },
+  rxAttachedBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    padding: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  rxMissingBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FEF2F2',
     padding: SPACING.sm,
     borderRadius: BORDER_RADIUS.md,
-    marginTop: 4,
   },
-  itemRow: {
+  walletToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  walletLeftCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  walletIconCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#ECE8F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  walletAppliedAlert: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+    marginTop: SPACING.sm,
+  },
+  paymentMethodRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderLight,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: 4,
   },
-  itemThumb: {
-    width: 44,
-    height: 44,
-    borderRadius: BORDER_RADIUS.sm,
-    backgroundColor: COLORS.surfaceSubtle,
+  paymentMethodSelected: {
+    backgroundColor: '#ECE8F7',
   },
-  itemDetails: {
-    flex: 1,
-    marginLeft: SPACING.md,
+  billRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  billDivider: {
+    height: 1,
+    backgroundColor: '#E8E8EE',
+    marginVertical: SPACING.xs,
   },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: '#E8E8EE',
+  },
+  bottomTotalCol: {
+    flex: 1,
+  },
+  bottomBtnCol: {
+    flex: 1.5,
   },
 });

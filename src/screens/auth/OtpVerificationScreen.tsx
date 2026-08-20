@@ -135,19 +135,19 @@ export const OtpVerificationScreen: React.FC = () => {
             <Ionicons name="shield-checkmark-outline" size={36} color={COLORS.primary} />
           </View>
 
-          <AppText variant="h1" color={COLORS.textPrimary} weight="800" style={styles.title}>
+          <AppText variant="h1" color={COLORS.textPrimary} weight="600" style={styles.title}>
             Verify your number
           </AppText>
 
           <View style={styles.subtitleRow}>
             <AppText variant="bodyMedium" color={COLORS.textSecondary}>
               Enter the 6-digit code sent to{' '}
-              <AppText variant="bodyMedium" weight="700" color={COLORS.textPrimary}>
+              <AppText variant="bodyMedium" weight="600" color={COLORS.textPrimary}>
                 +91 {phoneNumber.slice(0, 2)}XXX {phoneNumber.slice(-4)}
               </AppText>
             </AppText>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.changeNumberBtn}>
-              <AppText variant="caption" color={COLORS.primary} weight="700">
+              <AppText variant="caption" color={COLORS.primary} weight="600">
                 Change
               </AppText>
             </TouchableOpacity>
@@ -187,7 +187,7 @@ export const OtpVerificationScreen: React.FC = () => {
           <View style={styles.resendContainer}>
             {resendTimer > 0 ? (
               <AppText variant="caption" color={COLORS.textSecondary}>
-                Resend code in <AppText variant="caption" color={COLORS.primary} weight="700">{resendTimer}s</AppText>
+                Resend code in <AppText variant="caption" color={COLORS.primary} weight="600">{resendTimer}s</AppText>
               </AppText>
             ) : (
               <View style={styles.resendActionRow}>
@@ -195,7 +195,7 @@ export const OtpVerificationScreen: React.FC = () => {
                   Didn't receive the code?{' '}
                 </AppText>
                 <TouchableOpacity onPress={handleResend}>
-                  <AppText variant="caption" color={COLORS.primary} weight="700">
+                  <AppText variant="caption" color={COLORS.primary} weight="600">
                     Resend code
                   </AppText>
                 </TouchableOpacity>
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     borderColor: '#E8E8EE',
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: COLORS.textPrimary,
   },
   otpBoxFilled: {

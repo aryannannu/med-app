@@ -30,7 +30,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <Ionicons name={icon} size={42} color={COLORS.primary} />
       </View>
 
-      <AppText variant="h3" color={COLORS.textPrimary} weight="700" align="center" style={styles.title}>
+      <AppText variant="h3" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
         {title}
       </AppText>
 

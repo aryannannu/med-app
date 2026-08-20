@@ -29,7 +29,7 @@ export const CartBadge: React.FC<CartBadgeProps> = ({
       <Ionicons name="cart-outline" size={26} color={color} />
       {count > 0 && (
         <View style={[styles.badge, { backgroundColor: badgeBgColor }]}>
-          <AppText variant="caption" color="#FFFFFF" weight="700" style={styles.badgeText}>
+          <AppText variant="caption" color="#FFFFFF" weight="600" style={styles.badgeText}>
             {count > 99 ? '99+' : count}
           </AppText>
         </View>

@@ -35,7 +35,7 @@ export const AddressSelectionScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
           Saved Delivery Addresses
         </AppText>
         <View style={{ width: 40 }} />
@@ -71,7 +71,7 @@ export const AddressSelectionScreen: React.FC = () => {
                     size={14}
                     color={COLORS.primary}
                   />
-                  <AppText variant="caption" color={COLORS.primary} weight="700" style={{ marginLeft: 4 }}>
+                  <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
                     {address.label.toUpperCase()}
                   </AppText>
                 </View>
@@ -79,14 +79,14 @@ export const AddressSelectionScreen: React.FC = () => {
                 {isSelected && (
                   <View style={styles.selectedBadge}>
                     <Ionicons name="checkmark-circle" size={16} color={COLORS.secondary} />
-                    <AppText variant="caption" color={COLORS.secondaryDark} weight="700" style={{ marginLeft: 3 }}>
+                    <AppText variant="caption" color={COLORS.secondaryDark} weight="600" style={{ marginLeft: 3 }}>
                       Selected
                     </AppText>
                   </View>
                 )}
               </View>
 
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" style={styles.recipientName}>
+              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.recipientName}>
                 {address.recipientName}
               </AppText>
 
@@ -109,7 +109,7 @@ export const AddressSelectionScreen: React.FC = () => {
                   style={styles.editBtn}
                 >
                   <Ionicons name="pencil-outline" size={14} color={COLORS.primary} />
-                  <AppText variant="buttonSmall" color={COLORS.primary} weight="700" style={{ marginLeft: 4 }}>
+                  <AppText variant="buttonSmall" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
                     Edit Address
                   </AppText>
                 </TouchableOpacity>

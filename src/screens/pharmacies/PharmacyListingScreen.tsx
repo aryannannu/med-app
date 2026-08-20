@@ -50,7 +50,7 @@ export const PharmacyListingScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
           Nearby Pharmacies
         </AppText>
         <CartBadge count={totalItemCount} onPress={() => navigation.navigate('Cart')} />
@@ -78,7 +78,7 @@ export const PharmacyListingScreen: React.FC = () => {
             <AppText
               variant="caption"
               color={filterVerifiedOnly ? COLORS.secondaryDark : COLORS.textSecondary}
-              weight="700"
+              weight="600"
             >
               Verified Only
             </AppText>

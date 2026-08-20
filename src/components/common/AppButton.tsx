@@ -50,11 +50,11 @@ export const AppButton: React.FC<AppButtonProps> = ({
         bg = COLORS.primary;
         break;
       case 'secondary':
-        bg = COLORS.secondary;
+        bg = COLORS.primaryMuted;
         break;
       case 'outline':
-        bg = 'transparent';
-        border = COLORS.primary;
+        bg = COLORS.surface;
+        border = COLORS.primaryBorder;
         borderWidth = 1.5;
         break;
       case 'ghost':
@@ -65,17 +65,17 @@ export const AppButton: React.FC<AppButtonProps> = ({
         break;
     }
 
-    let minHeight: number = 52;
+    let minHeight: number = 50;
     let paddingVertical: number = SPACING.md;
     let paddingHorizontal: number = SPACING.xl;
 
     if (size === 'sm') {
-      minHeight = 40;
-      paddingVertical = SPACING.xs;
+      minHeight = 38;
+      paddingVertical = SPACING.xs + 2;
       paddingHorizontal = SPACING.md;
     } else if (size === 'md') {
-      minHeight = 46;
-      paddingVertical = SPACING.sm;
+      minHeight = 44;
+      paddingVertical = SPACING.sm + 2;
       paddingHorizontal = SPACING.lg;
     }
 
@@ -86,11 +86,11 @@ export const AppButton: React.FC<AppButtonProps> = ({
       minHeight,
       paddingVertical,
       paddingHorizontal,
-      borderRadius: BORDER_RADIUS.md,
+      borderRadius: size === 'sm' ? BORDER_RADIUS.md : BORDER_RADIUS.lg,
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
-      opacity: disabled ? 0.6 : 1,
+      opacity: disabled ? 0.55 : 1,
       width: fullWidth ? '100%' : 'auto',
     };
   };
@@ -99,9 +99,10 @@ export const AppButton: React.FC<AppButtonProps> = ({
     if (disabled) return COLORS.textMuted;
     switch (variant) {
       case 'primary':
-      case 'secondary':
       case 'danger':
         return COLORS.textInverse;
+      case 'secondary':
+        return COLORS.primary;
       case 'outline':
       case 'ghost':
         return COLORS.primary;

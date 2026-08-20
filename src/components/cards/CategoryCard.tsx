@@ -37,7 +37,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       <AppText
         variant="caption"
         color={isSelected ? COLORS.primary : COLORS.textPrimary}
-        weight="700"
+        weight="600"
         align="center"
         numberOfLines={2}
         style={styles.name}
@@ -53,11 +53,11 @@ const styles = StyleSheet.create({
     width: 86,
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.lg,
+    paddingVertical: SPACING.sm + 2,
     paddingHorizontal: SPACING.xs,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E8E8EE',
     marginRight: SPACING.sm,
   },
   containerSelected: {
@@ -65,9 +65,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primarySubtle,
   },
   iconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.xs,

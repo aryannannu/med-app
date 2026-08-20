@@ -104,10 +104,10 @@ export const LoginScreen: React.FC = () => {
                 resizeMode="contain"
               />
               <View style={styles.floatingMedInfo}>
-                <AppText variant="caption" color={COLORS.textSecondary} weight="700" style={{ fontSize: 10 }}>
+                <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={{ fontSize: 10 }}>
                   CIPLA
                 </AppText>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   Amoxicillin Capsules
                 </AppText>
                 <AppText variant="caption" color={COLORS.textMuted}>
@@ -118,7 +118,7 @@ export const LoginScreen: React.FC = () => {
                 <AppText variant="caption" color={COLORS.textMuted} style={styles.strikePrice}>
                   ₹150
                 </AppText>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   ₹135
                 </AppText>
               </View>
@@ -132,10 +132,10 @@ export const LoginScreen: React.FC = () => {
                 resizeMode="contain"
               />
               <View style={styles.floatingMedInfo}>
-                <AppText variant="caption" color={COLORS.textSecondary} weight="700" style={{ fontSize: 10 }}>
+                <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={{ fontSize: 10 }}>
                   CIPLA
                 </AppText>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   Atorvastatin Tablets
                 </AppText>
                 <AppText variant="caption" color={COLORS.textMuted}>
@@ -146,7 +146,7 @@ export const LoginScreen: React.FC = () => {
                 <AppText variant="caption" color={COLORS.textMuted} style={styles.strikePrice}>
                   ₹120
                 </AppText>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   ₹99
                 </AppText>
               </View>
@@ -160,10 +160,10 @@ export const LoginScreen: React.FC = () => {
                 resizeMode="contain"
               />
               <View style={styles.floatingMedInfo}>
-                <AppText variant="caption" color={COLORS.textSecondary} weight="700" style={{ fontSize: 10 }}>
+                <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={{ fontSize: 10 }}>
                   STERIS
                 </AppText>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   Lisinopril Tablets
                 </AppText>
                 <AppText variant="caption" color={COLORS.textMuted}>
@@ -174,7 +174,7 @@ export const LoginScreen: React.FC = () => {
                 <AppText variant="caption" color={COLORS.textMuted} style={styles.strikePrice}>
                   ₹130
                 </AppText>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="800">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   ₹110
                 </AppText>
               </View>
@@ -184,7 +184,7 @@ export const LoginScreen: React.FC = () => {
           {/* 2. HEALIT Logo Header */}
           <View style={styles.logoSection}>
             <HealitLogo width={160} height={52} />
-            <AppText variant="h2" color={COLORS.textPrimary} weight="800" align="center" style={{ marginTop: SPACING.sm }}>
+            <AppText variant="h2" color={COLORS.textPrimary} weight="600" align="center" style={{ marginTop: SPACING.sm }}>
               We Deliver Care
             </AppText>
             <AppText variant="bodyMedium" color={COLORS.textSecondary} align="center" style={{ marginTop: 2 }}>
@@ -197,7 +197,7 @@ export const LoginScreen: React.FC = () => {
             <View style={styles.phoneInputRow}>
               {/* Country Code Box */}
               <View style={[styles.countryCodeBox, SHADOWS.subtle]}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700">
+                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
                   🇮🇳 +91
                 </AppText>
               </View>
@@ -239,7 +239,7 @@ export const LoginScreen: React.FC = () => {
               <AppText
                 variant="button"
                 color={isPhoneValid ? '#FFFFFF' : '#707070'}
-                weight="700"
+                weight="600"
               >
                 {loading ? 'Sending Code...' : 'Log in'}
               </AppText>
@@ -249,7 +249,7 @@ export const LoginScreen: React.FC = () => {
           {/* 4. OR Divider */}
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
-            <AppText variant="caption" color={COLORS.textMuted} weight="700" style={styles.orText}>
+            <AppText variant="caption" color={COLORS.textMuted} weight="600" style={styles.orText}>
               OR
             </AppText>
             <View style={styles.dividerLine} />
@@ -263,7 +263,7 @@ export const LoginScreen: React.FC = () => {
               style={[styles.socialBtn, SHADOWS.subtle]}
             >
               <Ionicons name="logo-google" size={18} color="#EA4335" style={{ marginRight: SPACING.sm }} />
-              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="700">
+              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="600">
                 Continue with google
               </AppText>
             </TouchableOpacity>
@@ -274,7 +274,7 @@ export const LoginScreen: React.FC = () => {
               style={[styles.socialBtn, { marginTop: SPACING.md }, SHADOWS.subtle]}
             >
               <Ionicons name="person-outline" size={18} color={COLORS.primary} style={{ marginRight: SPACING.sm }} />
-              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="700">
+              <AppText variant="buttonSmall" color={COLORS.textPrimary} weight="600">
                 Continue as guest
               </AppText>
             </TouchableOpacity>
@@ -284,11 +284,11 @@ export const LoginScreen: React.FC = () => {
           <View style={styles.legalFooter}>
             <AppText variant="caption" color={COLORS.textSecondary} align="center" style={{ lineHeight: 18 }}>
               By Log in, you are agreeing to our{' '}
-              <AppText variant="caption" color={COLORS.textPrimary} weight="700" style={styles.underline}>
+              <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={styles.underline}>
                 Privacy Policy
               </AppText>{' '}
               and{' '}
-              <AppText variant="caption" color={COLORS.textPrimary} weight="700" style={styles.underline}>
+              <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={styles.underline}>
                 Terms &amp; Conditions
               </AppText>
               .

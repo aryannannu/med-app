@@ -30,7 +30,8 @@ import { formatDistance, formatDeliveryTime } from '../../utils/formatters';
 export const PharmacyDetailScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'PharmacyDetail'>>();
-  const { pharmacyId, pharmacy: initialPharm } = route.params;
+  const pharmacyId = route.params?.pharmacyId || 'pharm-1';
+  const initialPharm = route.params?.pharmacy;
 
   const [pharmacy, setPharmacy] = useState<Pharmacy | null>(initialPharm || null);
   const [inventory, setInventory] = useState<{ medicine: Medicine; inventory: PharmacyInventoryItem }[]>([]);
@@ -63,7 +64,7 @@ export const PharmacyDetailScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" numberOfLines={1} style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" numberOfLines={1} style={styles.headerTitle}>
           {pharmacy.name}
         </AppText>
         <CartBadge count={totalItemCount} onPress={() => navigation.navigate('Cart')} />
@@ -80,7 +81,7 @@ export const PharmacyDetailScreen: React.FC = () => {
               <View style={styles.profileRow}>
                 <Image source={{ uri: pharmacy.logo }} style={styles.logo} resizeMode="cover" />
                 <View style={styles.profileInfo}>
-                  <AppText variant="h3" color={COLORS.textPrimary} weight="800" numberOfLines={2}>
+                  <AppText variant="h3" color={COLORS.textPrimary} weight="600" numberOfLines={2}>
                     {pharmacy.name}
                   </AppText>
                   {pharmacy.isVerified && <VerifiedBadge style={{ marginTop: 4 }} />}
@@ -127,7 +128,7 @@ export const PharmacyDetailScreen: React.FC = () => {
               />
             </View>
 
-            <AppText variant="h4" color={COLORS.textPrimary} weight="700" style={styles.sectionTitle}>
+            <AppText variant="h4" color={COLORS.textPrimary} weight="600" style={styles.sectionTitle}>
               Store Medicine Inventory ({filteredItems.length})
             </AppText>
           </View>

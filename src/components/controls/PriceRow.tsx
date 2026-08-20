@@ -29,7 +29,7 @@ export const PriceRow: React.FC<PriceRowProps> = ({
 
   return (
     <View style={[layout === 'row' ? styles.row : styles.column, style]}>
-      <AppText variant={priceVariant} color={COLORS.primary} weight="800">
+      <AppText variant={priceVariant} color={COLORS.textPrimary} weight="600">
         {formatCurrency(price)}
       </AppText>
 
@@ -45,7 +45,7 @@ export const PriceRow: React.FC<PriceRowProps> = ({
 
           {calculatedDiscount > 0 && (
             <View style={styles.discountPill}>
-              <AppText variant="badge" color={COLORS.secondaryDark} weight="700">
+              <AppText variant="badge" color="#15803D" weight="600">
                 {formatDiscount(calculatedDiscount)}
               </AppText>
             </View>
@@ -77,9 +77,9 @@ const styles = StyleSheet.create({
     marginRight: SPACING.xs,
   },
   discountPill: {
-    backgroundColor: COLORS.secondaryLight,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: BORDER_RADIUS.xs,
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: BORDER_RADIUS.sm,
   },
 });

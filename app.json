@@ -20,7 +20,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "backgroundColor": "#3A2986"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.healit"
     },
     "web": {
       "bundler": "metro",

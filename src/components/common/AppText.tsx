@@ -18,13 +18,10 @@ const getFontFamilyForWeight = (weight?: string) => {
     case '500':
       return FONT_FAMILY.medium;
     case '600':
-      return FONT_FAMILY.semibold;
     case '700':
-      return FONT_FAMILY.bold;
     case '800':
-      return FONT_FAMILY.extrabold;
     case '900':
-      return FONT_FAMILY.black;
+      return FONT_FAMILY.semibold;
     case '400':
     default:
       return FONT_FAMILY.regular;
@@ -42,12 +39,17 @@ export const AppText: React.FC<AppTextProps> = ({
 }) => {
   const baseTypography = TYPOGRAPHY[variant] || TYPOGRAPHY.bodyMedium;
   const resolvedFontFamily = weight ? getFontFamilyForWeight(weight) : baseTypography.fontFamily;
+  const normalizedWeight = weight
+    ? parseInt(weight, 10) >= 600
+      ? '600'
+      : (weight as TextStyle['fontWeight'])
+    : baseTypography.fontWeight;
 
   const customStyle: TextStyle = {
     ...baseTypography,
     color,
     ...(resolvedFontFamily ? { fontFamily: resolvedFontFamily } : {}),
-    ...(weight ? { fontWeight: weight } : {}),
+    ...(normalizedWeight ? { fontWeight: normalizedWeight } : {}),
     ...(align ? { textAlign: align } : {}),
   };
 

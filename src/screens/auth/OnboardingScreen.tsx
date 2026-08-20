@@ -74,7 +74,7 @@ export const OnboardingScreen: React.FC = () => {
             <Ionicons name={step.icon} size={84} color={step.iconColor} />
           </View>
 
-          <AppText variant="h1" color={COLORS.textPrimary} weight="800" align="center" style={styles.title}>
+          <AppText variant="h1" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
             {step.title}
           </AppText>
 

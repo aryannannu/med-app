@@ -57,7 +57,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
           <View style={styles.floatingActionContainer}>
             {isOutOfStock ? (
               <View style={styles.outOfStockPill}>
-                <AppText variant="caption" color={COLORS.danger} weight="700" style={{ fontSize: 9 }}>
+                <AppText variant="caption" color={COLORS.danger} weight="600" style={{ fontSize: 9 }}>
                   OUT OF STOCK
                 </AppText>
               </View>
@@ -74,7 +74,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
                 onPress={onAddToCart}
                 style={styles.addPillBtn}
               >
-                <AppText variant="buttonSmall" color="#E11D48" weight="800" style={styles.addBtnText}>
+                <AppText variant="buttonSmall" color="#15803D" weight="600" style={styles.addBtnText}>
                   ADD
                 </AppText>
               </TouchableOpacity>
@@ -87,7 +87,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
           {/* 2. Price Block: Solid Green Price Tag + Strikethrough MRP */}
           <View style={styles.priceRow}>
             <View style={styles.greenPriceTag}>
-              <AppText variant="titleSmall" color="#FFFFFF" weight="800" style={{ fontSize: 13 }}>
+              <AppText variant="titleSmall" color="#FFFFFF" weight="600" style={{ fontSize: 13 }}>
                 {formatCurrency(medicine.discountPrice)}
               </AppText>
             </View>
@@ -98,7 +98,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
 
           {/* 3. Discount Line: e.g. ₹77 OFF */}
           <View style={styles.discountRow}>
-            <AppText variant="caption" color="#15803D" weight="800" style={styles.discountText}>
+            <AppText variant="caption" color="#15803D" weight="600" style={styles.discountText}>
               {savingsAmount > 0 ? `${formatCurrency(savingsAmount)} OFF` : `${medicine.discountPercentage}% OFF`}
             </AppText>
             <View style={styles.dottedLine} />
@@ -106,7 +106,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
 
           {/* 4. Product Title (consistent 2-line baseline height) */}
           <View style={styles.titleContainer}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="700" numberOfLines={2} style={styles.title}>
+            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={2} style={styles.title}>
               {medicine.name}
             </AppText>
           </View>
@@ -119,7 +119,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
           {/* 6. Rating */}
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={11} color="#15803D" />
-            <AppText variant="caption" color="#15803D" weight="700" style={{ marginLeft: 3, fontSize: 11 }}>
+            <AppText variant="caption" color="#15803D" weight="600" style={{ marginLeft: 3, fontSize: 11 }}>
               {medicine.rating || 4.7} ({medicine.reviewCount || '4.1k'})
             </AppText>
           </View>
@@ -141,7 +141,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
       </View>
 
       <View style={styles.listContent}>
-        <AppText variant="titleSmall" color={COLORS.textPrimary} numberOfLines={1} weight="700">
+        <AppText variant="titleSmall" color={COLORS.textPrimary} numberOfLines={1} weight="600">
           {medicine.name}
         </AppText>
         <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1}>
@@ -154,7 +154,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
         <View style={styles.listBottomRow}>
           <View style={styles.priceRow}>
             <View style={styles.greenPriceTag}>
-              <AppText variant="titleSmall" color="#FFFFFF" weight="800">
+              <AppText variant="titleSmall" color="#FFFFFF" weight="600">
                 {formatCurrency(medicine.discountPrice)}
               </AppText>
             </View>
@@ -176,7 +176,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
               onPress={onAddToCart}
               style={styles.addPillBtn}
             >
-              <AppText variant="buttonSmall" color="#E11D48" weight="800" style={styles.addBtnText}>
+              <AppText variant="buttonSmall" color="#15803D" weight="600" style={styles.addBtnText}>
                 ADD
               </AppText>
             </TouchableOpacity>
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1.5,
-    borderColor: '#E11D48',
+    borderColor: '#15803D',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

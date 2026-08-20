@@ -5,4 +5,7 @@ export * from './prescription';
 export * from './offer';
 export * from './order';
 export * from './user';
+export * from './wallet';
+export * from './payment';
+export * from './support';
 export * from './navigation';

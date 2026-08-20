@@ -95,10 +95,26 @@ export const COLORS = {
   tagBestRatedBg: '#FEF3C7',
   tagBestRatedBorder: '#FDE68A',
 
+  // Quick-Commerce Shopping Tokens
+  priceGreen: '#15803D',
+  priceGreenLight: '#DCFCE7',
+  priceGreenDark: '#14532D',
+  savingsGreen: '#16A34A',
+  savingsGreenLight: '#ECFDF5',
+  savingsGreenBorder: '#A7F3D0',
+  brandAction: PRIMARY_SCALE[500],
+  brandActionPressed: PRIMARY_SCALE[700],
+  cardBorderSubtle: '#F0F0F4',
+  chipInactiveBg: '#F3F4F8',
+  chipInactiveText: '#475569',
+  skeletonBg: '#E2E8F0',
+  skeletonHighlight: '#F1F5F9',
+
   // Overlays & Accents
-  overlay: 'rgba(21, 21, 21, 0.5)',
-  overlayLight: 'rgba(21, 21, 21, 0.25)',
-  starGold: '#D97706',
+  overlay: 'rgba(15, 23, 42, 0.45)',
+  overlayLight: 'rgba(15, 23, 42, 0.20)',
+  starGold: '#F59E0B',
+  starGoldLight: '#FEF3C7',
 } as const;
 
 export type ColorKey = keyof typeof COLORS;

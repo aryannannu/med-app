@@ -15,7 +15,7 @@ interface OfferContextType {
   activeFilter: OfferTag | 'all';
   timeRemainingSeconds: number;
   isOffersExpired: boolean;
-  startFindingPharmacies: (cartId: string, items: CartItem[], address: Address) => Promise<PharmacyOffer[]>;
+  startFindingPharmacies: (cartId: string, items: CartItem[], address?: Address | null) => Promise<PharmacyOffer[]>;
   selectOffer: (offer: PharmacyOffer) => void;
   setActiveFilter: (filter: OfferTag | 'all') => void;
   filteredOffers: PharmacyOffer[];
@@ -34,24 +34,25 @@ export const OfferProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [timeRemainingSeconds, setTimeRemainingSeconds] = useState(600); // 10 minutes
   const [isOffersExpired, setIsOffersExpired] = useState(false);
 
-  const { registerOfferInvalidationCallback } = useCart();
-  const { registerAddressChangedCallback } = useAddress();
+  useEffect(() => {
+    try {
+      const initial = OfferService.getMockOffersSync('cart-current');
+      setOffers(initial);
+      if (initial.length > 0) {
+        setSelectedOffer(initial[0]);
+      }
+    } catch {
+      // fallback
+    }
+  }, []);
 
   const invalidateOffers = useCallback(() => {
     OfferService.invalidateOffers();
-    setOffers([]);
-    setSelectedOffer(null);
+    const fresh = OfferService.getMockOffersSync('cart-current');
+    setOffers(fresh);
+    setSelectedOffer(fresh[0] || null);
     setIsOffersExpired(false);
   }, []);
-
-  useEffect(() => {
-    registerOfferInvalidationCallback(() => {
-      invalidateOffers();
-    });
-    registerAddressChangedCallback(() => {
-      invalidateOffers();
-    });
-  }, [registerOfferInvalidationCallback, registerAddressChangedCallback, invalidateOffers]);
 
   // Expiry countdown timer
   useEffect(() => {
@@ -72,20 +73,25 @@ export const OfferProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [offers]);
 
   const startFindingPharmacies = useCallback(
-    async (cartId: string, items: CartItem[], address: Address): Promise<PharmacyOffer[]> => {
+    async (cartId: string, items: CartItem[], address?: Address | null): Promise<PharmacyOffer[]> => {
       setIsMatching(true);
       setMatchingStep(1);
-      setMatchingStatusText('Broadcasting medicine requirement to 12 nearby verified pharmacies...');
+      setMatchingStatusText('Checking delivery location & serviceability radius...');
 
-      await new Promise((r) => setTimeout(r, 900));
+      await new Promise((r) => setTimeout(r, 600));
       setMatchingStep(2);
-      setMatchingStatusText('Verifying batch availability, expiries & bulk discounts...');
+      setMatchingStatusText('Found 12 licensed pharmacies within 3 km...');
 
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 700));
       setMatchingStep(3);
-      setMatchingStatusText('Receiving competitive offers with lowest prices & express ETAs...');
+      setMatchingStatusText('Verifying batch stock & prescription requirements...');
 
       const generatedOffers = await OfferService.generateOffersForCart(cartId, items, address);
+
+      await new Promise((r) => setTimeout(r, 700));
+      setMatchingStep(4);
+      setMatchingStatusText('Received 4 competitive pharmacy bids!');
+
       setOffers(generatedOffers);
       if (generatedOffers.length > 0) {
         setSelectedOffer(generatedOffers[0]); // Recommended default
