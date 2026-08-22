@@ -10,10 +10,12 @@ import {
   Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../types/navigation';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../../components/common/AppText';
+import { FloatingCart } from '../../components/common/FloatingCart';
 import { Ionicons } from '@expo/vector-icons';
 import { useAddress } from '../../store/AddressContext';
 import { useCart } from '../../store/CartContext';
@@ -36,91 +38,121 @@ const ALL_CATEGORIES: CategoryItem[] = [
     id: 'c1',
     name: 'Pain Relief & Fever',
     slug: 'pain-relief',
-    icon: 'fitness-outline',
+    icon: 'fitness',
     color: '#7C3AED',
     bg: '#F3E8FF',
-    itemCount: '142+ Medicines',
-    popularSubcats: ['Headache', 'Fever', 'Body Pain', 'Joints'],
+    itemCount: '142+ Meds',
+    popularSubcats: ['Headache', 'Fever', 'Body Pain'],
   },
   {
     id: 'c2',
     name: 'Cold, Cough & Flu',
     slug: 'cold-flu',
-    icon: 'thermometer-outline',
+    icon: 'thermometer',
     color: '#2563EB',
     bg: '#EFF6FF',
-    itemCount: '98+ Medicines',
-    popularSubcats: ['Syrups', 'Nasal Drops', 'Anti-Allergic', 'Lozenges'],
+    itemCount: '98+ Meds',
+    popularSubcats: ['Syrups', 'Nasal Drops', 'Lozenges'],
   },
   {
     id: 'c3',
     name: 'Diabetes Care',
     slug: 'diabetes',
-    icon: 'water-outline',
+    icon: 'water',
     color: '#D97706',
     bg: '#FEF3C7',
-    itemCount: '86+ Medicines',
-    popularSubcats: ['Oral Tablets', 'Test Strips', 'Insulin', 'Sugar Free'],
+    itemCount: '86+ Meds',
+    popularSubcats: ['Tablets', 'Test Strips', 'Insulin'],
   },
   {
     id: 'c4',
     name: 'Vitamins & Immunity',
     slug: 'vitamins',
-    icon: 'sunny-outline',
+    icon: 'sunny',
     color: '#059669',
     bg: '#ECFDF5',
-    itemCount: '164+ Medicines',
-    popularSubcats: ['Multivitamins', 'Vitamin C', 'Vitamin D3', 'Zinc'],
+    itemCount: '164+ Meds',
+    popularSubcats: ['Multivitamins', 'Vitamin C', 'Zinc'],
   },
   {
     id: 'c5',
     name: 'Stomach & Digestion',
     slug: 'digestive',
-    icon: 'heart-outline',
+    icon: 'heart',
     color: '#DC2626',
     bg: '#FEE2E2',
-    itemCount: '115+ Medicines',
-    popularSubcats: ['Antacids', 'Gas Relief', 'Probiotics', 'Laxatives'],
+    itemCount: '115+ Meds',
+    popularSubcats: ['Antacids', 'Gas Relief', 'Probiotics'],
   },
   {
     id: 'c6',
     name: 'Skin & Dermatology',
     slug: 'skin',
-    icon: 'sparkles-outline',
+    icon: 'sparkles',
     color: '#DB2777',
     bg: '#FDF2F8',
-    itemCount: '120+ Medicines',
-    popularSubcats: ['Anti-Fungal', 'Sunscreen', 'Acne Care', 'Healers'],
+    itemCount: '120+ Meds',
+    popularSubcats: ['Anti-Fungal', 'Sunscreen', 'Acne Care'],
   },
   {
     id: 'c7',
     name: 'Baby & Mother Care',
     slug: 'baby',
-    icon: 'happy-outline',
+    icon: 'happy',
     color: '#0891B2',
     bg: '#ECFEFF',
-    itemCount: '74+ Medicines',
-    popularSubcats: ['Colic Care', 'Massage Oils', 'Gripe Water', 'Drops'],
+    itemCount: '74+ Meds',
+    popularSubcats: ['Diapers', 'Gripe Water', 'Oils'],
   },
   {
     id: 'c8',
     name: 'Ayurvedic & Herbal',
     slug: 'ayurveda',
-    icon: 'leaf-outline',
+    icon: 'leaf',
     color: '#166534',
     bg: '#DCFCE7',
-    itemCount: '110+ Medicines',
-    popularSubcats: ['Chyawanprash', 'Liver Care', 'Herbal Cough', 'Honey'],
+    itemCount: '110+ Meds',
+    popularSubcats: ['Chyawanprash', 'Juices', 'Herbal Oils'],
   },
   {
     id: 'c9',
     name: 'Heart & BP Care',
     slug: 'heart-bp',
-    icon: 'pulse-outline',
+    icon: 'pulse',
     color: '#B91C1C',
     bg: '#FFE4E6',
-    itemCount: '92+ Medicines',
-    popularSubcats: ['BP Tablets', 'Cholesterol', 'Aspirin', 'Heart Tonics'],
+    itemCount: '92+ Meds',
+    popularSubcats: ['BP Tablets', 'Cholesterol', 'Tonics'],
+  },
+  {
+    id: 'c10',
+    name: 'Eye & Ear Care',
+    slug: 'eye-ear',
+    icon: 'eye',
+    color: '#4F46E5',
+    bg: '#EEF2FF',
+    itemCount: '65+ Meds',
+    popularSubcats: ['Eye Drops', 'Ear Drops', 'Wipes'],
+  },
+  {
+    id: 'c11',
+    name: 'Sexual Wellness',
+    slug: 'wellness',
+    icon: 'shield-checkmark',
+    color: '#9333EA',
+    bg: '#FAF5FF',
+    itemCount: '58+ Meds',
+    popularSubcats: ['Performance', 'Supplements', 'Care'],
+  },
+  {
+    id: 'c12',
+    name: 'First Aid & Surgical',
+    slug: 'first-aid',
+    icon: 'bandage',
+    color: '#0284C7',
+    bg: '#E0F2FE',
+    itemCount: '80+ Meds',
+    popularSubcats: ['Bandages', 'Antiseptic', 'Cotton'],
   },
 ];
 
@@ -130,8 +162,8 @@ export const CategoriesScreen: React.FC = () => {
   const { selectedAddress } = useAddress();
   const { summary, totalItemCount } = useCart();
   const { onScroll, collapseAnim } = useTabBarScroll();
+  const insets = useSafeAreaInsets();
 
-  // Floating Cart sits dynamically 12px above the floating tab bar
   const floatingCartBottom = collapseAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [Platform.OS === 'android' ? 88 : 96, Platform.OS === 'android' ? 72 : 80],
@@ -153,7 +185,7 @@ export const CategoriesScreen: React.FC = () => {
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleLarge" color={COLORS.textPrimary} weight="700">
               Categories
             </AppText>
             <TouchableOpacity
@@ -161,7 +193,7 @@ export const CategoriesScreen: React.FC = () => {
               onPress={() => navigation.navigate('AddressSelection', { isSelectingForCheckout: false })}
               style={styles.locationRow}
             >
-              <Ionicons name="location" size={12} color={COLORS.primary} />
+              <Ionicons name="location-sharp" size={13} color={COLORS.primary} />
               <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1} style={{ marginLeft: 3, fontSize: 11 }}>
                 Delivering to {selectedAddress?.label || 'Home'} • {selectedAddress?.city || 'Punjab'}
               </AppText>
@@ -189,89 +221,94 @@ export const CategoriesScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Categories Grid List */}
+        {/* Categories 2-Column Grid */}
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: totalItemCount > 0 ? 150 : 110 },
+          ]}
           onScroll={onScroll}
           scrollEventThrottle={16}
         >
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
-            All Health Categories ({filteredCategories.length})
-          </AppText>
+          <View style={styles.sectionHeaderRow}>
+            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+              Shop by Category
+            </AppText>
+            <AppText variant="caption" color={COLORS.textSecondary}>
+              {filteredCategories.length} Categories Available
+            </AppText>
+          </View>
 
           <View style={styles.categoriesGrid}>
             {filteredCategories.map((cat) => (
               <TouchableOpacity
                 key={cat.id}
-                activeOpacity={0.85}
+                activeOpacity={0.88}
                 onPress={() =>
                   navigation.navigate('CategoryListing', {
                     categorySlug: cat.slug,
                     categoryName: cat.name,
                   })
                 }
-                style={[styles.categoryCard, SHADOWS.subtle]}
+                style={[styles.categoryGridCard, { backgroundColor: cat.bg }]}
               >
-                <View style={[styles.categoryIconBox, { backgroundColor: cat.bg }]}>
-                  <Ionicons name={cat.icon} size={28} color={cat.color} />
-                </View>
-
-                <View style={styles.categoryInfo}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
-                    {cat.name}
-                  </AppText>
-                  <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginTop: 2, fontSize: 11 }}>
-                    {cat.itemCount}
-                  </AppText>
-
-                  {/* Subcategories preview tags */}
-                  <View style={styles.subcatsRow}>
-                    {cat.popularSubcats.slice(0, 3).map((sub, idx) => (
-                      <View key={idx} style={styles.subcatPill}>
-                        <AppText variant="caption" color={COLORS.textSecondary} style={{ fontSize: 9 }}>
-                          {sub}
-                        </AppText>
-                      </View>
-                    ))}
+                {/* Top Row: Icon circle + Count badge */}
+                <View style={styles.cardTopRow}>
+                  <View style={styles.categoryIconCircle}>
+                    <Ionicons name={cat.icon} size={22} color={cat.color} />
+                  </View>
+                  <View style={styles.countBadge}>
+                    <AppText style={[styles.countBadgeText, { color: cat.color }]}>
+                      {cat.itemCount}
+                    </AppText>
                   </View>
                 </View>
 
-                <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+                {/* Category Title */}
+                <AppText style={[styles.categoryTitleText, { color: cat.color }]} numberOfLines={2}>
+                  {cat.name}
+                </AppText>
+
+                {/* Subcategory Pills */}
+                <View style={styles.subcatsRow}>
+                  {cat.popularSubcats.map((sub, idx) => (
+                    <View key={idx} style={styles.subcatPill}>
+                      <AppText style={styles.subcatPillText} numberOfLines={1}>
+                        {sub}
+                      </AppText>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Explore Link */}
+                <View style={styles.exploreRow}>
+                  <AppText style={[styles.exploreText, { color: cat.color }]}>
+                    Explore →
+                  </AppText>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
+
+          {filteredCategories.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="search-outline" size={48} color={COLORS.textMuted} />
+              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: 12 }}>
+                No categories found
+              </AppText>
+              <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 4 }}>
+                Try searching for "Pain", "Diabetes", or "Vitamins"
+              </AppText>
+            </View>
+          )}
         </ScrollView>
 
         {/* Floating Cart Indicator */}
-        {totalItemCount > 0 && (
-          <Animated.View style={[styles.floatingCart, { bottom: floatingCartBottom }, SHADOWS.modal]}>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={() => navigation.navigate('Cart')}
-              style={styles.floatingCartInner}
-            >
-              <View style={styles.floatingCartLeft}>
-                <View style={styles.floatingCartBadge}>
-                  <Ionicons name="cart" size={16} color={COLORS.primary} />
-                  <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
-                    {totalItemCount} {totalItemCount === 1 ? 'Medicine' : 'Medicines'}
-                  </AppText>
-                </View>
-                <AppText variant="titleSmall" color="#FFFFFF" weight="600" style={{ marginLeft: SPACING.md }}>
-                  {formatCurrency(summary.estimatedFinalTotal)}
-                </AppText>
-              </View>
-
-              <View style={styles.floatingCartRight}>
-                <AppText variant="buttonSmall" color="#FFFFFF" weight="600">
-                  View Cart
-                </AppText>
-                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 4 }} />
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
+        <FloatingCart
+          onPressViewCart={() => navigation.navigate('Cart')}
+          bottomOffset={floatingCartBottom}
+        />
       </View>
     </SafeAreaView>
   );
@@ -290,10 +327,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
+    paddingTop: Platform.OS === 'android' ? 12 : 8,
+    paddingBottom: SPACING.xs,
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8EE',
   },
   locationRow: {
     flexDirection: 'row',
@@ -311,9 +347,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8F8FC',
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+    paddingVertical: Platform.OS === 'ios' ? 9 : 5,
     borderWidth: 1,
     borderColor: '#E8E8EE',
   },
@@ -325,45 +361,82 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: 110,
+  },
+  sectionHeaderRow: {
+    marginBottom: SPACING.md,
   },
   categoriesGrid: {
-    gap: SPACING.sm,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  categoryCard: {
+  categoryGridCard: {
+    width: '48.5%',
+    minHeight: 165,
+    borderRadius: 20,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    justifyContent: 'space-between',
+  },
+  cardTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: '#E8E8EE',
+    justifyContent: 'space-between',
     marginBottom: SPACING.xs,
   },
-  categoryIconBox: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+  categoryIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  categoryInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
+  countBadge: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  countBadgeText: {
+    fontSize: 10,
+    fontFamily: 'LexendDeca_700Bold',
+  },
+  categoryTitleText: {
+    fontSize: 14,
+    fontFamily: 'LexendDeca_700Bold',
+    marginTop: 6,
+    lineHeight: 18,
   },
   subcatsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 4,
-    marginTop: 6,
+    marginTop: 8,
   },
   subcatPill: {
-    backgroundColor: '#F8F8FC',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 2,
     paddingHorizontal: 6,
-    borderRadius: BORDER_RADIUS.full,
-    borderWidth: 1,
-    borderColor: '#E8E8EE',
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  subcatPillText: {
+    fontSize: 9,
+    fontFamily: 'LexendDeca_500Medium',
+    color: COLORS.textSecondary,
+  },
+  exploreRow: {
+    marginTop: 10,
+    alignSelf: 'flex-start',
+  },
+  exploreText: {
+    fontSize: 11,
+    fontFamily: 'LexendDeca_700Bold',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
   },
   floatingCart: {
     position: 'absolute',

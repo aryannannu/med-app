@@ -20,6 +20,7 @@ import { useAddress } from '../../store/AddressContext';
 import { usePrescription } from '../../store/PrescriptionContext';
 import { useSavedPharmacies } from '../../store/SavedPharmaciesContext';
 import { useAppTheme } from '../../store/ThemeContext';
+import { useTabBarScroll } from '../../store/TabBarScrollContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatPhoneNumber } from '../../utils/formatters';
 
@@ -31,6 +32,7 @@ export const ProfileScreen: React.FC = () => {
   const { prescriptions } = usePrescription();
   const { savedPharmacies } = useSavedPharmacies();
   const { themeMode } = useAppTheme();
+  const { onScroll } = useTabBarScroll();
 
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
@@ -51,7 +53,12 @@ export const ProfileScreen: React.FC = () => {
         </AppText>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      >
         {/* =========================================================================
             1. USER IDENTITY CARD
            ========================================================================= */}
@@ -349,6 +356,27 @@ export const ProfileScreen: React.FC = () => {
               </AppText>
             </View>
             <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => (navigation as any).navigate('HeaderShowcase')}
+            style={styles.menuRow}
+          >
+            <View style={[styles.menuIconCircle, { backgroundColor: '#ECE8F7' }]}>
+              <Ionicons name="color-palette-outline" size={20} color={COLORS.primary} />
+            </View>
+            <View style={styles.menuTextCol}>
+              <AppText variant="titleSmall" color={COLORS.primary} weight="700">
+                Header UI Design System
+              </AppText>
+              <AppText variant="caption" color={COLORS.textSecondary}>
+                20 Master Adaptive Variants
+              </AppText>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
 

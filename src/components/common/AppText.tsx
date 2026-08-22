@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TextStyle, TextProps, Platform } from 'react-native';
+import { Text, TextStyle, TextProps, StyleProp, Platform } from 'react-native';
 import { COLORS, TYPOGRAPHY, FONT_FAMILY } from '../../theme';
 
 export interface AppTextProps extends TextProps {
@@ -7,7 +7,7 @@ export interface AppTextProps extends TextProps {
   color?: string;
   weight?: '300' | '400' | '500' | '600' | '700' | '800' | '900';
   align?: 'auto' | 'left' | 'right' | 'center' | 'justify';
-  style?: TextStyle | TextStyle[];
+  style?: StyleProp<TextStyle>;
   children: React.ReactNode;
 }
 

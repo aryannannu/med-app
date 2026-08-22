@@ -5,11 +5,14 @@ export interface MedicineSalt {
 
 export interface MedicineVariant {
   id: string;
-  form: 'Tablet' | 'Capsule' | 'Syrup' | 'Injection' | 'Ointment' | 'Drops' | 'Inhaler' | 'Sachet';
+  form?: 'Tablet' | 'Capsule' | 'Syrup' | 'Injection' | 'Ointment' | 'Drops' | 'Inhaler' | 'Sachet';
   packSize: string; // e.g. "10 tablets in a strip", "100ml bottle"
   mrp: number;
   discountPrice?: number;
   inStock: boolean;
+  strength?: string; // e.g. "500mg" or "650mg"
+  savingsText?: string; // e.g. "Save ₹4"
+  label?: string; // e.g. "1 Strip", "Pack of 2"
 }
 
 export interface AlternativeMedicine {

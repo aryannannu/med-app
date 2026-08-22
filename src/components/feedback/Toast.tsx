@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, ViewStyle } from 'react-native';
+import { Animated, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../common/AppText';
@@ -11,6 +11,8 @@ export interface ToastProps {
   message: string;
   type?: ToastType;
   duration?: number;
+  actionLabel?: string;
+  onAction?: () => void;
   onDismiss: () => void;
   style?: ViewStyle;
 }
@@ -20,6 +22,8 @@ export const Toast: React.FC<ToastProps> = ({
   message,
   type = 'success',
   duration = 3000,
+  actionLabel,
+  onAction,
   onDismiss,
   style,
 }) => {
@@ -87,14 +91,14 @@ export const Toast: React.FC<ToastProps> = ({
   const getBgColor = () => {
     switch (type) {
       case 'success':
-        return COLORS.successLight;
+        return '#F0FDF4';
       case 'error':
-        return COLORS.dangerLight;
+        return '#FEF2F2';
       case 'warning':
-        return COLORS.warningLight;
+        return '#FFFBEB';
       case 'info':
       default:
-        return COLORS.infoLight;
+        return '#EEF0FD';
     }
   };
 
@@ -116,6 +120,18 @@ export const Toast: React.FC<ToastProps> = ({
       <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" style={styles.message}>
         {message}
       </AppText>
+      {actionLabel && onAction && (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => {
+            hide();
+            onAction();
+          }}
+          style={styles.actionBtn}
+        >
+          <AppText style={styles.actionBtnText}>{actionLabel}</AppText>
+        </TouchableOpacity>
+      )}
     </Animated.View>
   );
 };
@@ -137,5 +153,17 @@ const styles = StyleSheet.create({
   message: {
     marginLeft: SPACING.sm,
     flex: 1,
+  },
+  actionBtn: {
+    backgroundColor: '#3A2986',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  actionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

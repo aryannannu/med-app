@@ -19,6 +19,7 @@ import { QuantitySelector } from '../../components/controls/QuantitySelector';
 import { CartBadge } from '../../components/badges/CartBadge';
 import { LoadingState } from '../../components/feedback/LoadingState';
 import { BottomSheet } from '../../components/modals/BottomSheet';
+import { VariantSelectionModal } from '../../components/modals/VariantSelectionModal';
 import { Ionicons } from '@expo/vector-icons';
 import { MedicineService } from '../../services/medicineService';
 import { Medicine } from '../../types/medicine';
@@ -40,8 +41,9 @@ export const MedicineDetailsScreen: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showPriceCompareSheet, setShowPriceCompareSheet] = useState(false);
 
-  const { totalItemCount, addToCart, getItemQuantity, updateQuantity } = useCart();
+  const { totalItemCount, addToCart, removeFromCart, updateQuantity, getItemQuantity, undoRemove } = useCart();
   const { showToast } = useToast();
+  const [showVariantModal, setShowVariantModal] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -68,6 +70,7 @@ export const MedicineDetailsScreen: React.FC = () => {
 
   const cartQuantity = getItemQuantity(medicine.id);
   const isOutOfStock = medicine.inStock === false;
+  const hasMultipleVariants = medicine.variants && medicine.variants.length > 1;
 
   return (
     <AppScreen
@@ -132,23 +135,64 @@ export const MedicineDetailsScreen: React.FC = () => {
               leftIcon={<Ionicons name="notifications-outline" size={18} color={COLORS.primary} />}
             />
           ) : cartQuantity > 0 ? (
-            <QuantitySelector
-              quantity={cartQuantity}
-              onIncrement={() => addToCart(medicine, 1)}
-              onDecrement={() => updateQuantity(medicine.id, cartQuantity - 1)}
-              size="lg"
-            />
+            hasMultipleVariants ? (
+              <AppButton
+                title={`${cartQuantity} in Cart (Select Variant)`}
+                variant="primary"
+                onPress={() => setShowVariantModal(true)}
+                style={styles.bottomCta}
+                fullWidth={false}
+              />
+            ) : (
+              <QuantitySelector
+                quantity={cartQuantity}
+                onIncrement={() => {
+                  if (cartQuantity >= 10) {
+                    showToast('Maximum quantity limit (10) reached', 'warning');
+                  } else {
+                    updateQuantity(medicine.id, cartQuantity + 1);
+                  }
+                }}
+                onDecrement={() => {
+                  if (cartQuantity === 1) {
+                    removeFromCart(medicine.id);
+                    showToast(`${medicine.name} removed from cart`, 'info', 4000, 'Undo', () => undoRemove());
+                  } else {
+                    updateQuantity(medicine.id, cartQuantity - 1);
+                  }
+                }}
+                size="lg"
+              />
+            )
           ) : (
             <AppButton
-              title={medicine.rxRequired ? 'Add to Cart (Rx Required)' : 'Add to Cart'}
+              title={
+                hasMultipleVariants
+                  ? 'Select Pack Options'
+                  : medicine.rxRequired
+                  ? 'Add to Cart (Rx Required)'
+                  : 'Add to Cart'
+              }
               variant="primary"
               onPress={() => {
-                addToCart(medicine, 1);
-                showToast(`${medicine.name} added to cart`, 'success');
+                if (hasMultipleVariants) {
+                  setShowVariantModal(true);
+                } else {
+                  const added = addToCart(medicine, 1);
+                  if (added) {
+                    showToast(`${medicine.name} added to cart`, 'success');
+                    if (medicine.rxRequired) {
+                      setTimeout(() => {
+                        showToast('Prescription will be required before placing order', 'info', 3500);
+                      }, 800);
+                    }
+                  } else {
+                    showToast('Maximum quantity limit (10) reached', 'warning');
+                  }
+                }
               }}
               style={styles.bottomCta}
               fullWidth={false}
-              leftIcon={<Ionicons name="cart-outline" size={18} color="#FFFFFF" />}
             />
           )}
         </View>
@@ -543,6 +587,12 @@ export const MedicineDetailsScreen: React.FC = () => {
           />
         </View>
       </BottomSheet>
+
+      <VariantSelectionModal
+        visible={showVariantModal}
+        medicine={medicine}
+        onClose={() => setShowVariantModal(false)}
+      />
     </AppScreen>
   );
 };

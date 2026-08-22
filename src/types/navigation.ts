@@ -59,6 +59,7 @@ export type AppStackParamList = {
   DeleteAccount: undefined;
   OrderInvoice: { orderId: string };
   OrderConfirmation: { order: Order };
+  HeaderShowcase: undefined;
 };
 
 export type RootStackParamList = {

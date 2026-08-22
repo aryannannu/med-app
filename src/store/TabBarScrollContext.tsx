@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
-import { Animated, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { Animated, NativeSyntheticEvent, NativeScrollEvent, Easing } from 'react-native';
 
 interface TabBarScrollContextType {
   isCollapsed: boolean;
@@ -14,14 +14,14 @@ export const TabBarScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const collapseAnim = useRef(new Animated.Value(0)).current;
   const lastScrollY = useRef(0);
-  const scrollThreshold = 8;
+  const scrollThreshold = 14;
 
   useEffect(() => {
-    Animated.spring(collapseAnim, {
+    Animated.timing(collapseAnim, {
       toValue: isCollapsed ? 1 : 0,
-      useNativeDriver: false,
-      friction: 8,
-      tension: 45,
+      duration: 280,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
     }).start();
   }, [isCollapsed, collapseAnim]);
 
@@ -29,19 +29,19 @@ export const TabBarScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const currentScrollY = event.nativeEvent.contentOffset.y;
     const diff = currentScrollY - lastScrollY.current;
 
-    if (currentScrollY <= 15) {
+    if (currentScrollY <= 25) {
       // At the top of screen -> expand
       setIsCollapsed(false);
-    } else if (diff > scrollThreshold && currentScrollY > 30) {
-      // Scrolling down -> collapse (hide text, shrink dimensions)
+    } else if (diff > scrollThreshold && currentScrollY > 50) {
+      // Scrolling down -> collapse smoothly
       setIsCollapsed(true);
     } else if (diff < -scrollThreshold) {
-      // Scrolling up -> expand
+      // Scrolling up -> expand smoothly
       setIsCollapsed(false);
     }
 
     lastScrollY.current = currentScrollY;
-  }, []);
+  }, [scrollThreshold]);
 
   const setCollapsed = useCallback((collapsed: boolean) => {
     setIsCollapsed(collapsed);

@@ -4,19 +4,22 @@ import { apiClient } from './apiClient';
 import { ENV } from '../config/env';
 
 const SLUG_ALIASES: Record<string, string[]> = {
-  'pain-relief': ['pain-relief', 'pain-fever', 'pain'],
-  'pain-fever': ['pain-relief', 'pain-fever', 'pain'],
-  'cold-flu': ['cold-flu', 'cold-cough', 'cough-cold'],
-  'cold-cough': ['cold-flu', 'cold-cough', 'cough-cold'],
-  'diabetes': ['diabetes', 'diabetes-care'],
-  'vitamins': ['vitamins', 'vitamins-immunity', 'immunity'],
-  'digestive': ['digestive', 'digestion', 'stomach-digestion'],
-  'digestion': ['digestive', 'digestion', 'stomach-digestion'],
-  'skin': ['skin', 'skin-care', 'dermatology'],
-  'skin-care': ['skin', 'skin-care', 'dermatology'],
-  'baby': ['baby', 'baby-care', 'mother-baby'],
-  'ayurveda': ['ayurveda', 'ayurvedic', 'herbal'],
-  'heart-bp': ['heart-bp', 'cardiac', 'cardiac-care', 'bp'],
+  'pain-relief': ['pain-relief', 'pain-fever', 'pain', 'pain relief & fever'],
+  'pain-fever': ['pain-relief', 'pain-fever', 'pain', 'pain relief & fever'],
+  'cold-flu': ['cold-flu', 'cold-cough', 'cough-cold', 'cold, cough & flu'],
+  'cold-cough': ['cold-flu', 'cold-cough', 'cough-cold', 'cold, cough & flu'],
+  'diabetes': ['diabetes', 'diabetes-care', 'diabetes care'],
+  'vitamins': ['vitamins', 'vitamins-immunity', 'immunity', 'vitamins & immunity'],
+  'digestive': ['digestive', 'digestion', 'stomach-digestion', 'stomach & digestion', 'digestive care'],
+  'digestion': ['digestive', 'digestion', 'stomach-digestion', 'stomach & digestion', 'digestive care'],
+  'skin': ['skin', 'skin-care', 'dermatology', 'skin & dermatology'],
+  'skin-care': ['skin', 'skin-care', 'dermatology', 'skin & dermatology'],
+  'baby': ['baby', 'baby-care', 'mother-baby', 'baby & mother care'],
+  'ayurveda': ['ayurveda', 'ayurvedic', 'herbal', 'ayurvedic & herbal'],
+  'heart-bp': ['heart-bp', 'cardiac', 'cardiac-care', 'bp', 'heart & bp care'],
+  'eye-ear': ['eye-ear', 'eye', 'ear', 'eye & ear care'],
+  'wellness': ['wellness', 'sexual-wellness', 'sexual wellness'],
+  'first-aid': ['first-aid', 'surgical', 'first aid & surgical'],
 };
 
 export class MedicineService {
@@ -105,8 +108,29 @@ export class MedicineService {
     if (ENV.ENABLE_MOCK_FALLBACK) {
       await this.delay(100);
       const list = this.getMedicinesList();
-      const aliases = SLUG_ALIASES[categorySlug.toLowerCase()] || [categorySlug.toLowerCase()];
-      return list.filter((m) => aliases.includes(m.category.toLowerCase()));
+      const slugLower = (categorySlug || 'pain-relief').toLowerCase().trim();
+      const aliases = SLUG_ALIASES[slugLower] || [slugLower];
+
+      const filtered = list.filter((m) => {
+        const catSlug = (m.categorySlug || '').toLowerCase();
+        const catName = (m.category || '').toLowerCase();
+        return (
+          aliases.some((a) => catSlug.includes(a) || catName.includes(a)) ||
+          aliases.includes(catSlug) ||
+          aliases.includes(catName)
+        );
+      });
+
+      if (filtered.length > 0) return filtered;
+
+      // Fallback matching by name or category keyword
+      const fallback = list.filter(
+        (m) =>
+          m.category.toLowerCase().includes(slugLower) ||
+          m.name.toLowerCase().includes(slugLower)
+      );
+
+      return fallback.length > 0 ? fallback : list.slice(0, 8);
     }
     return [];
   }
