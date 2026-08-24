@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 
 export interface RxBadgeProps {
@@ -9,17 +10,20 @@ export interface RxBadgeProps {
 }
 
 export const RxBadge: React.FC<RxBadgeProps> = ({ size = 'sm', style }) => {
+  const { colors } = useAppTheme();
+
   return (
     <View
       style={[
         styles.badge,
         size === 'sm' ? styles.badgeSm : styles.badgeMd,
+        { backgroundColor: colors.rxRedLight, borderColor: colors.rxRedBorder },
         style,
       ]}
     >
       <AppText
         variant="badge"
-        color={COLORS.rxRed}
+        color={colors.rxRed}
         weight="600"
         style={size === 'sm' ? styles.textSm : styles.textMd}
       >
@@ -31,8 +35,6 @@ export const RxBadge: React.FC<RxBadgeProps> = ({ size = 'sm', style }) => {
 
 const styles = StyleSheet.create({
   badge: {
-    backgroundColor: COLORS.rxRedLight,
-    borderColor: '#FECACA',
     borderWidth: 1,
     borderRadius: BORDER_RADIUS.sm,
     alignSelf: 'flex-start',

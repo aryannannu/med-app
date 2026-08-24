@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,6 +16,7 @@ import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../store/AuthContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatPhoneNumber } from '../../utils/formatters';
 
 export const OtpVerificationScreen: React.FC = () => {
@@ -31,6 +32,7 @@ export const OtpVerificationScreen: React.FC = () => {
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const { verifyOtp, login } = useAuth();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   useEffect(() => {
     if (resendTimer > 0) {
@@ -95,7 +97,7 @@ export const OtpVerificationScreen: React.FC = () => {
       }
     } catch (e) {
       setLoading(false);
-      setError('Couldn’t connect. Check your internet connection and try again.');
+      setError('Couldnâ€™t connect. Check your internet connection and try again.');
     }
   };
 
@@ -108,46 +110,46 @@ export const OtpVerificationScreen: React.FC = () => {
         setOtpDigits(['1', '2', '3', '4', '5', '6']);
         showToast(`New code sent! Test OTP is ${res.testOtp || '123456'}`, 'info');
       } catch (e) {
-        showToast('Couldn’t send a new code. Please try again.', 'error');
+        showToast('Couldnâ€™t send a new code. Please try again.', 'error');
       }
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         {/* Top Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={styles.backBtn}
           >
-            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
           <View style={[styles.iconCircle, SHADOWS.subtle]}>
-            <Ionicons name="shield-checkmark-outline" size={36} color={COLORS.primary} />
+            <Ionicons name="shield-checkmark-outline" size={36} color={colors.primary} />
           </View>
 
-          <AppText variant="h1" color={COLORS.textPrimary} weight="600" style={styles.title}>
+          <AppText variant="h1" color={colors.textPrimary} weight="600" style={styles.title}>
             Verify your number
           </AppText>
 
           <View style={styles.subtitleRow}>
-            <AppText variant="bodyMedium" color={COLORS.textSecondary}>
+            <AppText variant="bodyMedium" color={colors.textSecondary}>
               Enter the 6-digit code sent to{' '}
-              <AppText variant="bodyMedium" weight="600" color={COLORS.textPrimary}>
+              <AppText variant="bodyMedium" weight="600" color={colors.textPrimary}>
                 +91 {phoneNumber.slice(0, 2)}XXX {phoneNumber.slice(-4)}
               </AppText>
             </AppText>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.changeNumberBtn}>
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 Change
               </AppText>
             </TouchableOpacity>
@@ -178,7 +180,7 @@ export const OtpVerificationScreen: React.FC = () => {
           </View>
 
           {error ? (
-            <AppText variant="caption" color={COLORS.danger} align="center" style={styles.errorText}>
+            <AppText variant="caption" color={colors.danger} align="center" style={styles.errorText}>
               {error}
             </AppText>
           ) : null}
@@ -186,16 +188,16 @@ export const OtpVerificationScreen: React.FC = () => {
           {/* Resend Timer / Action */}
           <View style={styles.resendContainer}>
             {resendTimer > 0 ? (
-              <AppText variant="caption" color={COLORS.textSecondary}>
-                Resend code in <AppText variant="caption" color={COLORS.primary} weight="600">{resendTimer}s</AppText>
+              <AppText variant="caption" color={colors.textSecondary}>
+                Resend code in <AppText variant="caption" color={colors.primary} weight="600">{resendTimer}s</AppText>
               </AppText>
             ) : (
               <View style={styles.resendActionRow}>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Didn't receive the code?{' '}
                 </AppText>
                 <TouchableOpacity onPress={handleResend}>
-                  <AppText variant="caption" color={COLORS.primary} weight="600">
+                  <AppText variant="caption" color={colors.primary} weight="600">
                     Resend code
                   </AppText>
                 </TouchableOpacity>
@@ -308,3 +310,4 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
 });
+

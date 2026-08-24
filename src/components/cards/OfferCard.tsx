@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { PharmacyOffer } from '../../types/offer';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { OfferTagBadge } from '../badges/OfferTagBadge';
 import { VerifiedBadge } from '../badges/VerifiedBadge';
@@ -24,6 +25,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   onSelect,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View
       style={[
@@ -42,8 +44,8 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         </View>
 
         <View style={styles.etaPill}>
-          <Ionicons name="flash" size={12} color={COLORS.primary} />
-          <AppText variant="badge" color={COLORS.primary} weight="600" style={styles.etaText}>
+          <Ionicons name="flash" size={12} color={colors.primary} />
+          <AppText variant="badge" color={colors.primary} weight="600" style={styles.etaText}>
             {offer.estimatedDeliveryTimeText}
           </AppText>
         </View>
@@ -52,7 +54,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       {/* Pharmacy Info Row */}
       <View style={styles.pharmacyRow}>
         <View style={styles.pharmacyDetails}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600" numberOfLines={1}>
             {offer.pharmacy.name}
           </AppText>
           <View style={styles.subMetaRow}>
@@ -62,8 +64,8 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         </View>
 
         <View style={styles.distanceBox}>
-          <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.distanceText}>
+          <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
+          <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.distanceText}>
             {formatDistance(offer.pharmacy.distanceKm)}
           </AppText>
         </View>
@@ -74,16 +76,16 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       {/* Pricing Breakdown Grid */}
       <View style={styles.priceBreakdown}>
         <View style={styles.priceItem}>
-          <AppText variant="caption" color={COLORS.textMuted}>
+          <AppText variant="caption" color={colors.textMuted}>
             Medicines Total
           </AppText>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
             {formatCurrency(offer.medicineSubtotal)}
           </AppText>
         </View>
 
         <View style={styles.priceItem}>
-          <AppText variant="caption" color={COLORS.textMuted}>
+          <AppText variant="caption" color={colors.textMuted}>
             Delivery Fee
           </AppText>
           <AppText
@@ -96,10 +98,10 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         </View>
 
         <View style={styles.priceItem}>
-          <AppText variant="caption" color={COLORS.textMuted}>
+          <AppText variant="caption" color={colors.textMuted}>
             Total Payable
           </AppText>
-          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
+          <AppText variant="titleLarge" color={colors.primary} weight="600">
             {formatCurrency(offer.finalPayableAmount)}
           </AppText>
         </View>
@@ -228,3 +230,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
 });
+
+
+

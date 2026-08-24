@@ -10,6 +10,7 @@ import { Medicine } from '../../types/medicine';
 import { AppText } from '../common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '../../utils/currency';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export interface MedicineCardProps {
   medicine: Medicine;
@@ -36,6 +37,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
   storeAttribution,
   style,
 }) => {
+  const { colors, isDark } = useAppTheme();
   const isOutOfStock = medicine.inStock === false;
   const hasMultipleVariants =
     medicine.variants && medicine.variants.length > 1;
@@ -51,25 +53,24 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
   const renderActionControl = () => {
     if (isOutOfStock) {
       return (
-        <View style={styles.outOfStockPill}>
-          <AppText style={styles.outOfStockText}>OUT OF STOCK</AppText>
+        <View style={[styles.outOfStockPill, { backgroundColor: colors.dangerLight }]}>
+          <AppText style={[styles.outOfStockText, { color: colors.danger }]}>OUT OF STOCK</AppText>
         </View>
       );
     }
 
-    // SCENARIO B: Multi-variant medicine already in cart or tapping add
     if (hasMultipleVariants) {
       if (cartQuantity > 0) {
         return (
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => onOpenVariantModal && onOpenVariantModal(medicine)}
-            style={styles.activeQtyPillBtn}
+            style={[styles.activeQtyPillBtn, { backgroundColor: colors.primarySubtle, borderColor: colors.primary }]}
           >
-            <Ionicons name="add" size={14} color="#4C2A9C" />
-            <View style={styles.qtyBadgeInner}>
-              <AppText style={styles.qtyText}>{cartQuantity}</AppText>
-              <Ionicons name="chevron-down" size={12} color="#4C2A9C" style={{ marginLeft: 2 }} />
+            <Ionicons name="add" size={14} color={colors.primary} />
+            <View style={[styles.qtyBadgeInner, { backgroundColor: colors.surface }]}>
+              <AppText style={[styles.qtyText, { color: colors.primary }]}>{cartQuantity}</AppText>
+              <Ionicons name="chevron-down" size={12} color={colors.primary} style={{ marginLeft: 2 }} />
             </View>
           </TouchableOpacity>
         );
@@ -78,17 +79,16 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={handleAddPress}
-          style={styles.addPillBtn}
+          style={[styles.addPillBtn, { backgroundColor: colors.primarySubtle, borderColor: colors.primary }]}
         >
-          <Ionicons name="add" size={20} color="#4C2A9C" />
+          <Ionicons name="add" size={20} color={colors.primary} />
         </TouchableOpacity>
       );
     }
 
-    // SCENARIO A: Single-variant medicine with quantity stepper
     if (cartQuantity > 0) {
       return (
-        <View style={styles.stepperContainer}>
+        <View style={[styles.stepperContainer, { backgroundColor: colors.primarySubtle, borderColor: colors.primary }]}>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={onDecrement}
@@ -97,16 +97,16 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
             <Ionicons
               name={cartQuantity === 1 ? 'trash-outline' : 'remove'}
               size={13}
-              color="#4C2A9C"
+              color={colors.primary}
             />
           </TouchableOpacity>
-          <AppText style={styles.stepperQtyNum}>{cartQuantity}</AppText>
+          <AppText style={[styles.stepperQtyNum, { color: colors.primary }]}>{cartQuantity}</AppText>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={onIncrement}
             style={styles.stepperTouchBtn}
           >
-            <Ionicons name="add" size={13} color="#4C2A9C" />
+            <Ionicons name="add" size={13} color={colors.primary} />
           </TouchableOpacity>
         </View>
       );
@@ -116,9 +116,9 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={handleAddPress}
-        style={styles.addPillBtn}
+        style={[styles.addPillBtn, { backgroundColor: colors.primarySubtle, borderColor: colors.primary }]}
       >
-        <Ionicons name="add" size={20} color="#4C2A9C" />
+        <Ionicons name="add" size={20} color={colors.primary} />
       </TouchableOpacity>
     );
   };
@@ -128,33 +128,31 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
       <TouchableOpacity
         activeOpacity={0.88}
         onPress={onPress}
-        style={[styles.cardContainer, style]}
+        style={[styles.cardContainer, { backgroundColor: colors.surface, borderColor: colors.border }, style]}
       >
         {/* 1. Image Box Container */}
-        <View style={styles.imageBox}>
+        <View style={[styles.imageBox, { backgroundColor: colors.surfaceSubtle }]}>
           <Image
             source={{ uri: medicine.image }}
             style={styles.productImg}
             resizeMode="cover"
           />
 
-          {/* Green RX Badge top-left */}
           {medicine.rxRequired && (
             <View style={styles.rxTag}>
               <AppText style={styles.rxTagText}>RX</AppText>
             </View>
           )}
 
-          {/* Floating ADD / Quantity Pill Button on bottom-right of image */}
           <View style={styles.floatingActionContainer}>
             {renderActionControl()}
           </View>
         </View>
 
         {/* 2. Dosage & Pack Size Pill Tag */}
-        <View style={styles.dosagePillTag}>
-          <Ionicons name="bandage" size={13} color="#4C2A9C" style={{ marginRight: 4 }} />
-          <AppText style={styles.dosagePillText} numberOfLines={1}>
+        <View style={[styles.dosagePillTag, { backgroundColor: colors.primarySubtle, borderColor: colors.primaryBorder }]}>
+          <Ionicons name="bandage" size={13} color={colors.primary} style={{ marginRight: 4 }} />
+          <AppText style={[styles.dosagePillText, { color: colors.primary }]} numberOfLines={1}>
             {hasMultipleVariants
               ? 'Multiple Options'
               : medicine.packForm || '10mg • 30N'}
@@ -171,34 +169,34 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
           </View>
 
           <View style={styles.ratingBadge}>
-            <Ionicons name="star" size={11} color="#059669" style={{ marginRight: 2 }} />
-            <AppText style={styles.ratingText}>
+            <Ionicons name="star" size={11} color={colors.success} style={{ marginRight: 2 }} />
+            <AppText style={[styles.ratingText, { color: colors.success }]}>
               {medicine.rating || '4.2'}({medicine.reviewCount ? `${(medicine.reviewCount/1000).toFixed(1)}k` : '2.k'})
             </AppText>
           </View>
         </View>
 
         {/* 4. Manufacturer Brand Name */}
-        <AppText style={styles.manufacturerText} numberOfLines={1}>
+        <AppText style={styles.manufacturerText} color={colors.textSecondary} numberOfLines={1}>
           {(medicine.manufacturer || 'CIPLA').toUpperCase()}
         </AppText>
 
         {/* 5. Product Title */}
         <View style={styles.titleWrapper}>
-          <AppText weight="700" style={styles.productTitle} numberOfLines={2}>
+          <AppText weight="700" style={styles.productTitle} color={colors.textPrimary} numberOfLines={2}>
             {medicine.name}
           </AppText>
         </View>
 
         {/* 6. Price & Discount Row */}
         <View style={styles.priceRow}>
-          <AppText style={styles.strikeMrpText}>
+          <AppText style={styles.strikeMrpText} color={colors.textMuted}>
             {formatCurrency(medicine.mrp)}
           </AppText>
-          <AppText style={styles.sellingPriceText}>
+          <AppText style={styles.sellingPriceText} color={colors.textPrimary}>
             {formatCurrency(medicine.discountPrice)}
           </AppText>
-          <AppText style={styles.discountText}>
+          <AppText style={styles.discountText} color={colors.success}>
             {medicine.discountPercentage || 15}%off
           </AppText>
         </View>
@@ -211,9 +209,9 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
     <TouchableOpacity
       activeOpacity={0.88}
       onPress={onPress}
-      style={[styles.listContainer, style]}
+      style={[styles.listContainer, { backgroundColor: colors.surface, borderColor: colors.border }, style]}
     >
-      <View style={styles.listImageWrapper}>
+      <View style={[styles.listImageWrapper, { backgroundColor: colors.surfaceSubtle }]}>
         <Image source={{ uri: medicine.image }} style={styles.listImage} resizeMode="cover" />
         {medicine.rxRequired && (
           <View style={styles.rxTagList}>
@@ -223,25 +221,25 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
       </View>
 
       <View style={styles.listContent}>
-        <AppText style={styles.manufacturerText} numberOfLines={1}>
+        <AppText style={styles.manufacturerText} color={colors.textSecondary} numberOfLines={1}>
           {(medicine.manufacturer || 'CIPLA').toUpperCase()}
         </AppText>
-        <AppText weight="700" style={styles.productTitle} numberOfLines={1}>
+        <AppText weight="700" style={styles.productTitle} color={colors.textPrimary} numberOfLines={1}>
           {medicine.name}
         </AppText>
         
-        <View style={[styles.dosagePillTag, { alignSelf: 'flex-start', marginHorizontal: 0, marginTop: 4 }]}>
-          <Ionicons name="bandage" size={12} color="#4C2A9C" style={{ marginRight: 3 }} />
-          <AppText style={styles.dosagePillText}>
+        <View style={[styles.dosagePillTag, { backgroundColor: colors.primarySubtle, borderColor: colors.primaryBorder, alignSelf: 'flex-start', marginHorizontal: 0, marginTop: 4 }]}>
+          <Ionicons name="bandage" size={12} color={colors.primary} style={{ marginRight: 3 }} />
+          <AppText style={[styles.dosagePillText, { color: colors.primary }]}>
             {hasMultipleVariants ? 'Multiple Options' : medicine.packForm || '10mg • 30N'}
           </AppText>
         </View>
 
         <View style={styles.listBottomRow}>
           <View style={styles.priceRow}>
-            <AppText style={styles.strikeMrpText}>{formatCurrency(medicine.mrp)}</AppText>
-            <AppText style={styles.sellingPriceText}>{formatCurrency(medicine.discountPrice)}</AppText>
-            <AppText style={styles.discountText}>{medicine.discountPercentage || 15}%off</AppText>
+            <AppText style={styles.strikeMrpText} color={colors.textMuted}>{formatCurrency(medicine.mrp)}</AppText>
+            <AppText style={styles.sellingPriceText} color={colors.textPrimary}>{formatCurrency(medicine.discountPrice)}</AppText>
+            <AppText style={styles.discountText} color={colors.success}>{medicine.discountPercentage || 15}%off</AppText>
           </View>
 
           {renderActionControl()}
@@ -254,11 +252,9 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
 const styles = StyleSheet.create({
   cardContainer: {
     width: 160,
-    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     paddingBottom: 10,
     borderWidth: 1,
-    borderColor: '#EFEFEF',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -271,7 +267,6 @@ const styles = StyleSheet.create({
     height: 135,
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: '#F8F8FC',
   },
   productImg: {
     width: '100%',
@@ -313,16 +308,10 @@ const styles = StyleSheet.create({
   addPillBtn: {
     paddingHorizontal: 12,
     height: 32,
-    backgroundColor: '#EEF0FD',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#5B28D6',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#5B28D6',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
     elevation: 3,
   },
   activeQtyPillBtn: {
@@ -331,10 +320,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EEF0FD',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#5B28D6',
   },
   stepperContainer: {
     width: 74,
@@ -342,10 +329,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#EEF0FD',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#5B28D6',
     paddingHorizontal: 4,
   },
   stepperTouchBtn: {
@@ -355,37 +340,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepperQtyNum: {
-    color: '#4C2A9C',
     fontSize: 13,
     fontWeight: '700',
   },
   addBtnText: {
-    color: '#4C2A9C',
     fontSize: 15,
     fontWeight: '700',
   },
   qtyBadgeInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 10,
     marginLeft: 6,
   },
   qtyText: {
-    color: '#4C2A9C',
     fontSize: 13,
     fontWeight: '700',
   },
   outOfStockPill: {
-    backgroundColor: '#FEE2E2',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 8,
   },
   outOfStockText: {
-    color: '#DC2626',
     fontSize: 9,
     fontWeight: '700',
   },
@@ -393,17 +372,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EEF0FD',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#C7D2FE',
     paddingVertical: 4,
     paddingHorizontal: 10,
     marginHorizontal: 8,
     marginTop: 8,
   },
   dosagePillText: {
-    color: '#4C2A9C',
     fontSize: 11.5,
     fontWeight: '600',
   },
@@ -428,12 +404,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ratingText: {
-    color: '#059669',
     fontSize: 11,
     fontWeight: '700',
   },
   manufacturerText: {
-    color: '#71717A',
     fontSize: 10.5,
     fontWeight: '600',
     letterSpacing: 0.4,
@@ -447,7 +421,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   productTitle: {
-    color: '#0F172A',
     fontSize: 14,
     fontFamily: 'LexendDeca_700Bold',
     fontWeight: '700',
@@ -460,32 +433,25 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   strikeMrpText: {
-    color: '#A1A1AA',
     fontSize: 12,
     textDecorationLine: 'line-through',
     marginRight: 6,
   },
   sellingPriceText: {
-    color: '#09090B',
     fontSize: 16,
     fontWeight: '800',
   },
   discountText: {
-    color: '#059669',
     fontSize: 13,
     fontWeight: '700',
     marginLeft: 6,
   },
-
-  // List Styles
   listContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 10,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#EFEFEF',
     alignItems: 'center',
   },
   listImageWrapper: {
@@ -494,7 +460,6 @@ const styles = StyleSheet.create({
     height: 85,
     borderRadius: 14,
     overflow: 'hidden',
-    backgroundColor: '#F8F8FC',
   },
   listImage: {
     width: '100%',
@@ -511,4 +476,3 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 });
-

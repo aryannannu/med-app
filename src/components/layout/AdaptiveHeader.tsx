@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -17,6 +17,7 @@ import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../common/AppText';
 import { useCart } from '../../store/CartContext';
 import { useAddress } from '../../store/AddressContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export type HeaderType =
   | 'home'
@@ -135,7 +136,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
 
   storeLogo,
   storeRating = 4.6,
-  storeDistanceTime = '1.2 km • 20 min',
+  storeDistanceTime = '1.2 km â€¢ 20 min',
   isVerifiedStore = true,
 
   brandName,
@@ -173,6 +174,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   const insets = useSafeAreaInsets();
   const { totalItemCount } = useCart();
   const { selectedAddress } = useAddress();
+  const { colors, isDark } = useAppTheme();
 
   const [internalSearch, setInternalSearch] = useState(searchQuery || '');
   const [internalWishlist, setInternalWishlist] = useState(isWishlisted);
@@ -202,7 +204,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   const paddingTop = isStandaloneShowcase ? 12 : Platform.OS === 'android' ? Math.max(insets.top, 28) : Math.max(insets.top, 16);
 
   // =========================================================================
-  // TYPE 01 — HOME SCREEN HEADER (Purple Gradient, Location, Bell, Mode Toggle, Search)
+  // TYPE 01 â€” HOME SCREEN HEADER (Purple Gradient, Location, Bell, Mode Toggle, Search)
   // =========================================================================
   if (type === 'home') {
     return (
@@ -322,7 +324,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   }
 
   // =========================================================================
-  // TYPE 03 — SEARCH CONTEXT HEADER (Autofocused Search, Voice, Clean Back)
+  // TYPE 03 â€” SEARCH CONTEXT HEADER (Autofocused Search, Voice, Clean Back)
   // =========================================================================
   if (type === 'search') {
     return (
@@ -358,7 +360,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   }
 
   // =========================================================================
-  // TYPE 18 — OFFERS / CAMPAIGN HEADER (Purple Banner with Coupon Badge)
+  // TYPE 18 â€” OFFERS / CAMPAIGN HEADER (Purple Banner with Coupon Badge)
   // =========================================================================
   if (type === 'offers') {
     return (
@@ -399,7 +401,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   }
 
   // =========================================================================
-  // TYPE 10 — PRESCRIPTION COMPARISON HEADER (With Contextual Filter Chips)
+  // TYPE 10 â€” PRESCRIPTION COMPARISON HEADER (With Contextual Filter Chips)
   // =========================================================================
   if (type === 'prescription-comparison') {
     return (
@@ -416,7 +418,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
               {title || 'Compare Pharmacies'}
             </AppText>
             <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
-              {subtitle || '8 medicines • 6 stores found'}
+              {subtitle || '8 medicines â€¢ 6 stores found'}
             </AppText>
           </View>
 
@@ -448,7 +450,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   }
 
   // =========================================================================
-  // TYPE 17 — FILTER HEADER (Active Count Badge & Clear All + Active Filter Chips)
+  // TYPE 17 â€” FILTER HEADER (Active Count Badge & Clear All + Active Filter Chips)
   // =========================================================================
   if (type === 'filter') {
     return (
@@ -499,7 +501,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   }
 
   // =========================================================================
-  // TYPE 06 — STORE DETAIL HEADER (Store Logo, Name, Verified Badge, Share, Save)
+  // TYPE 06 â€” STORE DETAIL HEADER (Store Logo, Name, Verified Badge, Share, Save)
   // =========================================================================
   if (type === 'store') {
     return (
@@ -528,7 +530,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
               </View>
 
               <AppText variant="caption" color={COLORS.textSecondary} style={{ fontSize: 11, marginTop: 1 }}>
-                ★ {storeRating} • {storeDistanceTime}
+                â˜… {storeRating} â€¢ {storeDistanceTime}
               </AppText>
             </View>
           </View>
@@ -557,7 +559,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   }
 
   // =========================================================================
-  // TYPE 08 — CHECKOUT HEADER (Step Indicator: 1 Delivery -> 2 Payment -> 3 Confirmation)
+  // TYPE 08 â€” CHECKOUT HEADER (Step Indicator: 1 Delivery -> 2 Payment -> 3 Confirmation)
   // =========================================================================
   if (type === 'checkout') {
     return (
@@ -608,7 +610,7 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   }
 
   // =========================================================================
-  // TYPE 07 & TYPE 09 — CART & PRESCRIPTION UPLOAD (Trust / Privacy Shield)
+  // TYPE 07 & TYPE 09 â€” CART & PRESCRIPTION UPLOAD (Trust / Privacy Shield)
   // =========================================================================
   if (type === 'cart' || type === 'prescription-upload') {
     const isCart = type === 'cart';
@@ -815,20 +817,20 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
   };
 
   return (
-    <View style={[styles.whiteHeaderContainer, { paddingTop }, style]}>
+    <View style={[styles.whiteHeaderContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop }, style]}>
       <View style={styles.headerBarRow}>
         {showBack && (
-          <TouchableOpacity activeOpacity={0.8} onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary} />
+          <TouchableOpacity activeOpacity={0.8} onPress={handleBack} style={[styles.backButton, { backgroundColor: colors.surfaceSubtle }]}>
+            <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
 
         <View style={{ flex: 1, marginLeft: showBack ? 8 : 0 }}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" numberOfLines={1}>
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="700" numberOfLines={1}>
             {getDefaultTitle()}
           </AppText>
           {getDefaultSubtitle() && (
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }} numberOfLines={1}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }} numberOfLines={1}>
               {getDefaultSubtitle()}
             </AppText>
           )}
@@ -1193,3 +1195,4 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
 });
+

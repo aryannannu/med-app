@@ -1,5 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { Image, ImageStyle, StyleProp } from 'react-native';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export interface HealitLogoProps {
   width?: number;
@@ -14,6 +15,7 @@ export const HealitLogo: React.FC<HealitLogoProps> = ({
   style,
   resizeMode = 'contain',
 }) => {
+  const { colors } = useAppTheme();
   return (
     <Image
       source={require('../../../assets/healit_logo.png')}
@@ -28,3 +30,6 @@ export const HealitLogo: React.FC<HealitLogoProps> = ({
     />
   );
 };
+
+
+

@@ -7,7 +7,8 @@ import {
   ViewStyle,
   TouchableOpacity,
 } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../theme';
+import { SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from './AppText';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -36,18 +37,19 @@ export const AppInput: React.FC<AppInputProps> = ({
   style,
   ...rest
 }) => {
+  const { colors } = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   const getBorderColor = (): string => {
-    if (error) return COLORS.borderError;
-    if (isFocused) return COLORS.borderFocus;
-    return COLORS.border;
+    if (error) return colors.borderError;
+    if (isFocused) return colors.borderFocus;
+    return colors.border;
   };
 
   return (
     <View style={[styles.wrapper, containerStyle]}>
       {label && (
-        <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+        <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
           {label}
         </AppText>
       )}
@@ -57,7 +59,7 @@ export const AppInput: React.FC<AppInputProps> = ({
           styles.inputContainer,
           {
             borderColor: getBorderColor(),
-            backgroundColor: isFocused ? COLORS.surface : COLORS.surfaceSubtle,
+            backgroundColor: isFocused ? colors.surface : colors.surfaceSubtle,
           },
         ]}
       >
@@ -68,8 +70,8 @@ export const AppInput: React.FC<AppInputProps> = ({
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholderTextColor={COLORS.textMuted}
-          style={[styles.input, style]}
+          placeholderTextColor={colors.textMuted}
+          style={[styles.input, { color: colors.textPrimary }, style]}
           {...rest}
         />
 
@@ -82,7 +84,7 @@ export const AppInput: React.FC<AppInputProps> = ({
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={styles.clearBtn}
           >
-            <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+            <Ionicons name="close-circle" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         )}
 
@@ -90,11 +92,11 @@ export const AppInput: React.FC<AppInputProps> = ({
       </View>
 
       {error ? (
-        <AppText variant="caption" color={COLORS.danger} style={styles.helper}>
+        <AppText variant="caption" color={colors.danger} style={styles.helper}>
           {error}
         </AppText>
       ) : helperText ? (
-        <AppText variant="caption" color={COLORS.textMuted} style={styles.helper}>
+        <AppText variant="caption" color={colors.textMuted} style={styles.helper}>
           {helperText}
         </AppText>
       ) : null}
@@ -122,7 +124,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     ...TYPOGRAPHY.bodyMedium,
-    color: COLORS.textPrimary,
     paddingVertical: SPACING.sm,
   },
   leftIcon: {

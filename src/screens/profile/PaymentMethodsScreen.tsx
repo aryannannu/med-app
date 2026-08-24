@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -18,6 +18,7 @@ import { ConfirmationModal } from '../../components/modals/ConfirmationModal';
 import { Ionicons } from '@expo/vector-icons';
 import { usePaymentMethods } from '../../store/PaymentMethodsContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const PaymentMethodsScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -32,6 +33,7 @@ export const PaymentMethodsScreen: React.FC = () => {
     setDefaultCard,
   } = usePaymentMethods();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   // Add UPI Modal State
   const [showAddUpiModal, setShowAddUpiModal] = useState(false);
@@ -102,17 +104,17 @@ export const PaymentMethodsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Payment Methods
         </AppText>
         <View style={{ width: 40 }} />
@@ -120,13 +122,13 @@ export const PaymentMethodsScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Section 1: Saved UPI */}
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.sectionHeaderRow}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
               UPI Accounts ({upiList.length})
             </AppText>
             <TouchableOpacity onPress={() => setShowAddUpiModal(true)}>
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 + Add UPI ID
               </AppText>
             </TouchableOpacity>
@@ -140,10 +142,10 @@ export const PaymentMethodsScreen: React.FC = () => {
                     <Ionicons name="flash" size={18} color="#2563EB" />
                   </View>
                   <View style={styles.methodDetails}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                    <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                       {upi.upiId}
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Instant 1-Tap UPI
                     </AppText>
                   </View>
@@ -159,7 +161,7 @@ export const PaymentMethodsScreen: React.FC = () => {
                         onPress={() => setDefaultUPI(upi.id)}
                         style={styles.makeDefaultBtn}
                       >
-                        <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 11 }}>
+                        <AppText variant="caption" color={colors.primary} weight="600" style={{ fontSize: 11 }}>
                           Set Default
                         </AppText>
                       </TouchableOpacity>
@@ -168,7 +170,7 @@ export const PaymentMethodsScreen: React.FC = () => {
                       onPress={() => setDeleteTarget({ type: 'upi', id: upi.id, name: upi.upiId })}
                       style={styles.deleteBtn}
                     >
-                      <Ionicons name="trash-outline" size={16} color={COLORS.textMuted} />
+                      <Ionicons name="trash-outline" size={16} color={colors.textMuted} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -179,13 +181,13 @@ export const PaymentMethodsScreen: React.FC = () => {
         </View>
 
         {/* Section 2: Saved Cards */}
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.sectionHeaderRow}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
               Saved Cards ({cardsList.length})
             </AppText>
             <TouchableOpacity onPress={() => setShowAddCardModal(true)}>
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 + Add New Card
               </AppText>
             </TouchableOpacity>
@@ -196,13 +198,13 @@ export const PaymentMethodsScreen: React.FC = () => {
               <React.Fragment key={card.id}>
                 <View style={styles.methodRow}>
                   <View style={[styles.methodIconCircle, { backgroundColor: '#F3E8FF' }]}>
-                    <Ionicons name="card" size={18} color={COLORS.primary} />
+                    <Ionicons name="card" size={18} color={colors.primary} />
                   </View>
                   <View style={styles.methodDetails}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                    <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                       {card.brand.toUpperCase()} {card.maskedNumber}
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Expires {card.expiryMonth}/{card.expiryYear} • {card.cardholderName}
                     </AppText>
                   </View>
@@ -218,7 +220,7 @@ export const PaymentMethodsScreen: React.FC = () => {
                         onPress={() => setDefaultCard(card.id)}
                         style={styles.makeDefaultBtn}
                       >
-                        <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 11 }}>
+                        <AppText variant="caption" color={colors.primary} weight="600" style={{ fontSize: 11 }}>
                           Set Default
                         </AppText>
                       </TouchableOpacity>
@@ -233,7 +235,7 @@ export const PaymentMethodsScreen: React.FC = () => {
                       }
                       style={styles.deleteBtn}
                     >
-                      <Ionicons name="trash-outline" size={16} color={COLORS.textMuted} />
+                      <Ionicons name="trash-outline" size={16} color={colors.textMuted} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -249,10 +251,10 @@ export const PaymentMethodsScreen: React.FC = () => {
             <Ionicons name="cash-outline" size={20} color="#15803D" />
           </View>
           <View style={styles.codTextCol}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
               Cash on Delivery (COD)
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
               Available directly during checkout for all serviceable addresses.
             </AppText>
           </View>
@@ -264,16 +266,16 @@ export const PaymentMethodsScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, SHADOWS.modal]}>
             <View style={styles.modalHeader}>
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
                 Add New UPI ID
               </AppText>
               <TouchableOpacity onPress={() => setShowAddUpiModal(false)}>
-                <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <View style={{ marginTop: SPACING.md }}>
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.inputLabel}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.inputLabel}>
                 VIRTUAL PAYMENT ADDRESS (VPA) *
               </AppText>
               <TextInput
@@ -283,16 +285,16 @@ export const PaymentMethodsScreen: React.FC = () => {
                   if (upiError) setUpiError('');
                 }}
                 placeholder="e.g. rahul@okaxis, user@paytm"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 autoCapitalize="none"
                 style={[styles.modalInput, upiError ? styles.modalInputError : null]}
               />
               {upiError ? (
-                <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+                <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                   {upiError}
                 </AppText>
               ) : (
-                <AppText variant="caption" color={COLORS.textMuted} style={styles.helperText}>
+                <AppText variant="caption" color={colors.textMuted} style={styles.helperText}>
                   Supports Google Pay, PhonePe, Paytm, BHIM, Axis, HDFC, ICICI
                 </AppText>
               )}
@@ -315,16 +317,16 @@ export const PaymentMethodsScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, SHADOWS.modal]}>
             <View style={styles.modalHeader}>
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
                 Add Credit / Debit Card
               </AppText>
               <TouchableOpacity onPress={() => setShowAddCardModal(false)}>
-                <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <View style={{ marginTop: SPACING.md }}>
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.inputLabel}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.inputLabel}>
                 CARD NUMBER *
               </AppText>
               <TextInput
@@ -334,47 +336,47 @@ export const PaymentMethodsScreen: React.FC = () => {
                   if (cardError) setCardError('');
                 }}
                 placeholder="4111 2222 3333 4444"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 keyboardType="number-pad"
                 maxLength={19}
                 style={[styles.modalInput, cardError ? styles.modalInputError : null]}
               />
 
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={[styles.inputLabel, { marginTop: SPACING.md }]}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={[styles.inputLabel, { marginTop: SPACING.md }]}>
                 NAME ON CARD *
               </AppText>
               <TextInput
                 value={cardholderName}
                 onChangeText={setCardholderName}
                 placeholder="Full Name as on card"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 style={styles.modalInput}
               />
 
               <View style={styles.expiryRow}>
                 <View style={{ flex: 1 }}>
-                  <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.inputLabel}>
+                  <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.inputLabel}>
                     EXPIRY MONTH
                   </AppText>
                   <TextInput
                     value={expiryMonth}
                     onChangeText={setExpiryMonth}
                     placeholder="MM (e.g. 12)"
-                    placeholderTextColor={COLORS.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={2}
                     style={styles.modalInput}
                   />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.inputLabel}>
+                  <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.inputLabel}>
                     EXPIRY YEAR
                   </AppText>
                   <TextInput
                     value={expiryYear}
                     onChangeText={setExpiryYear}
                     placeholder="YY (e.g. 28)"
-                    placeholderTextColor={COLORS.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={2}
                     style={styles.modalInput}
@@ -383,7 +385,7 @@ export const PaymentMethodsScreen: React.FC = () => {
               </View>
 
               {cardError ? (
-                <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+                <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                   {cardError}
                 </AppText>
               ) : null}
@@ -572,3 +574,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
 });
+
+
+
+

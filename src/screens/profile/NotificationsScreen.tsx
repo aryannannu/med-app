@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../types/navigation';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../../components/common/AppText';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +20,7 @@ import { formatDateTime } from '../../utils/formatters';
 
 export const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { colors, isDark } = useAppTheme();
   const [notifications, setNotifications] = useState<NotificationItem[]>(MOCK_NOTIFICATIONS);
 
   const markAllRead = () => {
@@ -39,16 +41,16 @@ export const NotificationsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
           Notifications
         </AppText>
         <TouchableOpacity onPress={markAllRead} style={styles.readAllBtn}>
-          <AppText variant="caption" color={COLORS.primary} weight="600">
+          <AppText variant="caption" color={colors.primary} weight="600">
             Mark Read
           </AppText>
         </TouchableOpacity>
@@ -86,17 +88,17 @@ export const NotificationsScreen: React.FC = () => {
 
                 <View style={styles.contentCol}>
                   <View style={styles.titleRow}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ flex: 1 }}>
+                    <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ flex: 1 }}>
                       {notif.title}
                     </AppText>
                     {!notif.isRead && <View style={styles.unreadDot} />}
                   </View>
 
-                  <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                  <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginTop: 2 }}>
                     {notif.message}
                   </AppText>
 
-                  <AppText variant="caption" color={COLORS.textMuted} style={{ marginTop: 6 }}>
+                  <AppText variant="caption" color={colors.textMuted} style={{ marginTop: 6 }}>
                     {formatDateTime(notif.timestamp)}
                   </AppText>
                 </View>
@@ -173,3 +175,6 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.xs,
   },
 });
+
+
+

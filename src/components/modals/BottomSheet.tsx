@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   Modal,
   View,
@@ -8,6 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -26,6 +27,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   children,
   contentStyle,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <Modal
       transparent
@@ -44,14 +46,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
               {title && (
                 <View style={styles.header}>
-                  <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+                  <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
                     {title}
                   </AppText>
                   <TouchableOpacity
                     onPress={onClose}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+                    <Ionicons name="close" size={22} color={colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
               )}
@@ -101,3 +103,6 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.md,
   },
 });
+
+
+

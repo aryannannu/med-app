@@ -1,6 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, ActivityIndicator, StyleSheet, ViewStyle } from 'react-native';
 import { COLORS, SPACING } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 
 export interface LoadingStateProps {
@@ -16,16 +17,17 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   style,
   fullScreen = false,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
       <View style={styles.spinnerWrapper}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
-      <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" align="center" style={styles.message}>
+      <AppText variant="titleMedium" color={colors.textPrimary} weight="600" align="center" style={styles.message}>
         {message}
       </AppText>
       {subMessage && (
-        <AppText variant="bodySmall" color={COLORS.textSecondary} align="center" style={styles.subMessage}>
+        <AppText variant="bodySmall" color={colors.textSecondary} align="center" style={styles.subMessage}>
           {subMessage}
         </AppText>
       )}
@@ -60,3 +62,6 @@ const styles = StyleSheet.create({
     maxWidth: 280,
   },
 });
+
+
+

@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { OrderTimelineEvent } from '../../types/order';
 import { COLORS, SPACING } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { formatDateTime } from '../../utils/formatters';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,9 +13,11 @@ export interface OrderStatusTimelineProps {
 }
 
 export const OrderStatusTimeline: React.FC<OrderStatusTimelineProps> = ({ events, style }) => {
+  const { colors } = useAppTheme();
   return (
     <View style={[styles.container, style]}>
       {events.map((event, index) => {
+  const { colors } = useAppTheme();
         const isLast = index === events.length - 1;
 
         return (
@@ -65,7 +68,7 @@ export const OrderStatusTimeline: React.FC<OrderStatusTimelineProps> = ({ events
                   {event.title}
                 </AppText>
                 {event.timestamp > 0 && (
-                  <AppText variant="caption" color={COLORS.textMuted}>
+                  <AppText variant="caption" color={colors.textMuted}>
                     {formatDateTime(event.timestamp)}
                   </AppText>
                 )}
@@ -155,3 +158,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
+
+
+

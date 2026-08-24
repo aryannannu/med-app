@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -15,30 +15,32 @@ import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useSupport } from '../../store/SupportContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const HelpArticleScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'HelpArticle'>>();
   const { getArticleById } = useSupport();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const article = getArticleById(route.params?.articleId || 'art-1');
   const [feedbackGiven, setFeedbackGiven] = useState<'yes' | 'no' | null>(null);
 
   if (!article) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
             Article Not Found
           </AppText>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.notFoundContainer}>
-          <AppText variant="bodyMedium" color={COLORS.textSecondary}>
+          <AppText variant="bodyMedium" color={colors.textSecondary}>
             This help article could not be loaded.
           </AppText>
         </View>
@@ -63,17 +65,17 @@ export const HelpArticleScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Help Article
         </AppText>
         <View style={{ width: 40 }} />
@@ -81,23 +83,23 @@ export const HelpArticleScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Title */}
-        <AppText variant="h3" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
+        <AppText variant="h3" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
           {article.title}
         </AppText>
 
         {/* Problem Summary Card */}
         <View style={[styles.summaryCard, SHADOWS.subtle]}>
           <View style={styles.summaryIconBox}>
-            <Ionicons name="information-circle" size={22} color={COLORS.primary} />
+            <Ionicons name="information-circle" size={22} color={colors.primary} />
           </View>
-          <AppText variant="bodySmall" color={COLORS.textPrimary} style={{ flex: 1, marginLeft: SPACING.sm }}>
+          <AppText variant="bodySmall" color={colors.textPrimary} style={{ flex: 1, marginLeft: SPACING.sm }}>
             {article.problemSummary}
           </AppText>
         </View>
 
         {/* Step-by-step resolution */}
         <View style={[styles.stepsCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
             Resolution Steps
           </AppText>
 
@@ -108,7 +110,7 @@ export const HelpArticleScreen: React.FC = () => {
                   {idx + 1}
                 </AppText>
               </View>
-              <AppText variant="bodySmall" color={COLORS.textPrimary} style={{ flex: 1, marginLeft: SPACING.md }}>
+              <AppText variant="bodySmall" color={colors.textPrimary} style={{ flex: 1, marginLeft: SPACING.md }}>
                 {step}
               </AppText>
             </View>
@@ -129,7 +131,7 @@ export const HelpArticleScreen: React.FC = () => {
 
         {/* Feedback Card */}
         <View style={[styles.feedbackCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
             Was this article helpful?
           </AppText>
           {feedbackGiven ? (
@@ -154,8 +156,8 @@ export const HelpArticleScreen: React.FC = () => {
                 onPress={() => handleFeedback('no')}
                 style={[styles.feedbackBtn, { borderColor: COLORS.textMuted }]}
               >
-                <Ionicons name="thumbs-down-outline" size={16} color={COLORS.textSecondary} />
-                <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={{ marginLeft: 4 }}>
+                <Ionicons name="thumbs-down-outline" size={16} color={colors.textSecondary} />
+                <AppText variant="caption" color={colors.textSecondary} weight="600" style={{ marginLeft: 4 }}>
                   No
                 </AppText>
               </TouchableOpacity>
@@ -267,3 +269,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+
+

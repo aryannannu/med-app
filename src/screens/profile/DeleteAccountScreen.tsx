@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -18,12 +18,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useOrders } from '../../store/OrderContext';
 import { useAuth } from '../../store/AuthContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const DeleteAccountScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { activeOrders } = useOrders();
   const { user, logout } = useAuth();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const [selectedReason, setSelectedReason] = useState<string>('privacy');
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -61,17 +63,17 @@ export const DeleteAccountScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.danger} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.danger} weight="600" style={styles.headerTitle}>
           Delete Account
         </AppText>
         <View style={{ width: 40 }} />
@@ -87,7 +89,7 @@ export const DeleteAccountScreen: React.FC = () => {
             <AppText variant="titleMedium" color="#DC2626" weight="600" style={{ marginTop: SPACING.md }}>
               Active Order in Progress
             </AppText>
-            <AppText variant="bodySmall" color={COLORS.textSecondary} align="center" style={{ marginTop: SPACING.xs }}>
+            <AppText variant="bodySmall" color={colors.textSecondary} align="center" style={{ marginTop: SPACING.xs }}>
               You currently have an ongoing medicine order (#{activeOrder?.id?.toUpperCase() || 'HL-ORDER'}). Please wait until the delivery is completed or resolved before deleting your account.
             </AppText>
             <AppButton
@@ -108,26 +110,26 @@ export const DeleteAccountScreen: React.FC = () => {
                   Permanent Action
                 </AppText>
               </View>
-              <AppText variant="bodySmall" color={COLORS.textPrimary} style={{ marginTop: SPACING.xs, lineHeight: 20 }}>
+              <AppText variant="bodySmall" color={colors.textPrimary} style={{ marginTop: SPACING.xs, lineHeight: 20 }}>
                 Deleting your HEALIT account is permanent and cannot be undone. You will immediately lose:
               </AppText>
 
               <View style={styles.consequencesList}>
                 <View style={styles.consequenceItem}>
                   <Ionicons name="close-circle" size={16} color="#DC2626" />
-                  <AppText variant="caption" color={COLORS.textSecondary} style={{ marginLeft: 6 }}>
+                  <AppText variant="caption" color={colors.textSecondary} style={{ marginLeft: 6 }}>
                     All saved delivery addresses and contacts
                   </AppText>
                 </View>
                 <View style={styles.consequenceItem}>
                   <Ionicons name="close-circle" size={16} color="#DC2626" />
-                  <AppText variant="caption" color={COLORS.textSecondary} style={{ marginLeft: 6 }}>
+                  <AppText variant="caption" color={colors.textSecondary} style={{ marginLeft: 6 }}>
                     Uploaded prescription records and digital vault
                   </AppText>
                 </View>
                 <View style={styles.consequenceItem}>
                   <Ionicons name="close-circle" size={16} color="#DC2626" />
-                  <AppText variant="caption" color={COLORS.textSecondary} style={{ marginLeft: 6 }}>
+                  <AppText variant="caption" color={colors.textSecondary} style={{ marginLeft: 6 }}>
                     Any remaining HEALIT Wallet balance &amp; coupons
                   </AppText>
                 </View>
@@ -135,7 +137,7 @@ export const DeleteAccountScreen: React.FC = () => {
             </View>
 
             {/* Reason Selector */}
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.lg, marginBottom: SPACING.sm }}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.lg, marginBottom: SPACING.sm }}>
               Please let us know why you are leaving:
             </AppText>
 
@@ -154,7 +156,7 @@ export const DeleteAccountScreen: React.FC = () => {
                         size={20}
                         color={isSelected ? '#DC2626' : COLORS.textMuted}
                       />
-                      <AppText variant="bodySmall" color={COLORS.textPrimary} style={{ marginLeft: SPACING.md, flex: 1 }}>
+                      <AppText variant="bodySmall" color={colors.textPrimary} style={{ marginLeft: SPACING.md, flex: 1 }}>
                         {r.label}
                       </AppText>
                     </TouchableOpacity>
@@ -193,11 +195,11 @@ export const DeleteAccountScreen: React.FC = () => {
                 Confirm Account Deletion
               </AppText>
               <TouchableOpacity onPress={() => setShowOtpModal(false)}>
-                <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: SPACING.md }}>
+            <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginTop: SPACING.md }}>
               Enter the 6-digit verification code sent to +91 {user?.phoneNumber || '9876543210'} to permanently erase your account.
             </AppText>
 
@@ -351,3 +353,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+
+

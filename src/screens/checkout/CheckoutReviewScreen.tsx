@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -24,6 +24,7 @@ import { useOffers } from '../../store/OfferContext';
 import { useOrders } from '../../store/OrderContext';
 import { useWallet } from '../../store/WalletContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatPhoneNumber } from '../../utils/formatters';
 import { PharmacyOffer } from '../../types/offer';
@@ -39,6 +40,7 @@ export const CheckoutReviewScreen: React.FC = () => {
   const { createOrder } = useOrders();
   const { balance: walletBalance, deductMoney } = useWallet();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const [deliveryInstructions, setDeliveryInstructions] = useState('Please ring bell & leave at door');
   const [useWalletBalance, setUseWalletBalance] = useState(false);
@@ -112,7 +114,7 @@ export const CheckoutReviewScreen: React.FC = () => {
         finalPayableAmount: summary.estimatedFinalTotal,
         totalSavings: summary.savingsTotal,
         estimatedDeliveryMinutes: 12,
-        estimatedDeliveryTimeText: '10–15 mins',
+        estimatedDeliveryTimeText: '10â€“15 mins',
         fulfillmentScore: 100,
         allMedicinesAvailable: true,
         itemPrices: items.map((it) => ({
@@ -150,17 +152,17 @@ export const CheckoutReviewScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
           Order Review &amp; Payment
         </AppText>
         <View style={{ width: 40 }} />
@@ -189,7 +191,7 @@ export const CheckoutReviewScreen: React.FC = () => {
                 3
               </AppText>
             </View>
-            <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 10 }}>
+            <AppText variant="caption" color={colors.primary} weight="600" style={{ fontSize: 10 }}>
               Checkout
             </AppText>
           </View>
@@ -199,15 +201,15 @@ export const CheckoutReviewScreen: React.FC = () => {
         <View style={[styles.sectionCard, SHADOWS.subtle]}>
           <View style={styles.sectionHeaderRow}>
             <View style={styles.sectionTitleRow}>
-              <Ionicons name="location" size={18} color={COLORS.primary} />
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+              <Ionicons name="location" size={18} color={colors.primary} />
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                 Delivery Address
               </AppText>
             </View>
             <TouchableOpacity
               onPress={() => navigation.navigate('AddressSelection', { isSelectingForCheckout: true })}
             >
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 Change
               </AppText>
             </TouchableOpacity>
@@ -216,14 +218,14 @@ export const CheckoutReviewScreen: React.FC = () => {
           {selectedAddress ? (
             <View style={styles.addressBox}>
               <View style={styles.addressLabelPill}>
-                <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 10 }}>
+                <AppText variant="caption" color={colors.primary} weight="600" style={{ fontSize: 10 }}>
                   {selectedAddress.label.toUpperCase()}
                 </AppText>
               </View>
-              <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 2 }}>
-                {selectedAddress.recipientName} • {formatPhoneNumber(selectedAddress.phone)}
+              <AppText variant="bodySmall" color={colors.textPrimary} weight="600" style={{ marginTop: 2 }}>
+                {selectedAddress.recipientName} â€¢ {formatPhoneNumber(selectedAddress.phone)}
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 {selectedAddress.houseFlatNumber}, {selectedAddress.streetAddress}, {selectedAddress.city} - {selectedAddress.pincode}
               </AppText>
             </View>
@@ -243,13 +245,13 @@ export const CheckoutReviewScreen: React.FC = () => {
           <View style={styles.sectionHeaderRow}>
             <View style={styles.sectionTitleRow}>
               <Ionicons name="storefront" size={18} color="#15803D" />
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                 Dispensing Pharmacy
               </AppText>
             </View>
             {selectedOffer && (
               <TouchableOpacity onPress={() => navigation.goBack()}>
-                <AppText variant="caption" color={COLORS.primary} weight="600">
+                <AppText variant="caption" color={colors.primary} weight="600">
                   Change
                 </AppText>
               </TouchableOpacity>
@@ -258,17 +260,17 @@ export const CheckoutReviewScreen: React.FC = () => {
 
           <View style={styles.pharmacySummaryRow}>
             <View style={styles.pharmacyIconBox}>
-              <Ionicons name="medical" size={20} color={COLORS.primary} />
+              <Ionicons name="medical" size={20} color={colors.primary} />
             </View>
             <View style={{ flex: 1, marginLeft: SPACING.sm }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <AppText variant="bodyMedium" color={COLORS.textPrimary} weight="600">
+                <AppText variant="bodyMedium" color={colors.textPrimary} weight="600">
                   {storeName}
                 </AppText>
                 <Ionicons name="checkmark-circle" size={14} color="#15803D" style={{ marginLeft: 4 }} />
               </View>
-              <AppText variant="caption" color={COLORS.textSecondary}>
-                Express delivery in {deliveryEta} mins • Licensed Retailer
+              <AppText variant="caption" color={colors.textSecondary}>
+                Express delivery in {deliveryEta} mins â€¢ Licensed Retailer
               </AppText>
             </View>
           </View>
@@ -276,7 +278,7 @@ export const CheckoutReviewScreen: React.FC = () => {
 
         {/* Section 3: Medicine Requirement Summary */}
         <View style={[styles.sectionCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
             Medicines in Order ({summary.totalQuantity} items)
           </AppText>
 
@@ -284,15 +286,15 @@ export const CheckoutReviewScreen: React.FC = () => {
             <View key={item.id} style={styles.itemRow}>
               <Image source={{ uri: item.medicine.image }} style={styles.itemThumb} resizeMode="cover" />
               <View style={styles.itemDetails}>
-                <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
+                <AppText variant="bodySmall" color={colors.textPrimary} weight="600" numberOfLines={1}>
                   {item.medicine.name}
                 </AppText>
-                <AppText variant="caption" color={COLORS.textMuted}>
-                  Qty: {item.quantity} • {item.medicine.packForm}
+                <AppText variant="caption" color={colors.textMuted}>
+                  Qty: {item.quantity} â€¢ {item.medicine.packForm}
                 </AppText>
                 {item.rxRequired && <RxBadge style={{ marginTop: 2 }} />}
               </View>
-              <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="bodySmall" color={colors.textPrimary} weight="600">
                 {formatCurrency((item.selectedVariant?.discountPrice ?? item.medicine.discountPrice) * item.quantity)}
               </AppText>
             </View>
@@ -304,13 +306,13 @@ export const CheckoutReviewScreen: React.FC = () => {
           <View style={[styles.sectionCard, SHADOWS.subtle]}>
             <View style={styles.sectionHeaderRow}>
               <View style={styles.sectionTitleRow}>
-                <Ionicons name="document-text" size={18} color={COLORS.primary} />
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+                <Ionicons name="document-text" size={18} color={colors.primary} />
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                   Attached Prescription
                 </AppText>
               </View>
               <TouchableOpacity onPress={() => navigation.navigate('UploadPrescription', { fromCart: true })}>
-                <AppText variant="caption" color={COLORS.primary} weight="600">
+                <AppText variant="caption" color={colors.primary} weight="600">
                   {activePrescription ? 'Change' : 'Upload'}
                 </AppText>
               </TouchableOpacity>
@@ -343,13 +345,13 @@ export const CheckoutReviewScreen: React.FC = () => {
           >
             <View style={styles.walletLeftCol}>
               <View style={styles.walletIconCircle}>
-                <Ionicons name="wallet" size={18} color={COLORS.primary} />
+                <Ionicons name="wallet" size={18} color={colors.primary} />
               </View>
               <View style={{ marginLeft: SPACING.sm }}>
-                <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="bodySmall" color={colors.textPrimary} weight="600">
                   HEALIT Wallet
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   {formatCurrency(walletBalance)} available
                 </AppText>
               </View>
@@ -375,7 +377,7 @@ export const CheckoutReviewScreen: React.FC = () => {
         {/* Section 6: Payment Method Picker */}
         {finalPayableAmount > 0 && (
           <View style={[styles.sectionCard, SHADOWS.subtle]}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
               Select Payment Method
             </AppText>
 
@@ -398,7 +400,7 @@ export const CheckoutReviewScreen: React.FC = () => {
                   />
                   <AppText
                     variant="bodySmall"
-                    color={COLORS.textPrimary}
+                    color={colors.textPrimary}
                     weight={isSelected ? '600' : '400'}
                     style={{ marginLeft: SPACING.sm, flex: 1 }}
                   >
@@ -412,7 +414,7 @@ export const CheckoutReviewScreen: React.FC = () => {
 
         {/* Delivery Instructions Input */}
         <View style={[styles.sectionCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.xs }}>
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.xs }}>
             Delivery Instructions
           </AppText>
           <AppInput
@@ -425,15 +427,15 @@ export const CheckoutReviewScreen: React.FC = () => {
 
         {/* Section 7: Final Bill Summary */}
         <View style={[styles.sectionCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
             Payment Summary
           </AppText>
 
           <View style={styles.billRow}>
-            <AppText variant="caption" color={COLORS.textSecondary}>
+            <AppText variant="caption" color={colors.textSecondary}>
               Medicine Subtotal
             </AppText>
-            <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+            <AppText variant="caption" color={colors.textPrimary} weight="600">
               {formatCurrency(selectedOffer ? selectedOffer.medicineSubtotal : summary.itemTotal)}
             </AppText>
           </View>
@@ -448,10 +450,10 @@ export const CheckoutReviewScreen: React.FC = () => {
           </View>
 
           <View style={styles.billRow}>
-            <AppText variant="caption" color={COLORS.textSecondary}>
+            <AppText variant="caption" color={colors.textSecondary}>
               Express Delivery Fee ({deliveryEta} mins)
             </AppText>
-            <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+            <AppText variant="caption" color={colors.textPrimary} weight="600">
               {(selectedOffer?.deliveryFee ?? summary.estimatedDeliveryFee) === 0
                 ? 'FREE'
                 : formatCurrency(selectedOffer?.deliveryFee ?? summary.estimatedDeliveryFee)}
@@ -460,10 +462,10 @@ export const CheckoutReviewScreen: React.FC = () => {
 
           {useWalletBalance && walletDeduction > 0 && (
             <View style={styles.billRow}>
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 HEALIT Wallet Applied
               </AppText>
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 - {formatCurrency(walletDeduction)}
               </AppText>
             </View>
@@ -472,10 +474,10 @@ export const CheckoutReviewScreen: React.FC = () => {
           <View style={styles.billDivider} />
 
           <View style={styles.billRow}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
               Final Amount Payable
             </AppText>
-            <AppText variant="titleLarge" color={COLORS.primary} weight="600">
+            <AppText variant="titleLarge" color={colors.primary} weight="600">
               {formatCurrency(finalPayableAmount)}
             </AppText>
           </View>
@@ -485,10 +487,10 @@ export const CheckoutReviewScreen: React.FC = () => {
       {/* Primary Sticky Bottom CTA */}
       <View style={[styles.bottomBar, SHADOWS.modal]}>
         <View style={styles.bottomTotalCol}>
-          <AppText variant="caption" color={COLORS.textMuted}>
+          <AppText variant="caption" color={colors.textMuted}>
             Final Payable
           </AppText>
-          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
+          <AppText variant="titleLarge" color={colors.primary} weight="600">
             {formatCurrency(finalPayableAmount)}
           </AppText>
         </View>
@@ -714,3 +716,4 @@ const styles = StyleSheet.create({
     flex: 1.5,
   },
 });
+

@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { PharmacyService } from '../../services/pharmacyService';
 import { Pharmacy } from '../../types/pharmacy';
 import { useCart } from '../../store/CartContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const PharmacyListingScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -28,6 +29,7 @@ export const PharmacyListingScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const { totalItemCount } = useCart();
+  const { colors, isDark } = useAppTheme();
 
   useEffect(() => {
     PharmacyService.getNearbyPharmacies().then((data) => {
@@ -45,12 +47,12 @@ export const PharmacyListingScreen: React.FC = () => {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Nearby Pharmacies
         </AppText>
         <CartBadge count={totalItemCount} onPress={() => navigation.navigate('Cart')} />

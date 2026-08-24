@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useOffers } from '../../store/OfferContext';
 import { useCart } from '../../store/CartContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatTimeRemaining } from '../../utils/formatters';
 import { PharmacyOffer } from '../../types/offer';
@@ -41,6 +42,7 @@ export const OfferComparisonScreen: React.FC = () => {
 
   const { items, summary } = useCart();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   // Sorting & Filtering State
   const [selectedSort, setSelectedSort] = useState<SortOption>('best_overall');
@@ -134,22 +136,22 @@ export const OfferComparisonScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.navigate('Cart')}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
         <View style={styles.headerTitleCol}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
             Compare Pharmacy Offers
           </AppText>
-          <AppText variant="caption" color={COLORS.textSecondary}>
+          <AppText variant="caption" color={colors.textSecondary}>
             {offers.length} verified pharmacies responded
           </AppText>
         </View>
@@ -158,7 +160,7 @@ export const OfferComparisonScreen: React.FC = () => {
           onPress={() => navigation.navigate('HelpArticle', { articleId: 'art-1' })}
           style={styles.helpBtn}
         >
-          <Ionicons name="help-circle-outline" size={22} color={COLORS.primary} />
+          <Ionicons name="help-circle-outline" size={22} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -266,7 +268,7 @@ export const OfferComparisonScreen: React.FC = () => {
               color={filterUnder15Min ? '#15803D' : COLORS.textSecondary}
               weight="600"
             >
-              ⚡ Under 15 mins
+              âš¡ Under 15 mins
             </AppText>
           </TouchableOpacity>
 
@@ -287,8 +289,8 @@ export const OfferComparisonScreen: React.FC = () => {
         {/* Offers List */}
         {processedOffers.length === 0 && (
           <View style={[styles.filterNoticeBanner, SHADOWS.subtle]}>
-            <Ionicons name="information-circle" size={18} color={COLORS.primary} />
-            <AppText variant="caption" color={COLORS.textPrimary} style={{ marginLeft: 6, flex: 1 }}>
+            <Ionicons name="information-circle" size={18} color={colors.primary} />
+            <AppText variant="caption" color={colors.textPrimary} style={{ marginLeft: 6, flex: 1 }}>
               No bids matched all selected filters. Showing all {sourceList.length} available pharmacy bids below.
             </AppText>
             <TouchableOpacity
@@ -301,7 +303,7 @@ export const OfferComparisonScreen: React.FC = () => {
               }}
               style={styles.resetFiltersPill}
             >
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 Reset
               </AppText>
             </TouchableOpacity>
@@ -328,7 +330,7 @@ export const OfferComparisonScreen: React.FC = () => {
                   <View style={styles.cardHeaderRow}>
                     <View style={styles.storeDetails}>
                       <View style={styles.storeNameRow}>
-                        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
+                        <AppText variant="titleSmall" color={colors.textPrimary} weight="600" numberOfLines={1}>
                           {offer.pharmacy.name}
                         </AppText>
                         {offer.pharmacy.isVerified && (
@@ -338,13 +340,13 @@ export const OfferComparisonScreen: React.FC = () => {
 
                       <View style={styles.storeMetaRow}>
                         <Ionicons name="star" size={12} color="#F59E0B" />
-                        <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 2 }}>
+                        <AppText variant="caption" color={colors.textPrimary} weight="600" style={{ marginLeft: 2 }}>
                           {offer.pharmacy.rating}
                         </AppText>
-                        <AppText variant="caption" color={COLORS.textMuted}>
-                          •
+                        <AppText variant="caption" color={colors.textMuted}>
+                          â€¢
                         </AppText>
-                        <AppText variant="caption" color={COLORS.textSecondary}>
+                        <AppText variant="caption" color={colors.textSecondary}>
                           {offer.pharmacy.distanceKm} km away
                         </AppText>
                       </View>
@@ -387,7 +389,7 @@ export const OfferComparisonScreen: React.FC = () => {
                         onPress={() => setInspectingOffer(offer)}
                         style={styles.quoteDetailsLink}
                       >
-                        <AppText variant="caption" color={COLORS.primary} weight="600">
+                        <AppText variant="caption" color={colors.primary} weight="600">
                           View itemized quote &gt;
                         </AppText>
                       </TouchableOpacity>
@@ -395,7 +397,7 @@ export const OfferComparisonScreen: React.FC = () => {
 
                     {/* Price & Savings */}
                     <View style={styles.priceContainer}>
-                      <AppText variant="h3" color={COLORS.textPrimary} weight="600">
+                      <AppText variant="h2" color={colors.textPrimary} weight="800" style={{ fontSize: 26 }}>
                         {formatCurrency(offer.finalPayableAmount)}
                       </AppText>
                       {offer.totalSavings > 0 && (
@@ -411,10 +413,10 @@ export const OfferComparisonScreen: React.FC = () => {
                   {/* Bottom Action CTA */}
                   <AppButton
                     title="Choose Pharmacy"
-                    variant="primary"
+                    variant="secondary"
                     size="md"
                     onPress={() => handleChoosePharmacy(offer)}
-                    rightIcon={<Ionicons name="arrow-forward" size={16} color="#FFFFFF" />}
+                    rightIcon={<Ionicons name="arrow-forward" size={16} color={colors.primary} />}
                     style={styles.choosePharmacyBtn}
                   />
                 </View>
@@ -429,34 +431,34 @@ export const OfferComparisonScreen: React.FC = () => {
           <View style={[styles.modalCard, SHADOWS.modal]}>
             <View style={styles.modalHeader}>
               <View>
-                <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
                   {inspectingOffer?.pharmacy.name}
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
-                  {inspectingOffer?.pharmacy.address.line1} • DL: {inspectingOffer?.pharmacy.licenseNumber}
+                <AppText variant="caption" color={colors.textSecondary}>
+                  {inspectingOffer?.pharmacy.address.line1} â€¢ DL: {inspectingOffer?.pharmacy.licenseNumber}
                 </AppText>
               </View>
               <TouchableOpacity onPress={() => setInspectingOffer(null)}>
-                <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.modalSectionTitle}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.modalSectionTitle}>
                 DISPENSED MEDICINE QUOTES
               </AppText>
 
               {inspectingOffer?.itemPrices.map((item, i) => (
                 <View key={i} style={styles.modalItemRow}>
                   <View style={{ flex: 1 }}>
-                    <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
+                    <AppText variant="bodySmall" color={colors.textPrimary} weight="600">
                       {item.medicineName}
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textMuted}>
-                      Qty: {item.quantity} • Batch stock confirmed
+                    <AppText variant="caption" color={colors.textMuted}>
+                      Qty: {item.quantity} â€¢ Batch stock confirmed
                     </AppText>
                   </View>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                  <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                     {formatCurrency(item.totalPrice)}
                   </AppText>
                 </View>
@@ -465,10 +467,10 @@ export const OfferComparisonScreen: React.FC = () => {
               <View style={styles.modalDivider} />
 
               <View style={styles.modalBillRow}>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Medicine Subtotal
                 </AppText>
-                <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+                <AppText variant="caption" color={colors.textPrimary} weight="600">
                   {formatCurrency(inspectingOffer?.medicineSubtotal || 0)}
                 </AppText>
               </View>
@@ -483,19 +485,19 @@ export const OfferComparisonScreen: React.FC = () => {
               </View>
 
               <View style={styles.modalBillRow}>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Express Delivery ({inspectingOffer?.estimatedDeliveryMinutes} min)
                 </AppText>
-                <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+                <AppText variant="caption" color={colors.textPrimary} weight="600">
                   {inspectingOffer?.deliveryFee === 0 ? 'FREE' : formatCurrency(inspectingOffer?.deliveryFee || 0)}
                 </AppText>
               </View>
 
               <View style={[styles.modalBillRow, { marginTop: SPACING.xs }]}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Final Payable Amount
                 </AppText>
-                <AppText variant="titleMedium" color={COLORS.primary} weight="600">
+                <AppText variant="titleMedium" color={colors.primary} weight="600">
                   {formatCurrency(inspectingOffer?.finalPayableAmount || 0)}
                 </AppText>
               </View>
@@ -523,10 +525,10 @@ export const OfferComparisonScreen: React.FC = () => {
             <View style={styles.partialIconCircle}>
               <Ionicons name="alert-circle" size={32} color="#D97706" />
             </View>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.sm }}>
+            <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.sm }}>
               Partial Cart Fulfillment
             </AppText>
-            <AppText variant="bodySmall" color={COLORS.textSecondary} align="center" style={{ marginTop: SPACING.xs, lineHeight: 20 }}>
+            <AppText variant="bodySmall" color={colors.textSecondary} align="center" style={{ marginTop: SPACING.xs, lineHeight: 20 }}>
               {partialOfferPending?.pharmacy.name} has{' '}
               <AppText variant="bodySmall" weight="600" color="#15803D">
                 {partialOfferPending?.itemPrices.filter((i) => i.isAvailable).length} of {items.length} medicines
@@ -834,3 +836,4 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
 });
+

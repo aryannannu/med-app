@@ -17,6 +17,7 @@ import { LoadingState } from '../../components/feedback/LoadingState';
 import { useOrders } from '../../store/OrderContext';
 import { useToast } from '../../store/ToastContext';
 import { useTabBarScroll } from '../../store/TabBarScrollContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { Order } from '../../types/order';
 
 export const OrdersScreen: React.FC = () => {
@@ -26,6 +27,7 @@ export const OrdersScreen: React.FC = () => {
   const { activeOrders, completedOrders, cancelledOrders, isLoading, reorder } = useOrders();
   const { showToast } = useToast();
   const { onScroll } = useTabBarScroll();
+  const { colors, isDark } = useAppTheme();
 
   const getDisplayedOrders = (): Order[] => {
     switch (activeTab) {
@@ -49,9 +51,9 @@ export const OrdersScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <AppText variant="titleLarge" color={COLORS.textPrimary} weight="600">
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <AppText variant="titleLarge" color={colors.textPrimary} weight="600">
           My Medicine Orders
         </AppText>
       </View>

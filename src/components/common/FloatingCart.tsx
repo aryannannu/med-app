@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
+import { useAppTheme } from '../../store/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCart } from '../../store/CartContext';
 import { AppText } from './AppText';
@@ -20,6 +21,7 @@ export const FloatingCart: React.FC<FloatingCartProps> = ({
   onPressViewCart,
   bottomOffset = 88,
 }) => {
+  const { colors } = useAppTheme();
   const { totalItemCount, summary } = useCart();
   const [offersModalVisible, setOffersModalVisible] = useState(false);
 
@@ -78,8 +80,8 @@ export const FloatingCart: React.FC<FloatingCartProps> = ({
               </AppText>
               <AppText style={styles.deliverySubtext} numberOfLines={1}>
                 {isFreeDeliveryUnlocked
-                  ? '🎉 Enjoy zero delivery fee'
-                  : `Shop for ₹${Math.ceil(remainingForFreeDelivery)} more`}
+                  ? 'ðŸŽ‰ Enjoy zero delivery fee'
+                  : `Shop for â‚¹${Math.ceil(remainingForFreeDelivery)} more`}
               </AppText>
             </View>
           </TouchableOpacity>
@@ -235,3 +237,6 @@ const styles = StyleSheet.create({
     fontFamily: 'LexendDeca_600SemiBold',
   },
 });
+
+
+

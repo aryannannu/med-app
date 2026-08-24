@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -16,10 +16,12 @@ import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useSupport } from '../../store/SupportContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatDateTime } from '../../utils/formatters';
 
 export const SupportChatScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { colors, isDark } = useAppTheme();
   const route = useRoute<RouteProp<AppStackParamList, 'SupportChat'>>();
   const { chatMessages, sendMessage } = useSupport();
 
@@ -48,20 +50,20 @@ export const SupportChatScreen: React.FC = () => {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
         <View style={styles.agentInfoCol}>
           <View style={styles.agentTitleRow}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
               HEALIT Support (Priya)
             </AppText>
             <View style={styles.onlineDot} />
@@ -75,7 +77,7 @@ export const SupportChatScreen: React.FC = () => {
           onPress={() => navigation.navigate('HelpCenter')}
           style={styles.backBtn}
         >
-          <Ionicons name="help-circle-outline" size={22} color={COLORS.primary} />
+          <Ionicons name="help-circle-outline" size={22} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -91,8 +93,8 @@ export const SupportChatScreen: React.FC = () => {
           {/* Order Banner if applicable */}
           {orderId && (
             <View style={styles.orderContextBanner}>
-              <Ionicons name="receipt-outline" size={16} color={COLORS.primary} />
-              <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+              <Ionicons name="receipt-outline" size={16} color={colors.primary} />
+              <AppText variant="caption" color={colors.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                 Chat regarding Order #{orderId.toUpperCase()}
               </AppText>
             </View>
@@ -107,7 +109,7 @@ export const SupportChatScreen: React.FC = () => {
               return (
                 <View key={msg.id} style={styles.systemMessageRow}>
                   <View style={styles.systemBubble}>
-                    <AppText variant="caption" color={COLORS.textSecondary} align="center">
+                    <AppText variant="caption" color={colors.textSecondary} align="center">
                       {msg.text}
                     </AppText>
                   </View>
@@ -167,7 +169,7 @@ export const SupportChatScreen: React.FC = () => {
                 onPress={() => handleSend(prompt)}
                 style={styles.promptChip}
               >
-                <AppText variant="caption" color={COLORS.primary} weight="600">
+                <AppText variant="caption" color={colors.primary} weight="600">
                   {prompt}
                 </AppText>
               </TouchableOpacity>
@@ -181,7 +183,7 @@ export const SupportChatScreen: React.FC = () => {
             value={inputMessage}
             onChangeText={setInputMessage}
             placeholder="Type your message..."
-            placeholderTextColor={COLORS.textMuted}
+            placeholderTextColor={colors.textMuted}
             style={styles.textInput}
           />
           <TouchableOpacity
@@ -350,3 +352,7 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.sm,
   },
 });
+
+
+
+

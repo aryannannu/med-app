@@ -1,6 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { formatCurrency, formatDiscount } from '../../utils/currency';
 
@@ -21,6 +22,7 @@ export const PriceDisplay: React.FC<PriceDisplayProps> = ({
   layout = 'row',
   style,
 }) => {
+  const { colors } = useAppTheme();
   const showDiscount = mrp && mrp > price;
   const calculatedDiscount = discountPercentage || (mrp ? Math.round(((mrp - price) / mrp) * 100) : 0);
 
@@ -29,7 +31,7 @@ export const PriceDisplay: React.FC<PriceDisplayProps> = ({
 
   return (
     <View style={[layout === 'row' ? styles.row : styles.column, style]}>
-      <AppText variant={priceVariant} color={COLORS.textPrimary} weight="600">
+      <AppText variant={priceVariant} color={colors.textPrimary} weight="600">
         {formatCurrency(price)}
       </AppText>
 
@@ -37,7 +39,7 @@ export const PriceDisplay: React.FC<PriceDisplayProps> = ({
         <View style={styles.discountRow}>
           <AppText
             variant={mrpVariant}
-            color={COLORS.textMuted}
+            color={colors.textMuted}
             style={styles.mrpText}
           >
             {formatCurrency(mrp)}
@@ -83,3 +85,6 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.sm,
   },
 });
+
+
+

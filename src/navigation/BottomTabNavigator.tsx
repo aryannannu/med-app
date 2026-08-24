@@ -11,6 +11,7 @@ import { AppText } from '../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrders } from '../store/OrderContext';
 import { useTabBarScroll } from '../store/TabBarScrollContext';
+import { useAppTheme } from '../store/ThemeContext';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -24,7 +25,7 @@ interface TabItemConfig {
 const TAB_CONFIG: TabItemConfig[] = [
   { name: 'HomeTab', label: 'Home', activeIcon: 'home', inactiveIcon: 'home-outline' },
   { name: 'CategoriesTab', label: 'Categories', activeIcon: 'grid', inactiveIcon: 'grid-outline' },
-  { name: 'OrdersTab', label: 'Recent order', activeIcon: 'grid', inactiveIcon: 'grid-outline' },
+  { name: 'OrdersTab', label: 'Recent order', activeIcon: 'receipt', inactiveIcon: 'receipt-outline' },
   { name: 'ProfileTab', label: 'Profile', activeIcon: 'person', inactiveIcon: 'person-outline' },
 ];
 
@@ -35,6 +36,7 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const { activeOrders } = useOrders();
   const { collapseAnim } = useTabBarScroll();
+  const { colors, isDark } = useAppTheme();
 
   const translateY = collapseAnim.interpolate({
     inputRange: [0, 1],
@@ -51,6 +53,10 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({
     outputRange: [1, 0.94],
   });
 
+  const gradientColors: [string, string, string] = isDark
+    ? ['rgba(15, 15, 20, 0)', 'rgba(15, 15, 20, 0.75)', 'rgba(15, 15, 20, 0.98)']
+    : ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.75)', 'rgba(255, 255, 255, 0.98)'];
+
   return (
     <Animated.View
       style={[
@@ -62,15 +68,15 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({
       ]}
       pointerEvents="box-none"
     >
-      {/* 10% to 90% Soft White Linear Gradient Overlay Under Nav Bar */}
+      {/* Soft Linear Gradient Overlay Under Nav Bar */}
       <LinearGradient
-        colors={['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.75)', 'rgba(255, 255, 255, 0.98)']}
+        colors={gradientColors}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.bottomGradientOverlay}
         pointerEvents="none"
       />
-      <View style={styles.tabCard}>
+      <View style={[styles.tabCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;
           const config = TAB_CONFIG.find((c) => c.name === route.name);
@@ -100,14 +106,19 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({
               activeOpacity={0.75}
               style={styles.tabItem}
             >
-              <View style={[styles.iconPill, isFocused && styles.activeIconPill]}>
+              <View
+                style={[
+                  styles.iconPill,
+                  isFocused && { backgroundColor: colors.primaryMuted },
+                ]}
+              >
                 <Ionicons
                   name={isFocused ? config.activeIcon : config.inactiveIcon}
                   size={22}
-                  color={isFocused ? '#4C2A9C' : '#262626'}
+                  color={isFocused ? colors.primary : colors.textSecondary}
                 />
                 {showBadge && (
-                  <View style={styles.badgePill}>
+                  <View style={[styles.badgePill, { borderColor: colors.surfaceElevated }]}>
                     <AppText variant="caption" color="#FFFFFF" weight="600" style={styles.badgeText}>
                       {activeOrders.length}
                     </AppText>
@@ -117,6 +128,7 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({
               <AppText
                 style={[
                   styles.tabLabel,
+                  { color: isFocused ? colors.primary : colors.textSecondary },
                   isFocused ? styles.activeTabLabel : styles.inactiveTabLabel,
                 ]}
                 numberOfLines={1}
@@ -177,15 +189,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
     borderRadius: 36,
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderWidth: 1,
-    borderColor: '#ECECF2',
-    shadowColor: '#1E1B4B',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.18,
     shadowRadius: 18,
     elevation: 12,
   },
@@ -202,20 +212,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
-  activeIconPill: {
-    backgroundColor: '#F0EBF9',
-  },
   tabLabel: {
     fontSize: 11.5,
     marginTop: 3,
     textAlign: 'center',
   },
   activeTabLabel: {
-    color: '#4C2A9C',
     fontWeight: '700',
   },
   inactiveTabLabel: {
-    color: '#262626',
     fontWeight: '600',
   },
   badgePill: {
@@ -230,7 +235,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 3,
     borderWidth: 1,
-    borderColor: '#FFFFFF',
   },
   badgeText: {
     fontSize: 8,

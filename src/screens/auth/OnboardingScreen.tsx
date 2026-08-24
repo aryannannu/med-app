@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { AppButton } from '../../components/common/AppButton';
 import { HealitLogo } from '../../components/common/HealitLogo';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../store/AuthContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 const ONBOARDING_STEPS = [
   {
@@ -33,6 +34,7 @@ const ONBOARDING_STEPS = [
 
 export const OnboardingScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, 'Onboarding'>>();
+  const { colors, isDark } = useAppTheme();
   const [currentStep, setCurrentStep] = useState(0);
   const { completeOnboarding } = useAuth();
 
@@ -53,15 +55,15 @@ export const OnboardingScreen: React.FC = () => {
   const step = ONBOARDING_STEPS[currentStep];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         {/* Top Header with Skip */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <HealitLogo width={110} height={32} />
 
           {currentStep < ONBOARDING_STEPS.length - 1 && (
             <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
-              <AppText variant="buttonSmall" color={COLORS.textSecondary} weight="600">
+              <AppText variant="buttonSmall" color={colors.textSecondary} weight="600">
                 Skip
               </AppText>
             </TouchableOpacity>
@@ -74,11 +76,11 @@ export const OnboardingScreen: React.FC = () => {
             <Ionicons name={step.icon} size={84} color={step.iconColor} />
           </View>
 
-          <AppText variant="h1" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
+          <AppText variant="h1" color={colors.textPrimary} weight="600" align="center" style={styles.title}>
             {step.title}
           </AppText>
 
-          <AppText variant="bodyLarge" color={COLORS.textSecondary} align="center" style={styles.description}>
+          <AppText variant="bodyLarge" color={colors.textSecondary} align="center" style={styles.description}>
             {step.description}
           </AppText>
         </View>
@@ -186,3 +188,4 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceMuted,
   },
 });
+

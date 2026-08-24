@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   ScrollView,
@@ -10,6 +10,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../types/navigation';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -112,22 +113,23 @@ const LEGAL_DOCS: Record<string, DocContent> = {
 
 export const LegalDocumentScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { colors, isDark } = useAppTheme();
   const route = useRoute<RouteProp<AppStackParamList, 'LegalDocument'>>();
   const docType = route.params?.docType || 'terms';
   const doc = LEGAL_DOCS[docType] || LEGAL_DOCS.terms;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           {doc.title}
         </AppText>
         <View style={{ width: 40 }} />
@@ -138,10 +140,10 @@ export const LegalDocumentScreen: React.FC = () => {
         <View style={[styles.complianceCard, SHADOWS.subtle]}>
           <Ionicons name="shield-checkmark" size={20} color="#15803D" />
           <View style={{ marginLeft: SPACING.md, flex: 1 }}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
               Government Regulatory Compliance
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
               Compliant with Drugs and Cosmetics Act &amp; Pharmacy Practice Regulations • Last Updated {doc.lastUpdated}
             </AppText>
           </View>
@@ -151,10 +153,10 @@ export const LegalDocumentScreen: React.FC = () => {
         <View style={[styles.docCard, SHADOWS.subtle]}>
           {doc.sections.map((section, idx) => (
             <View key={idx} style={styles.sectionBlock}>
-              <AppText variant="titleSmall" color={COLORS.primary} weight="600" style={{ marginBottom: 4 }}>
+              <AppText variant="titleSmall" color={colors.primary} weight="600" style={{ marginBottom: 4 }}>
                 {section.heading}
               </AppText>
-              <AppText variant="bodySmall" color={COLORS.textPrimary} style={{ lineHeight: 22 }}>
+              <AppText variant="bodySmall" color={colors.textPrimary} style={{ lineHeight: 22 }}>
                 {section.body}
               </AppText>
               {idx < doc.sections.length - 1 && <View style={styles.divider} />}
@@ -221,3 +223,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
 });
+
+
+

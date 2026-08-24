@@ -1,3 +1,4 @@
+// Force Metro cache refresh: 22:33
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
@@ -33,6 +34,7 @@ import { useOrders } from '../../store/OrderContext';
 import { useAuth } from '../../store/AuthContext';
 import { useToast } from '../../store/ToastContext';
 import { useTabBarScroll } from '../../store/TabBarScrollContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatDistance, formatDeliveryTime } from '../../utils/formatters';
 
@@ -135,7 +137,7 @@ const STORE_DEALS = [
   {
     id: 'deal-2',
     pharmacyName: 'Apollo Pharmacy 24x7',
-    title: 'Free Delivery on Orders Above ₹199',
+    title: 'Free Delivery on Orders Above â‚¹199',
     badge: 'FREE DELIVERY',
     pharmacyId: 'pharm-2',
     bg: '#CCFBF1',
@@ -215,10 +217,10 @@ const TOP_COMPOSITIONS = [
 
 const PROMO_OFFERS = [
   { id: 'p1', title: 'Flat 20% OFF', subtitle: 'On all essential medicines', code: 'MED20', bg: '#F3E8FF', color: '#3A2986', badge: '20% OFF', icon: 'pricetag' },
-  { id: 'p2', title: 'Free Delivery', subtitle: 'On orders above ₹299', code: 'FREEDEL', bg: '#DCFCE7', color: '#166534', badge: 'FREE DEL', icon: 'bicycle' },
-  { id: 'p3', title: 'Extra ₹100 OFF', subtitle: 'First order special discount', code: 'WELCOME100', bg: '#FEF3C7', color: '#D97706', badge: 'SAVE ₹100', icon: 'gift' },
+  { id: 'p2', title: 'Free Delivery', subtitle: 'On orders above â‚¹299', code: 'FREEDEL', bg: '#DCFCE7', color: '#166534', badge: 'FREE DEL', icon: 'bicycle' },
+  { id: 'p3', title: 'Extra â‚¹100 OFF', subtitle: 'First order special discount', code: 'WELCOME100', bg: '#FEF3C7', color: '#D97706', badge: 'SAVE â‚¹100', icon: 'gift' },
   { id: 'p4', title: 'Wellness Sale', subtitle: 'Up to 35% OFF vitamins', code: 'WELLNESS35', bg: '#FDF2F8', color: '#DB2777', badge: '35% OFF', icon: 'sparkles' },
-  { id: 'p5', title: 'Rx Upload Bonus', subtitle: 'Get ₹50 cashback on Rx upload', code: 'RX50', bg: '#EFF6FF', color: '#2563EB', badge: 'CASHBACK', icon: 'document-text' },
+  { id: 'p5', title: 'Rx Upload Bonus', subtitle: 'Get â‚¹50 cashback on Rx upload', code: 'RX50', bg: '#EFF6FF', color: '#2563EB', badge: 'CASHBACK', icon: 'document-text' },
   { id: 'p6', title: 'Chronic Care Savings', subtitle: 'Flat 18% OFF monthly refills', code: 'REFILL18', bg: '#ECFEFF', color: '#0891B2', badge: '18% OFF', icon: 'repeat' },
 ];
 
@@ -230,8 +232,8 @@ const COMBO_BUNDLES = [
 ];
 
 const PREVIOUS_ORDERS = [
-  { id: 'ord-10234', orderNo: 'Order #HD10234', date: 'Delivered 2 days ago', itemsSummary: 'Crocin 650 × 2 • Dolo 650 × 1 • ORS × 2', total: 245 },
-  { id: 'ord-10198', orderNo: 'Order #HD10198', date: 'Delivered last week', itemsSummary: 'Becosules Z × 1 • Volini Gel × 1', total: 176 },
+  { id: 'ord-10234', orderNo: 'Order #HD10234', date: 'Delivered 2 days ago', itemsSummary: 'Crocin 650 Ã— 2 â€¢ Dolo 650 Ã— 1 â€¢ ORS Ã— 2', total: 245 },
+  { id: 'ord-10198', orderNo: 'Order #HD10198', date: 'Delivered last week', itemsSummary: 'Becosules Z Ã— 1 â€¢ Volini Gel Ã— 1', total: 176 },
 ];
 
 const WELLNESS_ARTICLES = [
@@ -316,6 +318,7 @@ export const HomeScreen: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { onScroll, collapseAnim } = useTabBarScroll();
+  const { colors, isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
   const bottomOffset = Math.max(insets.bottom, 14);
 
@@ -474,20 +477,20 @@ export const HomeScreen: React.FC = () => {
         key={pharmacy.id}
         activeOpacity={0.85}
         onPress={() => navigation.navigate('PharmacyDetail', { pharmacyId: pharmacy.id })}
-        style={[styles.pharmacyCard, SHADOWS.subtle]}
+        style={[styles.pharmacyCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
       >
         <Image source={{ uri: pharmacy.logo }} style={styles.pharmacyLogo} resizeMode="cover" />
 
         <View style={styles.pharmacyDetails}>
           <View style={styles.pharmacyNameRow}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1} style={{ flex: 1 }}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600" numberOfLines={1} style={{ flex: 1 }}>
               {pharmacy.name}
             </AppText>
             {pharmacy.isVerified && (
               <View style={styles.verifiedTag}>
-                <Ionicons name="checkmark-circle" size={12} color={COLORS.primary} />
-                <AppText variant="caption" color={COLORS.primary} weight="600" style={{ fontSize: 10, marginLeft: 2 }}>
-                  ✓ Verified
+                <Ionicons name="checkmark-circle" size={12} color={colors.primary} />
+                <AppText variant="caption" color={colors.primary} weight="600" style={{ fontSize: 10, marginLeft: 2 }}>
+                  Verified
                 </AppText>
               </View>
             )}
@@ -497,27 +500,27 @@ export const HomeScreen: React.FC = () => {
             <AppText variant="caption" color="#15803D" weight="600">
               {pharmacy.rating} ★
             </AppText>
-            <AppText variant="caption" color={COLORS.textMuted} style={{ marginHorizontal: 4 }}>
+            <AppText variant="caption" color={colors.textMuted} style={{ marginHorizontal: 3 }}>
               •
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary}>
+            <AppText variant="caption" color={colors.textSecondary}>
               {formatDistance(pharmacy.distanceKm)}
             </AppText>
-            <AppText variant="caption" color={COLORS.textMuted} style={{ marginHorizontal: 4 }}>
+            <AppText variant="caption" color={colors.textMuted} style={{ marginHorizontal: 3 }}>
               •
             </AppText>
-            <AppText variant="caption" color={COLORS.primary} weight="600">
+            <AppText variant="caption" color={colors.primary} weight="600">
               {formatDeliveryTime(pharmacy.estimatedDeliveryTimeMinutes)}
             </AppText>
-            <AppText variant="caption" color={COLORS.textMuted} style={{ marginHorizontal: 4 }}>
+            <AppText variant="caption" color={colors.textMuted} style={{ marginHorizontal: 3 }}>
               •
             </AppText>
             <AppText variant="caption" color={pharmacy.isOpenNow ? '#15803D' : '#DC2626'} weight="600">
-              {pharmacy.isOpenNow ? 'Open Now' : 'Closed'}
+              {pharmacy.isOpenNow ? 'Open' : 'Closed'}
             </AppText>
           </View>
 
-          <AppText variant="caption" color={COLORS.textMuted} numberOfLines={1} style={{ marginTop: 2, fontSize: 11 }}>
+          <AppText variant="caption" color={colors.textMuted} numberOfLines={1} style={{ marginTop: 2, fontSize: 11 }}>
             📍 {pharmacy.address.line1}
           </AppText>
         </View>
@@ -534,7 +537,7 @@ export const HomeScreen: React.FC = () => {
         key={pharmacy.id}
         activeOpacity={0.9}
         onPress={() => navigation.navigate('PharmacyDetail', { pharmacyId: pharmacy.id })}
-        style={[styles.largeStoreCard, SHADOWS.card]}
+        style={[styles.largeStoreCard, { backgroundColor: colors.surface }, SHADOWS.card]}
       >
         {/* Hero Store Image Banner */}
         <View style={styles.largeStoreImageContainer}>
@@ -568,7 +571,7 @@ export const HomeScreen: React.FC = () => {
           <View style={styles.largeStoreImageBadge}>
             <Ionicons name="flash" size={11} color="#FFFFFF" style={{ marginRight: 3 }} />
             <AppText style={styles.largeStoreBadgeText}>
-              Free delivery with HEALIT • {formatDeliveryTime(pharmacy.estimatedDeliveryTimeMinutes)}
+              Free delivery with HEALIT â€¢ {formatDeliveryTime(pharmacy.estimatedDeliveryTimeMinutes)}
             </AppText>
           </View>
 
@@ -594,15 +597,15 @@ export const HomeScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Row 2: Sub-info (Near & Fast • 800m • Open Now) */}
+          {/* Row 2: Sub-info (Near & Fast â€¢ 800m â€¢ Open Now) */}
           <View style={styles.largeStoreSubInfoRow}>
             <Ionicons name="flash" size={13} color="#059669" style={{ marginRight: 3 }} />
             <AppText style={styles.largeStoreSubInfoText}>
-              Near & Fast • {formatDistance(pharmacy.distanceKm)} • {pharmacy.isOpenNow ? 'Open Now' : 'Closed'}
+              Near & Fast â€¢ {formatDistance(pharmacy.distanceKm)} â€¢ {pharmacy.isOpenNow ? 'Open Now' : 'Closed'}
             </AppText>
             {pharmacy.isVerified && (
               <View style={styles.verifiedMiniTag}>
-                <Ionicons name="checkmark-circle" size={11} color={COLORS.primary} />
+                <Ionicons name="checkmark-circle" size={11} color={colors.primary} />
                 <AppText style={styles.verifiedMiniText}>Verified</AppText>
               </View>
             )}
@@ -610,16 +613,16 @@ export const HomeScreen: React.FC = () => {
 
           {/* Row 3: Offer Tag (Blue / Purple) */}
           <View style={styles.largeStoreOfferRow}>
-            <Ionicons name="pricetag" size={13} color={COLORS.primary} style={{ marginRight: 5 }} />
+            <Ionicons name="pricetag" size={13} color={colors.primary} style={{ marginRight: 5 }} />
             <AppText style={styles.largeStoreOfferText} numberOfLines={1}>
-              Flat ₹120 OFF on orders above ₹199
+              Flat â‚¹120 OFF on orders above â‚¹199
             </AppText>
           </View>
 
           {/* Row 4: Address & Stock Availability */}
           <View style={styles.largeStoreAddressRow}>
             <AppText style={styles.largeStoreAddressText} numberOfLines={1}>
-              📍 {pharmacy.address.line1} • 8/8 Medicines Available
+              ðŸ“ {pharmacy.address.line1} â€¢ 8/8 Medicines Available
             </AppText>
           </View>
         </View>
@@ -631,14 +634,18 @@ export const HomeScreen: React.FC = () => {
     return <LoadingState fullScreen message="Loading HEALIT..." />;
   }
 
+  const headerGradientColors: [string, string, string, string] = isDark
+    ? ['#1A103D', '#251554', '#32196E', colors.background]
+    : ['#431EAF', '#5223C7', '#6933DC', '#F8F8FC'];
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* =========================================================================
             1. TOP HERO GRADIENT HEADER (Exact match to screenshot)
            ========================================================================= */}
         <LinearGradient
-          colors={['#431EAF', '#5223C7', '#6933DC', '#F8F8FC']}
+          colors={headerGradientColors}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={styles.gradientHeader}
@@ -719,12 +726,11 @@ export const HomeScreen: React.FC = () => {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() =>
-                navigation.navigate('MainTabs', {
-                  screen: 'SearchTab',
-                  params: { initialQuery: activeMode === 'stores' ? 'pharmacy' : '' },
-                } as any)
+                navigation.navigate('Search', {
+                  initialQuery: activeMode === 'stores' ? 'pharmacy' : '',
+                })
               }
-              style={styles.searchBarInput}
+              style={[styles.searchBarInput, { backgroundColor: colors.surface }]}
             >
               <Ionicons name="search-outline" size={20} color="#666666" style={{ marginRight: 8 }} />
               <AppText style={styles.searchPlaceholderText} numberOfLines={1}>
@@ -735,7 +741,7 @@ export const HomeScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Quick Filter Category Icons Horizontal Bar (Matching Target Design) */}
+          {/* Quick Filter Category Icons Horizontal Bar */}
           <View style={styles.quickFilterSection}>
             <ScrollView
               horizontal
@@ -744,6 +750,10 @@ export const HomeScreen: React.FC = () => {
             >
               {QUICK_FILTER_TABS.map((tab) => {
                 const isSelected = selectedFilter === tab.id;
+                const activeBg = isDark ? colors.surfaceElevated : '#FFFFFF';
+                const activeColor = isDark ? colors.primary : '#3A2986';
+                const inactiveColor = isDark ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.95)';
+
                 return (
                   <TouchableOpacity
                     key={tab.id}
@@ -751,17 +761,18 @@ export const HomeScreen: React.FC = () => {
                     onPress={() => setSelectedFilter(tab.id)}
                     style={[
                       styles.quickFilterItemContainer,
-                      isSelected && styles.quickFilterItemActiveCard,
+                      isSelected && [styles.quickFilterItemActiveCard, { backgroundColor: activeBg, borderColor: isDark ? colors.primary : 'transparent' }],
                     ]}
                   >
                     <Ionicons
                       name={(isSelected ? tab.activeIcon : tab.icon) as any}
-                      size={24}
-                      color={isSelected ? '#4C2A9C' : '#333333'}
+                      size={22}
+                      color={isSelected ? activeColor : inactiveColor}
                     />
                     <AppText
                       style={[
                         styles.quickFilterText,
+                        { color: isSelected ? activeColor : inactiveColor },
                         isSelected ? styles.quickFilterTextActive : styles.quickFilterTextInactive,
                       ]}
                     >
@@ -776,7 +787,7 @@ export const HomeScreen: React.FC = () => {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
           onScroll={onScroll}
           scrollEventThrottle={16}
           refreshControl={
@@ -784,7 +795,7 @@ export const HomeScreen: React.FC = () => {
               refreshing={refreshing}
               onRefresh={onRefresh}
               colors={[COLORS.primary]}
-              tintColor={COLORS.primary}
+              tintColor={colors.primary}
             />
           }
         >
@@ -793,24 +804,24 @@ export const HomeScreen: React.FC = () => {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => navigation.navigate('OrderDetails', { orderId: activeOrder.id })}
-              style={[styles.activeOrderCard, SHADOWS.subtle]}
+              style={[styles.activeOrderCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
             >
               <View style={styles.activeOrderIconBox}>
                 <Ionicons name="bicycle" size={20} color="#FFFFFF" />
               </View>
               <View style={{ flex: 1, marginLeft: SPACING.md }}>
                 <View style={styles.activeOrderHeader}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                  <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                     Your order is on the way
                   </AppText>
                   <View style={styles.activePulseDot} />
                 </View>
-                <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
-                  {activeOrder.items.length} medicines • Arriving in 10–15 min
+                <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                  {activeOrder.items.length} medicines â€¢ Arriving in 10â€“15 min
                 </AppText>
               </View>
-              <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
-                Track →
+              <AppText variant="buttonSmall" color={colors.primary} weight="600">
+                Track â†’
               </AppText>
             </TouchableOpacity>
           )}
@@ -829,14 +840,14 @@ export const HomeScreen: React.FC = () => {
                         <Ionicons
                           name={(selectedTabInfo.activeIcon || selectedTabInfo.icon) as any}
                           size={18}
-                          color={COLORS.primary}
+                          color={colors.primary}
                           style={{ marginRight: 6 }}
                         />
-                        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                        <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                           {selectedTabInfo.title}
                         </AppText>
                       </View>
-                      <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                      <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                         {selectedTabInfo.subtitle}
                       </AppText>
                     </View>
@@ -848,7 +859,7 @@ export const HomeScreen: React.FC = () => {
                         })
                       }
                     >
-                      <AppText variant="bodySmall" color={COLORS.primary} weight="600">
+                      <AppText variant="bodySmall" color={colors.primary} weight="600">
                         View All →
                       </AppText>
                     </TouchableOpacity>
@@ -858,19 +869,69 @@ export const HomeScreen: React.FC = () => {
                 </View>
               )}
 
-              {/* 2ND SECTION (or 1st when 'All'): Shop by Brand */}
-              <View style={styles.sectionContainer}>
+              {/* 3RD SECTION (when category selected): Nearby Pharmacies */}
+              {selectedFilter !== 'all' && (
+                <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
+                  <View style={styles.sectionHeaderRow}>
+                    <View>
+                      <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                        Nearby Pharmacies
+                      </AppText>
+                      <AppText variant="caption" color={colors.textSecondary}>
+                        Verified licensed chemist shops fulfilling orders
+                      </AppText>
+                    </View>
+                    <TouchableOpacity onPress={() => setActiveMode('stores')}>
+                      <AppText variant="bodySmall" color={colors.primary} weight="600">
+                        View all →
+                      </AppText>
+                    </TouchableOpacity>
+                  </View>
+
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+                    {nearbyPharmacies.map((pharmacy) => (
+                      <View key={pharmacy.id} style={{ width: 310, marginRight: SPACING.md }}>
+                        {renderPharmacyCard(pharmacy)}
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {/* Popular Medicines */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                      Popular Medicines
+                    </AppText>
+                    <AppText variant="caption" color={colors.textSecondary}>
+                      Most ordered healthcare items near you
+                    </AppText>
+                  </View>
+                  <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all →
+                    </AppText>
+                  </TouchableOpacity>
+                </View>
+
+                {renderTwoRowHorizontal(popularMedicines, (med) => renderMedicineCard(med))}
+              </View>
+
+              {/* 2ND SECTION (or 1st when 'All'): Shop by Brand */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
+                <View style={styles.sectionHeaderRow}>
+                  <View>
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Shop by Brand
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Trusted certified pharmaceutical companies
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
                       View all →
                     </AppText>
                   </TouchableOpacity>
@@ -909,70 +970,20 @@ export const HomeScreen: React.FC = () => {
                 </ScrollView>
               </View>
 
-              {/* 3RD SECTION (when category selected): Nearby Pharmacies */}
-              {selectedFilter !== 'all' && (
-                <View style={styles.sectionContainer}>
-                  <View style={styles.sectionHeaderRow}>
-                    <View>
-                      <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
-                        Nearby Pharmacies
-                      </AppText>
-                      <AppText variant="caption" color={COLORS.textSecondary}>
-                        Verified licensed chemist shops fulfilling orders
-                      </AppText>
-                    </View>
-                    <TouchableOpacity onPress={() => setActiveMode('stores')}>
-                      <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                        View all →
-                      </AppText>
-                    </TouchableOpacity>
-                  </View>
-
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-                    {nearbyPharmacies.map((pharmacy) => (
-                      <View key={pharmacy.id} style={{ width: 310, marginRight: SPACING.md }}>
-                        {renderPharmacyCard(pharmacy)}
-                      </View>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
-
-              {/* Popular Medicines */}
-              <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeaderRow}>
-                  <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
-                      Popular Medicines
-                    </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
-                      Most ordered healthcare items near you
-                    </AppText>
-                  </View>
-                  <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
-                    </AppText>
-                  </TouchableOpacity>
-                </View>
-
-                {renderTwoRowHorizontal(popularMedicines, (med) => renderMedicineCard(med))}
-              </View>
-
               {/* Daily Essentials */}
-              <View style={styles.sectionContainer}>
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Daily Essentials
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Everything you may need every day
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -982,19 +993,19 @@ export const HomeScreen: React.FC = () => {
 
               {/* Nearby Pharmacies (When 'All' tab is active) */}
               {selectedFilter === 'all' && (
-                <View style={styles.sectionContainer}>
+                <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                   <View style={styles.sectionHeaderRow}>
                     <View>
-                      <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                      <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                         Nearby Pharmacies
                       </AppText>
-                      <AppText variant="caption" color={COLORS.textSecondary}>
+                      <AppText variant="caption" color={colors.textSecondary}>
                         Verified licensed chemist shops fulfilling orders
                       </AppText>
                     </View>
                     <TouchableOpacity onPress={() => setActiveMode('stores')}>
-                      <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                        View all →
+                      <AppText variant="bodySmall" color={colors.primary} weight="600">
+                        View all â†’
                       </AppText>
                     </TouchableOpacity>
                   </View>
@@ -1009,20 +1020,20 @@ export const HomeScreen: React.FC = () => {
                 </View>
               )}
 
-              {/* SECTION 6 — Best Prices & Deals (2-Row Horizontal Scroll) */}
-              <View style={styles.sectionContainer}>
+              {/* SECTION 6 â€” Best Prices & Deals (2-Row Horizontal Scroll) */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Best Prices & Deals
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       High savings on essential health items
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1031,17 +1042,17 @@ export const HomeScreen: React.FC = () => {
               </View>
 
               {/* Quick Order Prescription Upload Banner */}
-              <View style={[styles.rxCtaCard, SHADOWS.subtle]}>
+              <View style={[styles.rxCtaCard, { backgroundColor: colors.primarySubtle, borderColor: colors.primaryBorder },, SHADOWS.subtle]}>
                 <View style={styles.rxCtaContent}>
                   <View style={styles.rxPill}>
                     <AppText variant="caption" color="#FFFFFF" weight="600" style={{ fontSize: 9 }}>
                       QUICK ORDER
                     </AppText>
                   </View>
-                  <AppText variant="titleMedium" color={COLORS.primary} weight="600" style={{ marginTop: 4 }}>
+                  <AppText variant="titleMedium" color={colors.primary} weight="600" style={{ marginTop: 4 }}>
                     Have a prescription?
                   </AppText>
-                  <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                  <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                     Upload your Rx and let nearby pharmacies provide the best offers.
                   </AppText>
 
@@ -1058,26 +1069,26 @@ export const HomeScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.rxCtaIllustration}>
-                  <Ionicons name="document-attach" size={52} color={COLORS.primary} />
+                  <Ionicons name="document-attach" size={52} color={colors.primary} />
                 </View>
               </View>
 
 
 
-              {/* SECTION 8 — Frequently Used (2-Row Horizontal Scroll) */}
-              <View style={styles.sectionContainer}>
+              {/* SECTION 8 â€” Frequently Used (2-Row Horizontal Scroll) */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Frequently Used
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Quickly reorder what you use often
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1087,20 +1098,20 @@ export const HomeScreen: React.FC = () => {
 
 
 
-              {/* SECTION 10 — Recommended for You (2-Row Horizontal Scroll) */}
-              <View style={styles.sectionContainer}>
+              {/* SECTION 10 â€” Recommended for You (2-Row Horizontal Scroll) */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Recommended for You
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Personalized recommendations based on health needs
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1108,20 +1119,20 @@ export const HomeScreen: React.FC = () => {
                 {renderTwoRowHorizontal(allMedicines.slice(2, 10), (med) => renderMedicineCard(med))}
               </View>
 
-              {/* SECTION 11 — Frequently Bought Together (Combos) */}
-              <View style={styles.sectionContainer}>
+              {/* SECTION 11 â€” Frequently Bought Together (Combos) */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Frequently Bought Together
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Curated essential health combo bundles
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1140,9 +1151,9 @@ export const HomeScreen: React.FC = () => {
                       <AppText style={styles.comboTitle}>{combo.name}</AppText>
                       <AppText style={styles.comboItemsText}>{combo.items}</AppText>
                       <View style={styles.comboPriceRow}>
-                        <AppText style={styles.comboPriceText}>₹{combo.price}</AppText>
-                        <AppText style={styles.comboMrpText}>₹{combo.originalPrice}</AppText>
-                        <AppText style={styles.comboSavingsText}>Save ₹{combo.savings}</AppText>
+                        <AppText style={styles.comboPriceText}>â‚¹{combo.price}</AppText>
+                        <AppText style={styles.comboMrpText}>â‚¹{combo.originalPrice}</AppText>
+                        <AppText style={styles.comboSavingsText}>Save â‚¹{combo.savings}</AppText>
                       </View>
                     </View>
                     <TouchableOpacity
@@ -1156,20 +1167,20 @@ export const HomeScreen: React.FC = () => {
                 ))}
               </View>
 
-              {/* SECTION 12 — Health & Wellness for You (2x2 Static Grid) */}
-              <View style={styles.sectionContainer}>
+              {/* SECTION 12 â€” Health & Wellness for You (2x2 Static Grid) */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Health & Wellness for You
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Guides, habits & preventive care
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1191,26 +1202,26 @@ export const HomeScreen: React.FC = () => {
                           {article.subtitle}
                         </AppText>
                       </View>
-                      <AppText style={[styles.wellnessExploreText, { color: article.color }]}>Explore →</AppText>
+                      <AppText style={[styles.wellnessExploreText, { color: article.color }]}>Explore â†’</AppText>
                     </TouchableOpacity>
                   ))}
                 </View>
               </View>
 
-              {/* SECTION 13 — Recently Viewed */}
-              <View style={styles.sectionContainer}>
+              {/* SECTION 13 â€” Recently Viewed */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Recently Viewed
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Items you opened recently
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1218,7 +1229,7 @@ export const HomeScreen: React.FC = () => {
                 {renderTwoRowHorizontal(popularMedicines, (med) => renderMedicineCard(med))}
               </View>
 
-              {/* SECTION 14 — Trust & Service Features Bar */}
+              {/* SECTION 14 â€” Trust & Service Features Bar */}
               <View style={styles.trustBarSection}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.trustBarRow}>
                   <View style={styles.trustItem}>
@@ -1261,19 +1272,19 @@ export const HomeScreen: React.FC = () => {
           {activeMode === 'stores' && (
             <>
               {/* 1ST SECTION IN STORE MODE: Shop by Brand (Exact same 3D dark cards carousel) */}
-              <View style={styles.sectionContainer}>
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Shop by Brand
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Trusted certified pharmaceutical companies
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1312,19 +1323,19 @@ export const HomeScreen: React.FC = () => {
               </View>
 
               {/* 2ND SECTION IN STORE MODE: Nearby Pharmacies (Zomato / Blinkit style full-width cards) */}
-              <View style={styles.sectionContainer}>
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View style={{ flex: 1, paddingRight: 8 }}>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Nearby Pharmacies
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                    <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                       Verified licensed chemist shops fulfilling orders
                     </AppText>
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'SearchTab', params: { initialQuery: 'pharmacy' } } as any)}>
-                    <AppText variant="bodySmall" color={COLORS.primary} weight="600">
-                      View all →
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all â†’
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1333,13 +1344,13 @@ export const HomeScreen: React.FC = () => {
               </View>
 
               {/* 3. Store Deals & Offers */}
-              <View style={styles.sectionContainer}>
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Store Deals &amp; Offers
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Special discounts offered by local chemists
                     </AppText>
                   </View>
@@ -1361,12 +1372,12 @@ export const HomeScreen: React.FC = () => {
                       <AppText variant="titleSmall" color={deal.color} weight="600" style={{ marginTop: SPACING.sm }}>
                         {deal.title}
                       </AppText>
-                      <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 4 }}>
-                        🏪 {deal.pharmacyName}
+                      <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 4 }}>
+                        ðŸª {deal.pharmacyName}
                       </AppText>
                       <View style={styles.storeDealActionRow}>
                         <AppText variant="caption" color={deal.color} weight="600">
-                          Visit Store →
+                          Visit Store â†’
                         </AppText>
                       </View>
                     </TouchableOpacity>
@@ -1375,13 +1386,13 @@ export const HomeScreen: React.FC = () => {
               </View>
 
               {/* 4. Browse Stores by Specialization */}
-              <View style={styles.sectionContainer}>
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
-                    <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
                       Browse Stores by Specialization
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary}>
+                    <AppText variant="caption" color={colors.textSecondary}>
                       Find specialized retail medical shops
                     </AppText>
                   </View>
@@ -1400,12 +1411,12 @@ export const HomeScreen: React.FC = () => {
                       style={[styles.storeCategoryCard, SHADOWS.subtle]}
                     >
                       <View style={[styles.storeCatIconCircle, { backgroundColor: '#ECE8F7' }]}>
-                        <Ionicons name={cat.icon as any} size={24} color={COLORS.primary} />
+                        <Ionicons name={cat.icon as any} size={24} color={colors.primary} />
                       </View>
-                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: 8 }}>
+                      <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginTop: 8 }}>
                         {cat.name}
                       </AppText>
-                      <AppText variant="caption" color={COLORS.textMuted} style={{ marginTop: 2 }}>
+                      <AppText variant="caption" color={colors.textMuted} style={{ marginTop: 2 }}>
                         {cat.count}
                       </AppText>
                     </TouchableOpacity>
@@ -1453,7 +1464,7 @@ export const HomeScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   gradientHeader: {
-    paddingTop: Platform.OS === 'android' ? 36 : 46,
+    paddingTop: Platform.OS === 'android' ? 8 : 12,
     paddingHorizontal: 16,
     paddingBottom: 16,
     borderBottomLeftRadius: 28,
@@ -2185,8 +2196,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   pharmacyLogo: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: '100%',
+    minHeight: 70,
     borderRadius: BORDER_RADIUS.md,
     backgroundColor: '#F8F8FC',
   },
@@ -2210,6 +2222,7 @@ const styles = StyleSheet.create({
   pharmacyMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     marginTop: 4,
   },
   storeDealCard: {
@@ -2648,3 +2661,5 @@ const styles = StyleSheet.create({
     fontFamily: 'LexendDeca_400Regular',
   },
 });
+
+

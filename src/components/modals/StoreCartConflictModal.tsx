@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   Modal,
   View,
@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   StyleSheet,
 } from 'react-native';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -24,6 +25,7 @@ export const StoreCartConflictModal: React.FC<StoreCartConflictModalProps> = ({
   onReplaceCart,
   onKeepCurrentCart,
 }) => {
+  const { colors } = useAppTheme();
   if (!visible) return null;
 
   return (
@@ -150,3 +152,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+
+

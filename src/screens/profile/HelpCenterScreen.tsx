@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -14,9 +14,11 @@ import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useSupport } from '../../store/SupportContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const HelpCenterScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { colors, isDark } = useAppTheme();
   const { helpCategories, helpArticles } = useSupport();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,17 +42,17 @@ export const HelpCenterScreen: React.FC = () => {
   }, [helpArticles, selectedCategory, searchQuery]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Help Center
         </AppText>
         <View style={{ width: 40 }} />
@@ -59,17 +61,17 @@ export const HelpCenterScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
         <View style={[styles.searchBox, SHADOWS.subtle]}>
-          <Ionicons name="search" size={20} color={COLORS.textMuted} />
+          <Ionicons name="search" size={20} color={colors.textMuted} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search your issue (e.g. order, refund, rx)"
-            placeholderTextColor={COLORS.textMuted}
+            placeholderTextColor={colors.textMuted}
             style={styles.searchInput}
           />
           {searchQuery ? (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -97,7 +99,7 @@ export const HelpCenterScreen: React.FC = () => {
         </TouchableOpacity>
 
         {/* Categories Grid */}
-        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+        <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
           Browse by Category
         </AppText>
 
@@ -129,14 +131,14 @@ export const HelpCenterScreen: React.FC = () => {
                 </View>
                 <AppText
                   variant="bodySmall"
-                  color={COLORS.textPrimary}
+                  color={colors.textPrimary}
                   weight="600"
                   numberOfLines={1}
                   style={{ marginTop: SPACING.xs }}
                 >
                   {cat.title}
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary} style={{ fontSize: 11 }}>
+                <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 11 }}>
                   {cat.articleCount} articles
                 </AppText>
               </TouchableOpacity>
@@ -146,7 +148,7 @@ export const HelpCenterScreen: React.FC = () => {
 
         {/* Articles List */}
         <View style={styles.articlesSection}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
             {selectedCategory
               ? `${helpCategories.find((c) => c.id === selectedCategory)?.title} Questions`
               : 'Frequently Asked Questions'}
@@ -154,8 +156,8 @@ export const HelpCenterScreen: React.FC = () => {
 
           {filteredArticles.length === 0 ? (
             <View style={styles.emptyArticles}>
-              <Ionicons name="help-circle-outline" size={36} color={COLORS.textMuted} />
-              <AppText variant="bodyMedium" color={COLORS.textSecondary} style={{ marginTop: SPACING.xs }}>
+              <Ionicons name="help-circle-outline" size={36} color={colors.textMuted} />
+              <AppText variant="bodyMedium" color={colors.textSecondary} style={{ marginTop: SPACING.xs }}>
                 No matching help articles found.
               </AppText>
             </View>
@@ -169,14 +171,14 @@ export const HelpCenterScreen: React.FC = () => {
                     style={styles.articleRow}
                   >
                     <View style={styles.articleTextCol}>
-                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                      <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                         {art.title}
                       </AppText>
-                      <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={2} style={{ marginTop: 2 }}>
+                      <AppText variant="caption" color={colors.textSecondary} numberOfLines={2} style={{ marginTop: 2 }}>
                         {art.shortDescription}
                       </AppText>
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+                    <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
                   </TouchableOpacity>
                   {idx < filteredArticles.length - 1 && <View style={styles.divider} />}
                 </React.Fragment>
@@ -314,3 +316,7 @@ const styles = StyleSheet.create({
     borderColor: '#E8E8EE',
   },
 });
+
+
+
+

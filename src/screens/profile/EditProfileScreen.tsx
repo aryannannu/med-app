@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -20,12 +20,14 @@ import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../store/AuthContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatPhoneNumber } from '../../utils/formatters';
 
 export const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const [name, setName] = useState(user?.name || 'Aryan Kumar');
   const [email, setEmail] = useState(user?.email || 'aryan.kumar@example.com');
@@ -120,17 +122,17 @@ export const EditProfileScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Personal Information
         </AppText>
         <View style={{ width: 40 }} />
@@ -161,16 +163,16 @@ export const EditProfileScreen: React.FC = () => {
                 <Ionicons name="camera" size={16} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: SPACING.sm }}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: SPACING.sm }}>
               Tap to change profile picture
             </AppText>
           </View>
 
           {/* Form Fields */}
-          <View style={[styles.card, SHADOWS.subtle]}>
+          <View style={[styles.card, SHADOWS.subtle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {/* Full Name */}
             <View style={styles.fieldGroup}>
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
                 FULL NAME *
               </AppText>
               <TextInput
@@ -180,11 +182,11 @@ export const EditProfileScreen: React.FC = () => {
                   if (nameError) setNameError('');
                 }}
                 placeholder="Enter your full name"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 style={[styles.input, nameError ? styles.inputError : null]}
               />
               {nameError ? (
-                <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+                <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                   {nameError}
                 </AppText>
               ) : null}
@@ -193,17 +195,17 @@ export const EditProfileScreen: React.FC = () => {
             {/* Mobile Number with Change Trigger */}
             <View style={styles.fieldGroup}>
               <View style={styles.labelRow}>
-                <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+                <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
                   MOBILE NUMBER * (LOGIN ID)
                 </AppText>
                 <TouchableOpacity onPress={() => setShowPhoneModal(true)}>
-                  <AppText variant="caption" color={COLORS.primary} weight="600">
+                  <AppText variant="caption" color={colors.primary} weight="600">
                     Change
                   </AppText>
                 </TouchableOpacity>
               </View>
               <View style={styles.phoneDisplayBox}>
-                <AppText variant="bodyMedium" color={COLORS.textPrimary} weight="600">
+                <AppText variant="bodyMedium" color={colors.textPrimary} weight="600">
                   +91 {formatPhoneNumber(phone)}
                 </AppText>
                 <View style={styles.verifiedTag}>
@@ -217,7 +219,7 @@ export const EditProfileScreen: React.FC = () => {
 
             {/* Email Address */}
             <View style={styles.fieldGroup}>
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
                 EMAIL ADDRESS (FOR INVOICES)
               </AppText>
               <TextInput
@@ -227,13 +229,13 @@ export const EditProfileScreen: React.FC = () => {
                   if (emailError) setEmailError('');
                 }}
                 placeholder="Enter email address"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={[styles.input, emailError ? styles.inputError : null]}
               />
               {emailError ? (
-                <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+                <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                   {emailError}
                 </AppText>
               ) : null}
@@ -241,21 +243,21 @@ export const EditProfileScreen: React.FC = () => {
 
             {/* Date of Birth */}
             <View style={styles.fieldGroup}>
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
                 DATE OF BIRTH (OPTIONAL)
               </AppText>
               <TextInput
                 value={dob}
                 onChangeText={setDob}
                 placeholder="DD Month YYYY (e.g. 14 Aug 1996)"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 style={styles.input}
               />
             </View>
 
             {/* Gender */}
             <View style={styles.fieldGroupLast}>
-              <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
                 GENDER
               </AppText>
               <View style={styles.genderRow}>
@@ -299,23 +301,23 @@ export const EditProfileScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, SHADOWS.modal]}>
             <View style={styles.modalHeader}>
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
                 Change Mobile Number
               </AppText>
               <TouchableOpacity onPress={() => setShowPhoneModal(false)}>
-                <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             {otpStep === 'input' ? (
               <View style={{ marginTop: SPACING.md }}>
-                <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginBottom: SPACING.md }}>
+                <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginBottom: SPACING.md }}>
                   Enter your new 10-digit mobile number. We will send a 6-digit OTP to verify.
                 </AppText>
 
                 <View style={styles.phoneInputRow}>
                   <View style={styles.countryCodeBox}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                    <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                       🇮🇳 +91
                     </AppText>
                   </View>
@@ -326,7 +328,7 @@ export const EditProfileScreen: React.FC = () => {
                       if (phoneModalError) setPhoneModalError('');
                     }}
                     placeholder="New Mobile Number"
-                    placeholderTextColor={COLORS.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="phone-pad"
                     maxLength={10}
                     style={styles.phoneInput}
@@ -334,7 +336,7 @@ export const EditProfileScreen: React.FC = () => {
                 </View>
 
                 {phoneModalError ? (
-                  <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+                  <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                     {phoneModalError}
                   </AppText>
                 ) : null}
@@ -350,8 +352,8 @@ export const EditProfileScreen: React.FC = () => {
               </View>
             ) : (
               <View style={{ marginTop: SPACING.md }}>
-                <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginBottom: SPACING.md }}>
-                  Enter the 6-digit OTP sent to <AppText variant="bodySmall" weight="600" color={COLORS.textPrimary}>+91 {newPhone}</AppText>
+                <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginBottom: SPACING.md }}>
+                  Enter the 6-digit OTP sent to <AppText variant="bodySmall" weight="600" color={colors.textPrimary}>+91 {newPhone}</AppText>
                 </AppText>
 
                 <View style={styles.otpBoxesRow}>
@@ -372,7 +374,7 @@ export const EditProfileScreen: React.FC = () => {
                 </View>
 
                 {phoneModalError ? (
-                  <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+                  <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                     {phoneModalError}
                   </AppText>
                 ) : null}
@@ -599,3 +601,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+
+
+

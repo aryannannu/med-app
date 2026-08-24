@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 
 export interface VerifiedBadgeProps {
@@ -13,6 +14,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
   label = 'Verified Pharmacy',
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View style={[styles.badge, style]}>
       <Ionicons name="checkmark-circle" size={14} color={COLORS.secondary} />
@@ -38,3 +40,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
 });
+
+
+

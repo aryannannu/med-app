@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { COLORS, SPACING } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export interface AppScreenProps {
   children: React.ReactNode;
@@ -27,20 +28,23 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   scrollable = false,
   style,
   contentContainerStyle,
-  backgroundColor = COLORS.background,
+  backgroundColor,
   refreshing = false,
   onRefresh,
   header,
   footer,
 }) => {
+  const { colors, isDark } = useAppTheme();
+  const resolvedBg = backgroundColor && backgroundColor !== COLORS.background ? backgroundColor : colors.background;
+
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor }]}>
-      <StatusBar barStyle="dark-content" backgroundColor={backgroundColor} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: resolvedBg }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={resolvedBg} />
       {header}
 
       {scrollable ? (
         <ScrollView
-          style={[styles.container, style]}
+          style={[styles.container, { backgroundColor: resolvedBg }, style]}
           contentContainerStyle={[styles.scrollContent, contentContainerStyle]}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -48,8 +52,8 @@ export const AppScreen: React.FC<AppScreenProps> = ({
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                colors={[COLORS.primary]}
-                tintColor={COLORS.primary}
+                colors={[colors.primary]}
+                tintColor={colors.primary}
               />
             ) : undefined
           }
@@ -57,7 +61,7 @@ export const AppScreen: React.FC<AppScreenProps> = ({
           {children}
         </ScrollView>
       ) : (
-        <View style={[styles.container, styles.flex, style]}>{children}</View>
+        <View style={[styles.container, styles.flex, { backgroundColor: resolvedBg }, style]}>{children}</View>
       )}
 
       {footer}

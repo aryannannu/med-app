@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSupport } from '../../store/SupportContext';
 import { TicketCategory } from '../../types/support';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 const ISSUE_CATEGORIES: TicketCategory[] = [
   'Order',
@@ -35,6 +36,7 @@ export const ReportIssueScreen: React.FC = () => {
   const route = useRoute<RouteProp<AppStackParamList, 'ReportIssue'>>();
   const { createTicket } = useSupport();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const [category, setCategory] = useState<TicketCategory>(
     (route.params?.category as TicketCategory) || 'Order'
@@ -90,17 +92,17 @@ export const ReportIssueScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Report an Issue
         </AppText>
         <View style={{ width: 40 }} />
@@ -108,7 +110,7 @@ export const ReportIssueScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Category Selector */}
-        <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionTitle}>
+        <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionTitle}>
           SELECT ISSUE CATEGORY *
         </AppText>
 
@@ -138,8 +140,8 @@ export const ReportIssueScreen: React.FC = () => {
           {/* Related Order if present */}
           {orderId && (
             <View style={styles.relatedOrderRow}>
-              <Ionicons name="receipt-outline" size={16} color={COLORS.primary} />
-              <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+              <Ionicons name="receipt-outline" size={16} color={colors.primary} />
+              <AppText variant="caption" color={colors.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                 Order #{orderId.toUpperCase()} linked
               </AppText>
             </View>
@@ -147,7 +149,7 @@ export const ReportIssueScreen: React.FC = () => {
 
           {/* Subject Field */}
           <View style={styles.fieldGroup}>
-            <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+            <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
               ISSUE SUMMARY / TITLE *
             </AppText>
             <TextInput
@@ -157,11 +159,11 @@ export const ReportIssueScreen: React.FC = () => {
                 if (subjectError) setSubjectError('');
               }}
               placeholder="e.g. Received incorrect dosage, delayed delivery"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={colors.textMuted}
               style={[styles.input, subjectError ? styles.inputError : null]}
             />
             {subjectError ? (
-              <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+              <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                 {subjectError}
               </AppText>
             ) : null}
@@ -169,7 +171,7 @@ export const ReportIssueScreen: React.FC = () => {
 
           {/* Description Field */}
           <View style={styles.fieldGroup}>
-            <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+            <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
               DESCRIBE THE ISSUE IN DETAIL *
             </AppText>
             <TextInput
@@ -179,14 +181,14 @@ export const ReportIssueScreen: React.FC = () => {
                 if (descError) setDescError('');
               }}
               placeholder="Please describe what happened so our pharmacy operations team can resolve it quickly..."
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={5}
               textAlignVertical="top"
               style={[styles.textArea, descError ? styles.inputError : null]}
             />
             {descError ? (
-              <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+              <AppText variant="caption" color={colors.danger} style={styles.errorText}>
                 {descError}
               </AppText>
             ) : null}
@@ -239,18 +241,18 @@ export const ReportIssueScreen: React.FC = () => {
             <View style={styles.successIconCircle}>
               <Ionicons name="checkmark" size={32} color="#15803D" />
             </View>
-            <AppText variant="h3" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.md }}>
+            <AppText variant="h3" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.md }}>
               Issue Reported!
             </AppText>
-            <AppText variant="bodySmall" color={COLORS.textSecondary} align="center" style={{ marginTop: SPACING.xs }}>
+            <AppText variant="bodySmall" color={colors.textSecondary} align="center" style={{ marginTop: SPACING.xs }}>
               Ticket Reference ID:
             </AppText>
             <View style={styles.ticketIdBadge}>
-              <AppText variant="titleMedium" color={COLORS.primary} weight="600">
+              <AppText variant="titleMedium" color={colors.primary} weight="600">
                 {createdTicketId}
               </AppText>
             </View>
-            <AppText variant="caption" color={COLORS.textSecondary} align="center" style={{ marginTop: SPACING.md }}>
+            <AppText variant="caption" color={colors.textSecondary} align="center" style={{ marginTop: SPACING.md }}>
               Our customer care and pharmacy partner team will review your report and respond within 2 hours.
             </AppText>
             <AppButton
@@ -413,3 +415,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+
+
+
+

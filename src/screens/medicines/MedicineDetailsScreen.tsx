@@ -25,6 +25,7 @@ import { MedicineService } from '../../services/medicineService';
 import { Medicine } from '../../types/medicine';
 import { useCart } from '../../store/CartContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 
 export const MedicineDetailsScreen: React.FC = () => {
@@ -43,6 +44,7 @@ export const MedicineDetailsScreen: React.FC = () => {
 
   const { totalItemCount, addToCart, removeFromCart, updateQuantity, getItemQuantity, undoRemove } = useCart();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
   const [showVariantModal, setShowVariantModal] = useState(false);
 
   useEffect(() => {

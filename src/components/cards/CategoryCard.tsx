@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
 import { MedicineCategory } from '../../types/medicine';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -18,6 +19,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   isSelected = false,
   style,
 }) => {
+  const { colors } = useAppTheme();
   const iconColor = category.color || COLORS.primary;
 
   return (
@@ -77,3 +79,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
 });
+
+
+

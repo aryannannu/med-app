@@ -7,7 +7,8 @@ import {
   TextStyle,
   View,
 } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from './AppText';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -40,28 +41,30 @@ export const AppButton: React.FC<AppButtonProps> = ({
   textStyle,
   fullWidth = true,
 }) => {
+  const { colors } = useAppTheme();
+
   const getContainerStyle = (): ViewStyle => {
-    let bg: string = COLORS.primary;
+    let bg: string = colors.primary;
     let border: string = 'transparent';
     let borderWidth: number = 0;
 
     switch (variant) {
       case 'primary':
-        bg = COLORS.primary;
+        bg = colors.primary;
         break;
       case 'secondary':
-        bg = COLORS.primaryMuted;
+        bg = colors.primaryMuted;
         break;
       case 'outline':
-        bg = COLORS.surface;
-        border = COLORS.primaryBorder;
+        bg = colors.surface;
+        border = colors.primaryBorder;
         borderWidth = 1.5;
         break;
       case 'ghost':
         bg = 'transparent';
         break;
       case 'danger':
-        bg = COLORS.danger;
+        bg = colors.danger;
         break;
     }
 
@@ -80,8 +83,8 @@ export const AppButton: React.FC<AppButtonProps> = ({
     }
 
     return {
-      backgroundColor: disabled ? COLORS.surfaceMuted : bg,
-      borderColor: disabled ? COLORS.border : border,
+      backgroundColor: disabled ? colors.surfaceMuted : bg,
+      borderColor: disabled ? colors.border : border,
       borderWidth,
       minHeight,
       paddingVertical,
@@ -96,18 +99,18 @@ export const AppButton: React.FC<AppButtonProps> = ({
   };
 
   const getTextColor = (): string => {
-    if (disabled) return COLORS.textMuted;
+    if (disabled) return colors.textMuted;
     switch (variant) {
       case 'primary':
       case 'danger':
-        return COLORS.textInverse;
+        return colors.textInverse;
       case 'secondary':
-        return COLORS.primary;
+        return colors.primary;
       case 'outline':
       case 'ghost':
-        return COLORS.primary;
+        return colors.primary;
       default:
-        return COLORS.textInverse;
+        return colors.textInverse;
     }
   };
 
@@ -121,7 +124,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'outline' || variant === 'ghost' ? COLORS.primary : COLORS.textInverse}
+          color={variant === 'outline' || variant === 'ghost' ? colors.primary : colors.textInverse}
         />
       ) : (
         <View style={styles.contentRow}>

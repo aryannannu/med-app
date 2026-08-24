@@ -1,4 +1,4 @@
-import { COLORS } from './colors';
+import { COLORS, LIGHT_COLORS, DARK_COLORS, ThemeColors } from './colors';
 import { TYPOGRAPHY, FONT_FAMILY, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from './typography';
 import { SPACING, LAYOUT } from './spacing';
 import { BORDER_RADIUS, ICON_SIZES } from './borderRadius';
@@ -22,6 +22,9 @@ export type Theme = typeof THEME;
 
 export {
   COLORS,
+  LIGHT_COLORS,
+  DARK_COLORS,
+  ThemeColors,
   TYPOGRAPHY,
   FONT_FAMILY,
   FONT_SIZES,
@@ -33,3 +36,4 @@ export {
   ICON_SIZES,
   SHADOWS,
 };
+

@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 
 export interface RatingBadgeProps {
@@ -17,6 +18,7 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
   showCount = true,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View style={[styles.container, style]}>
       <View style={styles.pill}>
@@ -26,7 +28,7 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
         </AppText>
       </View>
       {showCount && reviewCount !== undefined && (
-        <AppText variant="caption" color={COLORS.textMuted} style={styles.countText}>
+        <AppText variant="caption" color={colors.textMuted} style={styles.countText}>
           ({reviewCount.toLocaleString()})
         </AppText>
       )}
@@ -56,3 +58,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
 });
+
+
+

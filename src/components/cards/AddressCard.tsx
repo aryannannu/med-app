@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Address } from '../../types/user';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { formatPhoneNumber } from '../../utils/formatters';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,6 +22,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
   onEdit,
   style,
 }) => {
+  const { colors } = useAppTheme();
   const Container = onSelect ? TouchableOpacity : View;
 
   return (
@@ -45,45 +47,45 @@ export const AddressCard: React.FC<AddressCardProps> = ({
                 : 'location-outline'
             }
             size={14}
-            color={COLORS.primary}
+            color={colors.primary}
           />
-          <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
+          <AppText variant="caption" color={colors.primary} weight="600" style={{ marginLeft: 4 }}>
             {address.label.toUpperCase()}
           </AppText>
         </View>
 
         {isSelected && (
           <View style={styles.selectedBadge}>
-            <Ionicons name="checkmark-circle" size={15} color={COLORS.primary} />
-            <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 3 }}>
+            <Ionicons name="checkmark-circle" size={15} color={colors.primary} />
+            <AppText variant="caption" color={colors.primary} weight="600" style={{ marginLeft: 3 }}>
               Selected
             </AppText>
           </View>
         )}
       </View>
 
-      <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.recipientName}>
+      <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.recipientName}>
         {address.recipientName}
       </AppText>
 
-      <AppText variant="bodyMedium" color={COLORS.textSecondary} style={styles.fullAddress}>
+      <AppText variant="bodyMedium" color={colors.textSecondary} style={styles.fullAddress}>
         {address.houseFlatNumber}, {address.streetAddress}
         {address.landmark ? `, Near ${address.landmark}` : ''}
       </AppText>
 
-      <AppText variant="bodySmall" color={COLORS.textMuted} style={styles.cityPincode}>
+      <AppText variant="bodySmall" color={colors.textMuted} style={styles.cityPincode}>
         {address.city} - {address.pincode}
       </AppText>
 
-      <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" style={styles.phone}>
+      <AppText variant="bodySmall" color={colors.textPrimary} weight="600" style={styles.phone}>
         Phone: {formatPhoneNumber(address.phone)}
       </AppText>
 
       {onEdit && (
         <View style={styles.actionsRow}>
           <TouchableOpacity onPress={onEdit} style={styles.editBtn}>
-            <Ionicons name="pencil-outline" size={14} color={COLORS.primary} />
-            <AppText variant="buttonSmall" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
+            <Ionicons name="pencil-outline" size={14} color={colors.primary} />
+            <AppText variant="buttonSmall" color={colors.primary} weight="600" style={{ marginLeft: 4 }}>
               Edit Address
             </AppText>
           </TouchableOpacity>
@@ -158,3 +160,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
   },
 });
+
+
+

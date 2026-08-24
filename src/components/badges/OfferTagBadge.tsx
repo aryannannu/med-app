@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { OfferTag } from '../../types/offer';
 
@@ -11,7 +12,9 @@ export interface OfferTagBadgeProps {
 }
 
 export const OfferTagBadge: React.FC<OfferTagBadgeProps> = ({ tag, style }) => {
+  const { colors } = useAppTheme();
   const getTagConfig = () => {
+  const { colors } = useAppTheme();
     switch (tag) {
       case 'lowest_price':
         return {
@@ -88,3 +91,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
 });
+
+
+

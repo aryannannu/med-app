@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   Modal,
   View,
@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { AppButton } from '../common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,6 +34,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <Modal
       transparent
@@ -57,11 +59,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 />
               </View>
 
-              <AppText variant="titleLarge" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
+              <AppText variant="titleLarge" color={colors.textPrimary} weight="600" align="center" style={styles.title}>
                 {title}
               </AppText>
 
-              <AppText variant="bodyMedium" color={COLORS.textSecondary} align="center" style={styles.message}>
+              <AppText variant="bodyMedium" color={colors.textSecondary} align="center" style={styles.message}>
                 {message}
               </AppText>
 
@@ -132,3 +134,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+
+

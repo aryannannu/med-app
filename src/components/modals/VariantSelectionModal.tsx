@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import { useAppTheme } from '../../store/ThemeContext';
 import { Medicine, MedicineVariant } from '../../types/medicine';
 import { useCart } from '../../store/CartContext';
 import { useToast } from '../../store/ToastContext';
@@ -29,6 +30,7 @@ export const VariantSelectionModal: React.FC<VariantSelectionModalProps> = ({
   sourcePharmacyId,
   sourcePharmacyName,
 }) => {
+  const { colors } = useAppTheme();
   const { addToCart, getVariantQuantity, updateQuantity, removeFromCart, undoRemove } = useCart();
   const { showToast } = useToast();
 
@@ -276,7 +278,7 @@ export const VariantSelectionModal: React.FC<VariantSelectionModalProps> = ({
                       ? 'Select a Pack'
                       : selectedVariant.inStock === false
                       ? 'Currently Unavailable'
-                      : `Add ${selectedVariant.label || selectedVariant.packSize} • ${formatCurrency(
+                      : `Add ${selectedVariant.label || selectedVariant.packSize} â€¢ ${formatCurrency(
                           selectedVariant.discountPrice || selectedVariant.mrp
                         )}`}
                   </AppText>
@@ -502,3 +504,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+
+

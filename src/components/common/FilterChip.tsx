@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from './AppText';
 
 export interface FilterChipProps {
@@ -21,6 +22,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({
   iconName,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <TouchableOpacity
       activeOpacity={0.75}
@@ -96,3 +98,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
 });
+
+
+

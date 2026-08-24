@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -16,9 +16,11 @@ import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '../../utils/currency';
 import { useOrders } from '../../store/OrderContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const OrderConfirmationScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { colors, isDark } = useAppTheme();
   const route = useRoute<RouteProp<AppStackParamList, 'OrderConfirmation'>>();
   const { orders } = useOrders();
 
@@ -40,7 +42,7 @@ export const OrderConfirmationScreen: React.FC = () => {
   const deliveryEta = order?.selectedOffer?.estimatedDeliveryMinutes || 12;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Success Animation Badge */}
         <View style={styles.celebrationContainer}>
@@ -48,10 +50,10 @@ export const OrderConfirmationScreen: React.FC = () => {
             <Ionicons name="checkmark" size={44} color="#FFFFFF" />
           </Animated.View>
 
-          <AppText variant="h2" color={COLORS.textPrimary} weight="600" style={styles.successTitle}>
+          <AppText variant="h2" color={colors.textPrimary} weight="600" style={styles.successTitle}>
             Order Placed Successfully!
           </AppText>
-          <AppText variant="caption" color={COLORS.textSecondary} align="center">
+          <AppText variant="caption" color={colors.textSecondary} align="center">
             Your medicine cart has been confirmed &amp; sent to the dispensing pharmacy.
           </AppText>
         </View>
@@ -60,10 +62,10 @@ export const OrderConfirmationScreen: React.FC = () => {
         <View style={[styles.orderHeroCard, SHADOWS.card]}>
           <View style={styles.orderHeroTop}>
             <View>
-              <AppText variant="caption" color={COLORS.textMuted} weight="600">
+              <AppText variant="caption" color={colors.textMuted} weight="600">
                 ORDER ID
               </AppText>
-              <AppText variant="titleMedium" color={COLORS.primary} weight="600" style={{ marginTop: 2 }}>
+              <AppText variant="titleMedium" color={colors.primary} weight="600" style={{ marginTop: 2 }}>
                 #{order.id.toUpperCase()}
               </AppText>
             </View>
@@ -81,14 +83,14 @@ export const OrderConfirmationScreen: React.FC = () => {
           {/* Pharmacy Info */}
           <View style={styles.pharmacyRow}>
             <View style={styles.pharmacyIconBox}>
-              <Ionicons name="storefront" size={20} color={COLORS.primary} />
+              <Ionicons name="storefront" size={20} color={colors.primary} />
             </View>
             <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-              <AppText variant="caption" color={COLORS.textMuted}>
+              <AppText variant="caption" color={colors.textMuted}>
                 DISPENSING PHARMACY
               </AppText>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 1 }}>
-                <AppText variant="bodyMedium" color={COLORS.textPrimary} weight="600">
+                <AppText variant="bodyMedium" color={colors.textPrimary} weight="600">
                   {pharmacyName}
                 </AppText>
                 <Ionicons name="checkmark-circle" size={14} color="#15803D" style={{ marginLeft: 4 }} />
@@ -100,12 +102,12 @@ export const OrderConfirmationScreen: React.FC = () => {
 
           {/* Delivery Address */}
           <View style={styles.deliveryRow}>
-            <Ionicons name="location-outline" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="location-outline" size={18} color={colors.textSecondary} />
             <View style={{ flex: 1, marginLeft: SPACING.xs }}>
-              <AppText variant="caption" color={COLORS.textSecondary}>
-                Deliver to: <AppText variant="caption" color={COLORS.textPrimary} weight="600">{order.deliveryAddress.recipientName}</AppText> ({order.deliveryAddress.label})
+              <AppText variant="caption" color={colors.textSecondary}>
+                Deliver to: <AppText variant="caption" color={colors.textPrimary} weight="600">{order.deliveryAddress.recipientName}</AppText> ({order.deliveryAddress.label})
               </AppText>
-              <AppText variant="caption" color={COLORS.textMuted} numberOfLines={1} style={{ fontSize: 11 }}>
+              <AppText variant="caption" color={colors.textMuted} numberOfLines={1} style={{ fontSize: 11 }}>
                 {order.deliveryAddress.houseFlatNumber}, {order.deliveryAddress.streetAddress}, {order.deliveryAddress.city}
               </AppText>
             </View>
@@ -116,10 +118,10 @@ export const OrderConfirmationScreen: React.FC = () => {
           {/* Payment Details */}
           <View style={styles.paymentRow}>
             <View>
-              <AppText variant="caption" color={COLORS.textMuted}>
+              <AppText variant="caption" color={colors.textMuted}>
                 AMOUNT PAID
               </AppText>
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: 2 }}>
+              <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginTop: 2 }}>
                 {formatCurrency(order.totalAmount)}
               </AppText>
             </View>
@@ -135,7 +137,7 @@ export const OrderConfirmationScreen: React.FC = () => {
 
         {/* Live Order Steps Timeline Preview */}
         <View style={[styles.timelineCard, SHADOWS.subtle]}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
             Live Fulfillment Status
           </AppText>
 
@@ -144,10 +146,10 @@ export const OrderConfirmationScreen: React.FC = () => {
               <Ionicons name="checkmark" size={12} color="#FFFFFF" />
             </View>
             <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-              <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="bodySmall" color={colors.textPrimary} weight="600">
                 Order Received by Pharmacy
               </AppText>
-              <AppText variant="caption" color={COLORS.textMuted}>
+              <AppText variant="caption" color={colors.textMuted}>
                 Pharmacist verifying batch stocks &amp; packing medicines
               </AppText>
             </View>
@@ -158,10 +160,10 @@ export const OrderConfirmationScreen: React.FC = () => {
           <View style={styles.timelineStep}>
             <View style={styles.stepDotPending} />
             <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-              <AppText variant="bodySmall" color={COLORS.textSecondary}>
+              <AppText variant="bodySmall" color={colors.textSecondary}>
                 Express Rider Assigned
               </AppText>
-              <AppText variant="caption" color={COLORS.textMuted}>
+              <AppText variant="caption" color={colors.textMuted}>
                 Delivery partner will pick up from store
               </AppText>
             </View>
@@ -172,7 +174,7 @@ export const OrderConfirmationScreen: React.FC = () => {
           <View style={styles.timelineStep}>
             <View style={styles.stepDotPending} />
             <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-              <AppText variant="bodySmall" color={COLORS.textSecondary}>
+              <AppText variant="bodySmall" color={colors.textSecondary}>
                 Delivered at Doorstep ({deliveryEta} mins)
               </AppText>
             </View>
@@ -196,8 +198,8 @@ export const OrderConfirmationScreen: React.FC = () => {
             onPress={() => navigation.navigate('OrderInvoice', { orderId: order.id })}
             style={styles.secondaryActionBtn}
           >
-            <Ionicons name="document-text-outline" size={16} color={COLORS.primary} />
-            <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
+            <Ionicons name="document-text-outline" size={16} color={colors.primary} />
+            <AppText variant="caption" color={colors.primary} weight="600" style={{ marginLeft: 4 }}>
               Tax Invoice
             </AppText>
           </TouchableOpacity>
@@ -206,8 +208,8 @@ export const OrderConfirmationScreen: React.FC = () => {
             onPress={() => navigation.navigate('MainTabs', { screen: 'HomeTab' })}
             style={styles.secondaryActionBtn}
           >
-            <Ionicons name="home-outline" size={16} color={COLORS.textSecondary} />
-            <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={{ marginLeft: 4 }}>
+            <Ionicons name="home-outline" size={16} color={colors.textSecondary} />
+            <AppText variant="caption" color={colors.textSecondary} weight="600" style={{ marginLeft: 4 }}>
               Continue Shopping
             </AppText>
           </TouchableOpacity>
@@ -363,3 +365,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
   },
 });
+

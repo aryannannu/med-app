@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -14,11 +14,13 @@ import { AppText } from '../../components/common/AppText';
 import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useWallet } from '../../store/WalletContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/formatters';
 
 export const WalletScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { colors, isDark } = useAppTheme();
   const { balance, transactions } = useWallet();
   const [activeTab, setActiveTab] = useState<'all' | 'credits' | 'debits'>('all');
 
@@ -33,24 +35,24 @@ export const WalletScreen: React.FC = () => {
   }, [transactions, activeTab]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           HEALIT Wallet
         </AppText>
         <TouchableOpacity
           onPress={() => navigation.navigate('HelpArticle', { articleId: 'art-4' })}
           style={styles.helpBtn}
         >
-          <Ionicons name="help-circle-outline" size={22} color={COLORS.primary} />
+          <Ionicons name="help-circle-outline" size={22} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -108,7 +110,7 @@ export const WalletScreen: React.FC = () => {
               onPress={() => navigation.navigate('AddMoney', { prefilledAmount: amt })}
               style={[styles.quickChip, SHADOWS.subtle]}
             >
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 +{formatCurrency(amt)}
               </AppText>
             </TouchableOpacity>
@@ -117,7 +119,7 @@ export const WalletScreen: React.FC = () => {
 
         {/* Transaction History Section */}
         <View style={styles.historySection}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
             Wallet Activity & History
           </AppText>
 
@@ -166,11 +168,11 @@ export const WalletScreen: React.FC = () => {
           {/* Transactions List */}
           {filteredTransactions.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Ionicons name="receipt-outline" size={40} color={COLORS.textMuted} />
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.sm }}>
+              <Ionicons name="receipt-outline" size={40} color={colors.textMuted} />
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.sm }}>
                 No transactions in this category
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} align="center" style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} align="center" style={{ marginTop: 2 }}>
                 Your wallet top-ups, order payments, and refunds will show up here.
               </AppText>
             </View>
@@ -210,10 +212,10 @@ export const WalletScreen: React.FC = () => {
                       </View>
 
                       <View style={styles.txDetailsCol}>
-                        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                        <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                           {tx.title}
                         </AppText>
-                        <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                        <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                           {formatDate(tx.timestamp)}
                         </AppText>
                       </View>
@@ -425,3 +427,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+
+

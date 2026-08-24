@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, SafeAreaView, Animated, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,9 +10,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useOffers } from '../../store/OfferContext';
 import { useCart } from '../../store/CartContext';
 import { useAddress } from '../../store/AddressContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const FindingPharmaciesScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { colors, isDark } = useAppTheme();
   const route = useRoute<RouteProp<AppStackParamList, 'FindingPharmacies'>>();
   const cartId = route.params?.cartId || 'cart-current';
 
@@ -112,14 +114,14 @@ export const FindingPharmaciesScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         {/* Brand header */}
         <View style={styles.brandRow}>
           <View style={styles.brandIconCircle}>
             <Ionicons name="sparkles" size={16} color="#FFFFFF" />
           </View>
-          <AppText variant="titleSmall" color={COLORS.primary} weight="600" style={{ marginLeft: 8, letterSpacing: 0.5 }}>
+          <AppText variant="titleSmall" color={colors.primary} weight="600" style={{ marginLeft: 8, letterSpacing: 0.5 }}>
             HEALIT MARKETPLACE ENGINE
           </AppText>
         </View>
@@ -164,7 +166,7 @@ export const FindingPharmaciesScreen: React.FC = () => {
 
           {/* Satellite Pharmacy Pins */}
           <View style={[styles.satellitePin, { top: 15, left: 35 }]}>
-            <Ionicons name="storefront" size={14} color={COLORS.primary} />
+            <Ionicons name="storefront" size={14} color={colors.primary} />
           </View>
           <View style={[styles.satellitePin, { top: 30, right: 30 }]}>
             <Ionicons name="medical" size={14} color="#15803D" />
@@ -179,11 +181,11 @@ export const FindingPharmaciesScreen: React.FC = () => {
 
         {/* Status Messaging */}
         <View style={styles.statusContainer}>
-          <AppText variant="h2" color={COLORS.textPrimary} weight="600" align="center" style={styles.statusTitle}>
+          <AppText variant="h2" color={colors.textPrimary} weight="600" align="center" style={styles.statusTitle}>
             Requesting Pharmacy Bids
           </AppText>
 
-          <AppText variant="bodySmall" color={COLORS.textSecondary} align="center" style={styles.statusDescription}>
+          <AppText variant="bodySmall" color={colors.textSecondary} align="center" style={styles.statusDescription}>
             {matchingStatusText || 'Matching your medicine requirement with licensed local pharmacies...'}
           </AppText>
 
@@ -196,7 +198,7 @@ export const FindingPharmaciesScreen: React.FC = () => {
                   <Ionicons name="checkmark" size={14} color="#FFFFFF" />
                 </View>
               ) : (
-                <ActivityIndicator size="small" color={COLORS.primary} />
+                <ActivityIndicator size="small" color={colors.primary} />
               )}
               <AppText
                 variant="bodySmall"
@@ -215,7 +217,7 @@ export const FindingPharmaciesScreen: React.FC = () => {
                   <Ionicons name="checkmark" size={14} color="#FFFFFF" />
                 </View>
               ) : matchingStep === 1 ? (
-                <ActivityIndicator size="small" color={COLORS.primary} />
+                <ActivityIndicator size="small" color={colors.primary} />
               ) : (
                 <View style={styles.stepPendingDot} />
               )}
@@ -236,7 +238,7 @@ export const FindingPharmaciesScreen: React.FC = () => {
                   <Ionicons name="checkmark" size={14} color="#FFFFFF" />
                 </View>
               ) : matchingStep === 2 ? (
-                <ActivityIndicator size="small" color={COLORS.primary} />
+                <ActivityIndicator size="small" color={colors.primary} />
               ) : (
                 <View style={styles.stepPendingDot} />
               )}
@@ -288,7 +290,7 @@ export const FindingPharmaciesScreen: React.FC = () => {
         {/* Footer info */}
         <View style={styles.footer}>
           <Ionicons name="shield-checkmark" size={16} color="#15803D" />
-          <AppText variant="caption" color={COLORS.textSecondary} style={{ marginLeft: 6 }}>
+          <AppText variant="caption" color={colors.textSecondary} style={{ marginLeft: 6 }}>
             100% verified retail pharmacies with valid Drug Licenses
           </AppText>
         </View>
@@ -423,3 +425,4 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
 });
+

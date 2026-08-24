@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   ScrollView,
@@ -14,6 +14,7 @@ import { AppText } from '../../components/common/AppText';
 import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatDateTime } from '../../utils/formatters';
 
@@ -24,6 +25,7 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
   const route = useRoute<RouteProp<AppStackParamList, 'WalletTransactionDetails'>>();
   const { transactions } = useWallet();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const transaction = route.params?.transaction || transactions[0] || {
     id: 'tx-default',
@@ -40,24 +42,24 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
     transaction.type === 'topup' || transaction.type === 'refund' || transaction.type === 'cashback';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Transaction Receipt
         </AppText>
         <TouchableOpacity
           onPress={() => showToast('Receipt details copied to clipboard', 'info')}
           style={styles.backBtn}
         >
-          <Ionicons name="share-outline" size={22} color={COLORS.primary} />
+          <Ionicons name="share-outline" size={22} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -77,7 +79,7 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
             />
           </View>
 
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.txTitle}>
+          <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.txTitle}>
             {transaction.title.toUpperCase()}
           </AppText>
 
@@ -103,28 +105,28 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
           {/* Key-Value Details */}
           <View style={styles.detailsList}>
             <View style={styles.detailRow}>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Transaction ID
               </AppText>
-              <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+              <AppText variant="caption" color={colors.textPrimary} weight="600">
                 {transaction.id.toUpperCase()}
               </AppText>
             </View>
 
             <View style={styles.detailRow}>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Date &amp; Time
               </AppText>
-              <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+              <AppText variant="caption" color={colors.textPrimary} weight="600">
                 {formatDateTime(transaction.timestamp)}
               </AppText>
             </View>
 
             <View style={styles.detailRow}>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Transaction Type
               </AppText>
-              <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+              <AppText variant="caption" color={colors.textPrimary} weight="600">
                 {transaction.type === 'topup'
                   ? 'Wallet Top-up'
                   : transaction.type === 'refund'
@@ -135,10 +137,10 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
 
             {transaction.paymentSource && (
               <View style={styles.detailRow}>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Payment Mode
                 </AppText>
-                <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+                <AppText variant="caption" color={colors.textPrimary} weight="600">
                   {transaction.paymentSource}
                 </AppText>
               </View>
@@ -146,10 +148,10 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
 
             {transaction.referenceId && (
               <View style={styles.detailRow}>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Reference No.
                 </AppText>
-                <AppText variant="caption" color={COLORS.textPrimary} weight="600">
+                <AppText variant="caption" color={colors.textPrimary} weight="600">
                   {transaction.referenceId}
                 </AppText>
               </View>
@@ -169,17 +171,17 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
             style={[styles.orderLinkCard, SHADOWS.subtle]}
           >
             <View style={styles.orderLinkIconBox}>
-              <Ionicons name="receipt-outline" size={20} color={COLORS.primary} />
+              <Ionicons name="receipt-outline" size={20} color={colors.primary} />
             </View>
             <View style={styles.orderLinkInfo}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 View Related Order Details
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Tap to inspect items &amp; invoice
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
 
@@ -193,7 +195,7 @@ export const WalletTransactionDetailsScreen: React.FC = () => {
               orderId: transaction.relatedOrderId,
             })
           }
-          leftIcon={<Ionicons name="chatbubbles-outline" size={18} color={COLORS.primary} />}
+          leftIcon={<Ionicons name="chatbubbles-outline" size={18} color={colors.primary} />}
           style={{ marginTop: SPACING.md }}
         />
       </ScrollView>
@@ -302,3 +304,6 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.md,
   },
 });
+
+
+

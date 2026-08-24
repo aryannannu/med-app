@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Image,
@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Medicine } from '../../types/medicine';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { RxBadge } from '../badges/RxBadge';
 import { PriceRow } from '../controls/PriceRow';
@@ -33,6 +34,7 @@ export const MedicineListItem: React.FC<MedicineListItemProps> = ({
   cartQuantity = 0,
   style,
 }) => {
+  const { colors } = useAppTheme();
   const isOutOfStock = medicine.inStock === false;
 
   return (
@@ -48,17 +50,17 @@ export const MedicineListItem: React.FC<MedicineListItemProps> = ({
 
       <View style={styles.listContent}>
         <View style={styles.headerRow}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} numberOfLines={1} weight="600" style={styles.medName}>
+          <AppText variant="titleMedium" color={colors.textPrimary} numberOfLines={1} weight="600" style={styles.medName}>
             {medicine.name}
           </AppText>
         </View>
 
-        <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1} style={styles.saltText}>
+        <AppText variant="caption" color={colors.textSecondary} numberOfLines={1} style={styles.saltText}>
           {medicine.saltComposition}
         </AppText>
 
-        <AppText variant="caption" color={COLORS.textMuted} numberOfLines={1} style={styles.packText}>
-          By {medicine.manufacturer} • {medicine.packForm}
+        <AppText variant="caption" color={colors.textMuted} numberOfLines={1} style={styles.packText}>
+          By {medicine.manufacturer} â€¢ {medicine.packForm}
         </AppText>
 
         <View style={styles.listActionRow}>
@@ -66,15 +68,17 @@ export const MedicineListItem: React.FC<MedicineListItemProps> = ({
 
           {isOutOfStock ? (
             <View style={styles.outOfStockPill}>
-              <AppText variant="caption" color={COLORS.danger} weight="600">
+              <AppText variant="caption" color={colors.danger} weight="600">
                 Unavailable
               </AppText>
             </View>
           ) : cartQuantity > 0 ? (
             <QuantitySelector
               quantity={cartQuantity}
-              onIncrement={onIncrement || (() => {})}
-              onDecrement={onDecrement || (() => {})}
+              onIncrement={onIncrement || (() => {
+  const { colors } = useAppTheme();})}
+              onDecrement={onDecrement || (() => {
+  const { colors } = useAppTheme();})}
               size="sm"
             />
           ) : (
@@ -169,3 +173,6 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.sm,
   },
 });
+
+
+

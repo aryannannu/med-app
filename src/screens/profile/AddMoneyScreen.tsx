@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useWallet } from '../../store/WalletContext';
 import { usePaymentMethods } from '../../store/PaymentMethodsContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 
 export const AddMoneyScreen: React.FC = () => {
@@ -25,6 +26,7 @@ export const AddMoneyScreen: React.FC = () => {
   const { addMoney, balance } = useWallet();
   const { upiList, cardsList } = usePaymentMethods();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const [amountStr, setAmountStr] = useState(
     route.params?.prefilledAmount ? String(route.params.prefilledAmount) : '500'
@@ -74,17 +76,17 @@ export const AddMoneyScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Top-up Wallet
         </AppText>
         <View style={{ width: 40 }} />
@@ -93,9 +95,9 @@ export const AddMoneyScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Current Balance Banner */}
         <View style={styles.currentBalanceBanner}>
-          <AppText variant="caption" color={COLORS.textSecondary}>
+          <AppText variant="caption" color={colors.textSecondary}>
             Current Balance:{' '}
-            <AppText variant="caption" color={COLORS.primary} weight="600">
+            <AppText variant="caption" color={colors.primary} weight="600">
               {formatCurrency(balance)}
             </AppText>
           </AppText>
@@ -103,12 +105,12 @@ export const AddMoneyScreen: React.FC = () => {
 
         {/* Amount Input Card */}
         <View style={[styles.amountCard, SHADOWS.subtle]}>
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.label}>
+          <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.label}>
             ENTER TOP-UP AMOUNT
           </AppText>
 
           <View style={[styles.amountInputRow, error ? styles.inputRowError : null]}>
-            <AppText variant="h2" color={COLORS.textPrimary} weight="600" style={styles.currencySymbol}>
+            <AppText variant="h2" color={colors.textPrimary} weight="600" style={styles.currencySymbol}>
               ₹
             </AppText>
             <TextInput
@@ -118,7 +120,7 @@ export const AddMoneyScreen: React.FC = () => {
                 if (error) setError('');
               }}
               placeholder="0"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={colors.textMuted}
               keyboardType="number-pad"
               maxLength={5}
               style={styles.amountInput}
@@ -126,11 +128,11 @@ export const AddMoneyScreen: React.FC = () => {
           </View>
 
           {error ? (
-            <AppText variant="caption" color={COLORS.danger} style={styles.errorText}>
+            <AppText variant="caption" color={colors.danger} style={styles.errorText}>
               {error}
             </AppText>
           ) : (
-            <AppText variant="caption" color={COLORS.textMuted} style={styles.helperText}>
+            <AppText variant="caption" color={colors.textMuted} style={styles.helperText}>
               Min ₹10 • Max ₹10,000 per transaction
             </AppText>
           )}
@@ -160,7 +162,7 @@ export const AddMoneyScreen: React.FC = () => {
 
         {/* Select Payment Method */}
         <View style={styles.sectionHeader}>
-          <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
             Select Payment Method
           </AppText>
         </View>
@@ -180,10 +182,10 @@ export const AddMoneyScreen: React.FC = () => {
               <Ionicons name="flash-outline" size={20} color="#2563EB" />
             </View>
             <View style={styles.methodInfoCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 UPI Instant Payment
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Google Pay, PhonePe, Paytm, BHIM
               </AppText>
             </View>
@@ -210,12 +212,12 @@ export const AddMoneyScreen: React.FC = () => {
                     size={16}
                     color={selectedUpiId === upi.id ? COLORS.primary : COLORS.textMuted}
                   />
-                  <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+                  <AppText variant="caption" color={colors.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                     {upi.upiId}
                   </AppText>
                   {upi.isDefault && (
                     <View style={styles.defaultBadge}>
-                      <AppText variant="caption" color={COLORS.primary} style={{ fontSize: 9 }}>
+                      <AppText variant="caption" color={colors.primary} style={{ fontSize: 9 }}>
                         Default
                       </AppText>
                     </View>
@@ -238,13 +240,13 @@ export const AddMoneyScreen: React.FC = () => {
         >
           <View style={styles.methodTopRow}>
             <View style={[styles.methodIconBox, { backgroundColor: '#F3E8FF' }]}>
-              <Ionicons name="card-outline" size={20} color={COLORS.primary} />
+              <Ionicons name="card-outline" size={20} color={colors.primary} />
             </View>
             <View style={styles.methodInfoCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Credit / Debit Card
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Visa, MasterCard, RuPay
               </AppText>
             </View>
@@ -271,7 +273,7 @@ export const AddMoneyScreen: React.FC = () => {
                     size={16}
                     color={selectedCardId === c.id ? COLORS.primary : COLORS.textMuted}
                   />
-                  <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 6 }}>
+                  <AppText variant="caption" color={colors.textPrimary} weight="600" style={{ marginLeft: 6 }}>
                     {c.brand.toUpperCase()} {c.maskedNumber}
                   </AppText>
                 </TouchableOpacity>
@@ -456,3 +458,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E8E8EE',
   },
 });
+
+
+
+

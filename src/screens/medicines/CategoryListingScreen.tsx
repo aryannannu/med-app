@@ -24,6 +24,7 @@ import { Medicine } from '../../types/medicine';
 import { useCart } from '../../store/CartContext';
 import { useAddress } from '../../store/AddressContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 
 type SortOption = 'relevance' | 'fastest' | 'price_asc' | 'price_desc' | 'discount' | 'rating';
@@ -127,6 +128,7 @@ export const CategoryListingScreen: React.FC = () => {
   const { items, summary, totalItemCount, addToCart, removeFromCart, updateQuantity, getItemQuantity, undoRemove } = useCart();
   const { selectedAddress } = useAddress();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const formattedCategoryName = useMemo(() => {
     if (categoryName) return categoryName;
@@ -272,17 +274,15 @@ export const CategoryListingScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* =========================================================================
-            1. TOP HEADER (Matching Screenshot: Back, Category Title, Heart, Search)
-           ========================================================================= */}
-        <View style={styles.topHeaderBar}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        {/* Header */}
+        <View style={[styles.topHeaderBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()} style={styles.headerIconButton}>
-            <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary} />
+            <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
           </TouchableOpacity>
 
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700" style={styles.headerTitle} numberOfLines={1}>
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="700" style={styles.headerTitle} numberOfLines={1}>
             {formattedCategoryName}
           </AppText>
 
@@ -292,7 +292,7 @@ export const CategoryListingScreen: React.FC = () => {
               onPress={() => (navigation as any).navigate('Search', { initialQuery: formattedCategoryName })}
               style={styles.headerIconButton}
             >
-              <Ionicons name="heart-outline" size={22} color={COLORS.textPrimary} />
+              <Ionicons name="heart-outline" size={22} color={colors.textPrimary} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -300,17 +300,15 @@ export const CategoryListingScreen: React.FC = () => {
               onPress={() => navigation.navigate('Search', { initialQuery: formattedCategoryName })}
               style={[styles.headerIconButton, { marginLeft: 8 }]}
             >
-              <Ionicons name="search-outline" size={22} color={COLORS.textPrimary} />
+              <Ionicons name="search-outline" size={22} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* =========================================================================
-            2. MAIN SPLIT-SCREEN WORKSPACE (Left Subcategories Sidebar + Right Content)
-           ========================================================================= */}
+        {/* Workspace */}
         <View style={styles.splitWorkspace}>
-          {/* LEFT VERTICAL SUBCATEGORIES SIDEBAR */}
-          <View style={styles.leftSidebar}>
+          {/* LEFT SIDEBAR */}
+          <View style={[styles.leftSidebar, { backgroundColor: colors.surfaceSubtle, borderRightColor: colors.border }]}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.leftSidebarScroll}>
               {subcategories.map((subcat) => {
                 const isSelected = selectedSubcategory === subcat;
@@ -321,21 +319,21 @@ export const CategoryListingScreen: React.FC = () => {
                     key={subcat}
                     activeOpacity={0.8}
                     onPress={() => setSelectedSubcategory(subcat)}
-                    style={[styles.sidebarItem, isSelected && styles.sidebarItemActive]}
+                    style={[styles.sidebarItem, isSelected && { backgroundColor: colors.primaryMuted }]}
                   >
-                    {/* Active Left Purple Bar Highlight */}
-                    {isSelected && <View style={styles.sidebarActiveIndicator} />}
+                    {/* Active Indicator */}
+                    {isSelected && <View style={[styles.sidebarActiveIndicator, { backgroundColor: colors.primary }]} />}
 
-                    <View style={[styles.sidebarIconCircle, isSelected && styles.sidebarIconCircleActive]}>
+                    <View style={[styles.sidebarIconCircle, { backgroundColor: colors.surface, borderColor: isSelected ? colors.primary : colors.border }]}>
                       <Ionicons
                         name={iconName}
                         size={20}
-                        color={isSelected ? '#5B28D6' : COLORS.textSecondary}
+                        color={isSelected ? colors.primary : colors.textSecondary}
                       />
                     </View>
 
                     <AppText
-                      style={[styles.sidebarItemText, isSelected && styles.sidebarItemTextActive]}
+                      style={[styles.sidebarItemText, { color: isSelected ? colors.primary : colors.textSecondary }, isSelected && styles.sidebarItemTextActive]}
                       numberOfLines={2}
                       align="center"
                     >
@@ -347,14 +345,14 @@ export const CategoryListingScreen: React.FC = () => {
             </ScrollView>
           </View>
 
-          {/* RIGHT WORKSPACE AREA (Filters Bar + 2-Column Product Grid) */}
-          <View style={styles.rightWorkspace}>
+          {/* RIGHT WORKSPACE */}
+          <View style={[styles.rightWorkspace, { backgroundColor: colors.background }]}>
             {/* TOP FILTER CHIPS ROW */}
-            <View style={styles.topFilterChipsWrapper}>
+            <View style={[styles.topFilterChipsWrapper, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.topFilterChipsScroll}>
                 {/* Main Filter Icon Button */}
-                <TouchableOpacity activeOpacity={0.8} onPress={() => setIsFilterModalVisible(true)} style={styles.filterChipIconBtn}>
-                  <Ionicons name="options-outline" size={16} color={COLORS.textPrimary} />
+                <TouchableOpacity activeOpacity={0.8} onPress={() => setIsFilterModalVisible(true)} style={[styles.filterChipIconBtn, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
+                  <Ionicons name="options-outline" size={16} color={colors.textPrimary} />
                 </TouchableOpacity>
 
                 {/* Brand Dropdown Filter */}
@@ -363,9 +361,9 @@ export const CategoryListingScreen: React.FC = () => {
                   onPress={() => {
                     setSelectedBrandFilter(selectedBrandFilter === 'all' ? availableBrands[0] || 'all' : 'all');
                   }}
-                  style={[styles.filterChipItem, selectedBrandFilter !== 'all' && styles.filterChipItemActive]}
+                  style={[styles.filterChipItem, { backgroundColor: selectedBrandFilter !== 'all' ? colors.primarySubtle : colors.surfaceSubtle, borderColor: selectedBrandFilter !== 'all' ? colors.primary : colors.border }]}
                 >
-                  <AppText style={[styles.filterChipText, selectedBrandFilter !== 'all' && styles.filterChipTextActive]}>
+                  <AppText style={[styles.filterChipText, { color: selectedBrandFilter !== 'all' ? colors.primary : colors.textPrimary }]}>
                     Brand {selectedBrandFilter !== 'all' ? `: ${selectedBrandFilter}` : '▾'}
                   </AppText>
                 </TouchableOpacity>
@@ -378,9 +376,9 @@ export const CategoryListingScreen: React.FC = () => {
                       key={brand}
                       activeOpacity={0.8}
                       onPress={() => setSelectedBrandFilter(isSel ? 'all' : brand)}
-                      style={[styles.filterChipItem, isSel && styles.filterChipItemActive]}
+                      style={[styles.filterChipItem, { backgroundColor: isSel ? colors.primarySubtle : colors.surfaceSubtle, borderColor: isSel ? colors.primary : colors.border }]}
                     >
-                      <AppText style={[styles.filterChipText, isSel && styles.filterChipTextActive]}>
+                      <AppText style={[styles.filterChipText, { color: isSel ? colors.primary : colors.textPrimary }]}>
                         {brand}
                       </AppText>
                     </TouchableOpacity>
@@ -396,9 +394,9 @@ export const CategoryListingScreen: React.FC = () => {
                       prescription: prev.prescription === 'otc_only' ? 'all' : 'otc_only',
                     }));
                   }}
-                  style={[styles.filterChipItem, filters.prescription === 'otc_only' && styles.filterChipItemActive]}
+                  style={[styles.filterChipItem, { backgroundColor: filters.prescription === 'otc_only' ? colors.primarySubtle : colors.surfaceSubtle, borderColor: filters.prescription === 'otc_only' ? colors.primary : colors.border }]}
                 >
-                  <AppText style={[styles.filterChipText, filters.prescription === 'otc_only' && styles.filterChipTextActive]}>
+                  <AppText style={[styles.filterChipText, { color: filters.prescription === 'otc_only' ? colors.primary : colors.textPrimary }]}>
                     OTC Only
                   </AppText>
                 </TouchableOpacity>

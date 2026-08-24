@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -27,8 +28,28 @@ export const Toast: React.FC<ToastProps> = ({
   onDismiss,
   style,
 }) => {
+  const { colors } = useAppTheme();
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
+
+  const hide = useRef(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: -100,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onDismissRef.current();
+    });
+  }).current;
 
   useEffect(() => {
     if (visible) {
@@ -53,33 +74,14 @@ export const Toast: React.FC<ToastProps> = ({
     } else {
       hide();
     }
-  }, [visible]);
-
-  const hide = () => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: -100,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      onDismiss();
-    });
-  };
-
-  if (!visible) return null;
+  }, [visible, duration]);
 
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />;
+        return <Ionicons name="checkmark-circle" size={20} color={colors.success} />;
       case 'error':
-        return <Ionicons name="alert-circle" size={20} color={COLORS.danger} />;
+        return <Ionicons name="alert-circle" size={20} color={colors.danger} />;
       case 'warning':
         return <Ionicons name="warning" size={20} color={COLORS.warning} />;
       case 'info':
@@ -102,6 +104,8 @@ export const Toast: React.FC<ToastProps> = ({
     }
   };
 
+  if (!visible) return null;
+
   return (
     <Animated.View
       style={[
@@ -117,7 +121,7 @@ export const Toast: React.FC<ToastProps> = ({
       ]}
     >
       {getIcon()}
-      <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" style={styles.message}>
+      <AppText variant="bodySmall" color={colors.textPrimary} weight="600" style={styles.message}>
         {message}
       </AppText>
       {actionLabel && onAction && (
@@ -167,3 +171,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+
+

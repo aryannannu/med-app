@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
 } from 'react-native';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '../../utils/currency';
@@ -34,27 +35,27 @@ const MILESTONE_OFFERS: MilestoneOffer[] = [
   },
   {
     id: 'm2',
-    title: 'Unlock extra ₹50 OFF',
+    title: 'Unlock extra â‚¹50 OFF',
     targetAmount: 1200,
-    discountValueText: '₹50 OFF',
+    discountValueText: 'â‚¹50 OFF',
   },
   {
     id: 'm3',
-    title: 'Unlock extra ₹100 OFF',
+    title: 'Unlock extra â‚¹100 OFF',
     targetAmount: 1800,
-    discountValueText: '₹100 OFF',
+    discountValueText: 'â‚¹100 OFF',
   },
   {
     id: 'm4',
-    title: 'Unlock extra ₹150 OFF',
+    title: 'Unlock extra â‚¹150 OFF',
     targetAmount: 2400,
-    discountValueText: '₹150 OFF',
+    discountValueText: 'â‚¹150 OFF',
   },
   {
     id: 'm5',
-    title: 'Unlock extra ₹200 OFF',
+    title: 'Unlock extra â‚¹200 OFF',
     targetAmount: 3000,
-    discountValueText: '₹200 OFF',
+    discountValueText: 'â‚¹200 OFF',
   },
 ];
 
@@ -63,6 +64,7 @@ export const OffersForYouModal: React.FC<OffersForYouModalProps> = ({
   onClose,
   cartSubtotal,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <Modal
       visible={visible}
@@ -99,6 +101,7 @@ export const OffersForYouModal: React.FC<OffersForYouModalProps> = ({
               >
                 <View style={styles.timelineWrapper}>
                   {MILESTONE_OFFERS.map((item, index) => {
+  const { colors } = useAppTheme();
                     const isUnlocked = cartSubtotal >= item.targetAmount;
                     const remaining = item.targetAmount - cartSubtotal;
                     const prevTarget = index === 0 ? 0 : MILESTONE_OFFERS[index - 1].targetAmount;
@@ -159,8 +162,8 @@ export const OffersForYouModal: React.FC<OffersForYouModalProps> = ({
                               </AppText>
                               <AppText style={styles.offerSubtitle}>
                                 {isUnlocked
-                                  ? `🎉 Unlocked (${item.discountValueText})`
-                                  : `Shop for ₹${Math.ceil(remaining)} more`}
+                                  ? `ðŸŽ‰ Unlocked (${item.discountValueText})`
+                                  : `Shop for â‚¹${Math.ceil(remaining)} more`}
                               </AppText>
                             </View>
 
@@ -377,3 +380,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
 });
+
+
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -10,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../../components/common/AppText';
 import { AdaptiveHeader, HeaderType } from '../../components/layout/AdaptiveHeader';
 
@@ -25,6 +26,7 @@ interface HeaderVariantSpec {
 
 export const HeaderShowcaseScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { colors, isDark } = useAppTheme();
   const [selectedFilterCategory, setSelectedFilterCategory] = useState<string>('ALL');
   const [activeHomeMode, setActiveHomeMode] = useState<'medicines' | 'stores'>('medicines');
   const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3>(1);
@@ -51,7 +53,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 02',
       titleName: 'STANDARD INNER PAGE HEADER',
       categoryGroup: 'SHOPPING',
-      uxPriority: 'Back arrow, Strong page title (Pain Relief), Subtitle context (120+ products), Search 🔍, Cart badge 🛒 2.',
+      uxPriority: 'Back arrow, Strong page title (Pain Relief), Subtitle context (120+ products), Search ðŸ”, Cart badge ðŸ›’ 2.',
       props: {
         type: 'standard',
         title: 'Pain Relief & Fever',
@@ -64,7 +66,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 03',
       titleName: 'SEARCH CONTEXT HEADER',
       categoryGroup: 'DISCOVERY',
-      uxPriority: 'Back arrow, Auto-focused search input field, clear action, voice search mic icon 🎙️.',
+      uxPriority: 'Back arrow, Auto-focused search input field, clear action, voice search mic icon ðŸŽ™ï¸.',
       props: {
         type: 'search',
         searchPlaceholder: 'Search medicines, brands or pharmacies...',
@@ -77,7 +79,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 04',
       titleName: 'CATEGORY DETAIL HEADER',
       categoryGroup: 'DISCOVERY',
-      uxPriority: 'Back arrow, Category Name (Diabetes Care), Product count subtext (200+ products), Search 🔍, Cart badge 🛒.',
+      uxPriority: 'Back arrow, Category Name (Diabetes Care), Product count subtext (200+ products), Search ðŸ”, Cart badge ðŸ›’.',
       props: {
         type: 'category',
         title: 'Diabetes Care',
@@ -90,11 +92,11 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 05',
       titleName: 'PRODUCT DETAIL HEADER',
       categoryGroup: 'SHOPPING',
-      uxPriority: 'Back arrow, Product Name (Crocin 650 Tablet), Brand subtitle (GSK), Search 🔍, Wishlist ♡, Cart badge 🛒.',
+      uxPriority: 'Back arrow, Product Name (Crocin 650 Tablet), Brand subtitle (GSK), Search ðŸ”, Wishlist â™¡, Cart badge ðŸ›’.',
       props: {
         type: 'product',
         title: 'Crocin 650 Advance Tablet',
-        subtitle: 'GlaxoSmithKline • Strip of 15',
+        subtitle: 'GlaxoSmithKline â€¢ Strip of 15',
         brandName: 'GSK',
       },
     },
@@ -104,12 +106,12 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 06',
       titleName: 'STORE DETAIL HEADER',
       categoryGroup: 'SHOPPING',
-      uxPriority: 'Back arrow, Pharmacy logo, Verified badge ✓, Rating ★ 4.6 • 1.2 km • 20 min, Share ↗, Save ♡.',
+      uxPriority: 'Back arrow, Pharmacy logo, Verified badge âœ“, Rating â˜… 4.6 â€¢ 1.2 km â€¢ 20 min, Share â†—, Save â™¡.',
       props: {
         type: 'store',
         title: 'Apollo Pharmacy 24x7',
         storeRating: 4.8,
-        storeDistanceTime: '0.8 km • 15 min',
+        storeDistanceTime: '0.8 km â€¢ 15 min',
         isVerifiedStore: true,
       },
     },
@@ -119,7 +121,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 07',
       titleName: 'CART HEADER',
       categoryGroup: 'TRANSACTION',
-      uxPriority: 'Back arrow, My Cart title, Item count (3 items), Trust security badge 🛡️ 100% Secure.',
+      uxPriority: 'Back arrow, My Cart title, Item count (3 items), Trust security badge ðŸ›¡ï¸ 100% Secure.',
       props: {
         type: 'cart',
         title: 'My Cart',
@@ -132,7 +134,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 08',
       titleName: 'CHECKOUT HEADER',
       categoryGroup: 'TRANSACTION',
-      uxPriority: 'Back arrow, Checkout title, Step progress indicator (1 Delivery ➔ 2 Payment ➔ 3 Confirmation).',
+      uxPriority: 'Back arrow, Checkout title, Step progress indicator (1 Delivery âž” 2 Payment âž” 3 Confirmation).',
       props: {
         type: 'checkout',
         title: 'Checkout',
@@ -145,7 +147,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 09',
       titleName: 'PRESCRIPTION UPLOAD HEADER',
       categoryGroup: 'FOCUSED',
-      uxPriority: 'Back arrow, Upload Prescription title, Secure & Private subtext, Privacy shield 🛡️.',
+      uxPriority: 'Back arrow, Upload Prescription title, Secure & Private subtext, Privacy shield ðŸ›¡ï¸.',
       props: {
         type: 'prescription-upload',
         title: 'Upload Prescription',
@@ -158,11 +160,11 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 10',
       titleName: 'PRESCRIPTION COMPARISON HEADER',
       categoryGroup: 'SHOPPING',
-      uxPriority: 'Back arrow, Compare Pharmacies, 8 medicines • 6 stores found, Filter button, Contextual filter chips.',
+      uxPriority: 'Back arrow, Compare Pharmacies, 8 medicines â€¢ 6 stores found, Filter button, Contextual filter chips.',
       props: {
         type: 'prescription-comparison',
         title: 'Compare Nearby Pharmacies',
-        subtitle: '8 medicines detected • 6 stores available',
+        subtitle: '8 medicines detected â€¢ 6 stores available',
         selectedChip: activeChip,
         onChipSelect: (id: string) => setActiveChip(id),
       },
@@ -173,7 +175,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 11',
       titleName: 'ORDERS HEADER',
       categoryGroup: 'MANAGEMENT',
-      uxPriority: 'Back arrow, My Orders title, Track & manage subtext, Search 🔍, Filter ⚙.',
+      uxPriority: 'Back arrow, My Orders title, Track & manage subtext, Search ðŸ”, Filter âš™.',
       props: {
         type: 'orders',
         title: 'My Orders',
@@ -186,11 +188,11 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 12',
       titleName: 'ORDER DETAIL HEADER',
       categoryGroup: 'MANAGEMENT',
-      uxPriority: 'Back arrow, Order #HLT23984 title, Placed on 22 May subtext, Support / Help CTA 💬.',
+      uxPriority: 'Back arrow, Order #HLT23984 title, Placed on 22 May subtext, Support / Help CTA ðŸ’¬.',
       props: {
         type: 'order-detail',
         title: 'Order #HLT-98421',
-        subtitle: 'Placed on 22 May • Delivered',
+        subtitle: 'Placed on 22 May â€¢ Delivered',
       },
     },
     {
@@ -199,7 +201,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 13',
       titleName: 'PROFILE HEADER',
       categoryGroup: 'MANAGEMENT',
-      uxPriority: 'Back arrow, My Profile title, Manage your account subtext, Settings icon ⚙.',
+      uxPriority: 'Back arrow, My Profile title, Manage your account subtext, Settings icon âš™.',
       props: {
         type: 'profile',
         title: 'My Profile',
@@ -225,7 +227,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       numberLabel: 'HEADER TYPE 15',
       titleName: 'WISHLIST HEADER',
       categoryGroup: 'SHOPPING',
-      uxPriority: 'Back arrow, Wishlist title, 12 saved items subtext, Search 🔍, Cart badge 🛒.',
+      uxPriority: 'Back arrow, Wishlist title, 12 saved items subtext, Search ðŸ”, Cart badge ðŸ›’.',
       props: {
         type: 'wishlist',
         title: 'Saved Medicines',
@@ -268,7 +270,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       props: {
         type: 'offers',
         title: 'Flat 20% OFF Essential Meds',
-        subtitle: 'Valid on orders above ₹299 from nearby stores',
+        subtitle: 'Valid on orders above â‚¹299 from nearby stores',
         couponCode: 'HEAL20',
       },
     },
@@ -295,7 +297,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
       props: {
         type: 'focused',
         title: 'Add New Delivery Address',
-        subtitle: 'Step 1 of 2 • Enter location details',
+        subtitle: 'Step 1 of 2 â€¢ Enter location details',
       },
     },
   ];
@@ -306,19 +308,19 @@ export const HeaderShowcaseScreen: React.FC = () => {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         {/* Top Screen Title & Back */}
         <View style={styles.showcaseTopBar}>
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()} style={styles.backCircleBtn}>
-            <Ionicons name="arrow-back" size={20} color={COLORS.textPrimary} />
+            <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
 
           <View style={{ flex: 1, marginLeft: 10 }}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+            <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
               Universal Header Design System
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary}>
+            <AppText variant="caption" color={colors.textSecondary}>
               HEALIT 20 Master Adaptive Header Variants
             </AppText>
           </View>
@@ -347,7 +349,7 @@ export const HeaderShowcaseScreen: React.FC = () => {
 
         {/* Interactive Controls Bar */}
         <View style={styles.interactiveControlsRow}>
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600">
+          <AppText variant="caption" color={colors.textSecondary} weight="600">
             Interactive Test Controls:
           </AppText>
 
@@ -356,8 +358,8 @@ export const HeaderShowcaseScreen: React.FC = () => {
             onPress={() => setCheckoutStep((prev) => (prev === 3 ? 1 : ((prev + 1) as any)))}
             style={styles.controlPillBtn}
           >
-            <Ionicons name="arrow-forward-circle" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />
-            <AppText variant="caption" color={COLORS.primary} weight="600">
+            <Ionicons name="arrow-forward-circle" size={14} color={colors.primary} style={{ marginRight: 4 }} />
+            <AppText variant="caption" color={colors.primary} weight="600">
               Step: {checkoutStep}
             </AppText>
           </TouchableOpacity>
@@ -380,9 +382,9 @@ export const HeaderShowcaseScreen: React.FC = () => {
 
               {/* UX Priority Context Notes */}
               <View style={styles.uxNotesBox}>
-                <Ionicons name="information-circle" size={15} color={COLORS.primary} style={{ marginRight: 6 }} />
-                <AppText variant="caption" color={COLORS.textSecondary} style={{ flex: 1, fontSize: 11.5 }}>
-                  <AppText weight="700" color={COLORS.textPrimary}>UX Intent: </AppText>
+                <Ionicons name="information-circle" size={15} color={colors.primary} style={{ marginRight: 6 }} />
+                <AppText variant="caption" color={colors.textSecondary} style={{ flex: 1, fontSize: 11.5 }}>
+                  <AppText weight="700" color={colors.textPrimary}>UX Intent: </AppText>
                   {spec.uxPriority}
                 </AppText>
               </View>
@@ -547,3 +549,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFD',
   },
 });
+

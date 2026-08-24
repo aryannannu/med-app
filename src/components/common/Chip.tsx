@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from './AppText';
 
 export interface ChipProps {
@@ -22,22 +23,24 @@ export const Chip: React.FC<ChipProps> = ({
   size = 'md',
   style,
 }) => {
-  const getColors = () => {
+  const { colors } = useAppTheme();
+
+  const getChipColors = () => {
     if (selected) {
       return {
-        bg: variant === 'secondary' ? COLORS.secondaryLight : COLORS.primarySubtle,
-        border: variant === 'secondary' ? COLORS.secondary : COLORS.primary,
-        text: variant === 'secondary' ? COLORS.secondaryDark : COLORS.primary,
+        bg: variant === 'secondary' ? colors.secondaryLight : colors.primarySubtle,
+        border: variant === 'secondary' ? colors.secondary : colors.primary,
+        text: variant === 'secondary' ? colors.secondaryDark : colors.primary,
       };
     }
     return {
-      bg: COLORS.surfaceSubtle,
-      border: COLORS.border,
-      text: COLORS.textSecondary,
+      bg: colors.surfaceSubtle,
+      border: colors.border,
+      text: colors.textSecondary,
     };
   };
 
-  const colors = getColors();
+  const chipColors = getChipColors();
 
   const Container = onPress ? TouchableOpacity : View;
 
@@ -48,8 +51,8 @@ export const Chip: React.FC<ChipProps> = ({
       style={[
         styles.chip,
         {
-          backgroundColor: colors.bg,
-          borderColor: colors.border,
+          backgroundColor: chipColors.bg,
+          borderColor: chipColors.border,
           paddingVertical: size === 'sm' ? 4 : 6,
           paddingHorizontal: size === 'sm' ? SPACING.sm : SPACING.md,
         },
@@ -59,7 +62,7 @@ export const Chip: React.FC<ChipProps> = ({
       {icon && <View style={styles.icon}>{icon}</View>}
       <AppText
         variant={size === 'sm' ? 'caption' : 'bodySmall'}
-        color={colors.text}
+        color={chipColors.text}
         weight={selected ? '700' : '500'}
       >
         {label}

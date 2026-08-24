@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 
 export interface CartBadgeProps {
@@ -19,6 +20,7 @@ export const CartBadge: React.FC<CartBadgeProps> = ({
   badgeBgColor = COLORS.danger,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -64,3 +66,6 @@ const styles = StyleSheet.create({
     lineHeight: 12,
   },
 });
+
+
+

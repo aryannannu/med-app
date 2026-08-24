@@ -22,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../../store/CartContext';
 import { usePrescription } from '../../store/PrescriptionContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 
 export const CartScreen: React.FC = () => {
@@ -29,6 +30,7 @@ export const CartScreen: React.FC = () => {
   const { cartId, items, summary, updateQuantity, removeFromCart, clearCart } = useCart();
   const { activePrescription } = usePrescription();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
 
@@ -90,22 +92,22 @@ export const CartScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
         <View style={styles.headerTitleCol}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
             {isStoreSpecificCart ? `Cart • ${storeName}` : 'Medicine Cart'}
           </AppText>
-          <AppText variant="caption" color={COLORS.textSecondary}>
+          <AppText variant="caption" color={colors.textSecondary}>
             {summary.itemCount} {summary.itemCount === 1 ? 'medicine' : 'medicines'} ({summary.totalQuantity} items)
           </AppText>
         </View>
@@ -117,18 +119,18 @@ export const CartScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
         {/* Universal Marketplace Cart Banner vs Store Cart */}
         {!isStoreSpecificCart ? (
-          <View style={[styles.marketplaceBanner, SHADOWS.subtle]}>
+          <View style={[styles.marketplaceBanner, { backgroundColor: colors.primarySubtle, borderColor: colors.primaryBorder }, SHADOWS.subtle]}>
             <View style={styles.bannerIconCircle}>
               <Ionicons name="sparkles" size={18} color="#FFFFFF" />
             </View>
             <View style={{ flex: 1, marginLeft: SPACING.md }}>
-              <AppText variant="titleSmall" color={COLORS.primary} weight="600">
+              <AppText variant="titleSmall" color={colors.primary} weight="600">
                 Universal Medicine Request
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2, lineHeight: 18 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2, lineHeight: 18 }}>
                 You don't need to pick a pharmacy now. After you tap below, eligible local pharmacies will send you competing prices &amp; express delivery bids.
               </AppText>
             </View>
@@ -151,7 +153,7 @@ export const CartScreen: React.FC = () => {
                 <AppText variant="titleSmall" color="#DC2626" weight="600">
                   {unavailableItems.length} Item{unavailableItems.length > 1 ? 's' : ''} Currently Unavailable
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                   Some items are out of stock at nearby pharmacies. Please remove them to proceed.
                 </AppText>
               </View>
@@ -173,10 +175,10 @@ export const CartScreen: React.FC = () => {
               color={activePrescription ? '#15803D' : '#DC2626'}
             />
             <View style={styles.rxAlertContent}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 {activePrescription ? 'Prescription Attached' : 'Prescription Required for Rx Medicines'}
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 {activePrescription
                   ? `Attached: ${activePrescription.fileName}`
                   : 'Your doctor prescription is needed before dispatch.'}
@@ -185,9 +187,9 @@ export const CartScreen: React.FC = () => {
 
             <TouchableOpacity
               onPress={() => navigation.navigate('UploadPrescription', { fromCart: true })}
-              style={styles.rxActionBtn}
+              style={[styles.rxActionBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
-              <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
+              <AppText variant="buttonSmall" color={colors.primary} weight="600">
                 {activePrescription ? 'Change' : 'Upload'}
               </AppText>
             </TouchableOpacity>
@@ -195,16 +197,16 @@ export const CartScreen: React.FC = () => {
         )}
 
         {/* Free Delivery Progress Bar */}
-        <View style={[styles.freeDeliveryBox, SHADOWS.subtle]}>
+        <View style={[styles.freeDeliveryBox, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
           <View style={styles.freeDeliveryHeader}>
             <Ionicons
               name="bicycle"
               size={18}
-              color={summary.isEligibleForFreeDelivery ? '#15803D' : COLORS.primary}
+              color={summary.isEligibleForFreeDelivery ? colors.success : colors.primary}
             />
             <AppText
               variant="bodySmall"
-              color={COLORS.textPrimary}
+              color={colors.textPrimary}
               weight="600"
               style={{ marginLeft: 6, flex: 1 }}
             >
@@ -213,13 +215,13 @@ export const CartScreen: React.FC = () => {
                 : `Add ${formatCurrency(summary.amountNeededForFreeDelivery)} more for free delivery`}
             </AppText>
           </View>
-          <View style={styles.progressBarBg}>
+          <View style={[styles.progressBarBg, { backgroundColor: colors.surfaceSubtle }]}>
             <View
               style={[
                 styles.progressBarFill,
                 {
                   width: `${Math.min(100, (summary.itemTotal / summary.freeDeliveryThreshold) * 100)}%`,
-                  backgroundColor: summary.isEligibleForFreeDelivery ? '#15803D' : COLORS.primary,
+                  backgroundColor: summary.isEligibleForFreeDelivery ? colors.success : colors.primary,
                 },
               ]}
             />
@@ -229,27 +231,27 @@ export const CartScreen: React.FC = () => {
         {/* Medicine Cart Items List */}
         <View style={styles.itemsContainer}>
           <View style={styles.itemsHeaderRow}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
               Medicines ({summary.itemCount})
             </AppText>
             <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-              <AppText variant="caption" color={COLORS.primary} weight="600">
+              <AppText variant="caption" color={colors.primary} weight="600">
                 + Add More
               </AppText>
             </TouchableOpacity>
           </View>
 
           {items.map((item) => (
-            <View key={item.id} style={[styles.itemCard, SHADOWS.subtle]}>
+            <View key={item.id} style={[styles.itemCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
               <Image source={{ uri: item.medicine.image }} style={styles.itemImage} resizeMode="cover" />
 
               <View style={styles.itemInfo}>
                 <View style={styles.itemHeader}>
                   <View style={{ flex: 1, marginRight: SPACING.sm }}>
-                    <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
+                    <AppText variant="titleSmall" color={colors.textPrimary} weight="600" numberOfLines={1}>
                       {item.medicine.name}
                     </AppText>
-                    <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1} style={{ marginTop: 1 }}>
+                    <AppText variant="caption" color={colors.textSecondary} numberOfLines={1} style={{ marginTop: 1 }}>
                       {item.medicine.saltComposition}
                     </AppText>
                   </View>
@@ -259,7 +261,7 @@ export const CartScreen: React.FC = () => {
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     style={styles.deleteIconBtn}
                   >
-                    <Ionicons name="trash-outline" size={16} color={COLORS.textMuted} />
+                    <Ionicons name="trash-outline" size={16} color={colors.textMuted} />
                   </TouchableOpacity>
                 </View>
 
@@ -285,36 +287,36 @@ export const CartScreen: React.FC = () => {
         </View>
 
         {/* Bill Estimate Summary */}
-        <View style={[styles.billCard, SHADOWS.subtle]}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
+        <View style={[styles.billCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
             Price &amp; Bill Estimate
           </AppText>
 
           <View style={styles.billRow}>
-            <AppText variant="bodySmall" color={COLORS.textSecondary}>
+            <AppText variant="bodySmall" color={colors.textSecondary}>
               Item Total (MRP)
             </AppText>
-            <AppText variant="bodySmall" color={COLORS.textPrimary}>
+            <AppText variant="bodySmall" color={colors.textPrimary}>
               {formatCurrency(summary.mrpTotal)}
             </AppText>
           </View>
 
           <View style={styles.billRow}>
-            <AppText variant="bodySmall" color="#15803D" weight="600">
+            <AppText variant="bodySmall" color={colors.success} weight="600">
               Estimated Marketplace Savings
             </AppText>
-            <AppText variant="bodySmall" color="#15803D" weight="600">
+            <AppText variant="bodySmall" color={colors.success} weight="600">
               - {formatCurrency(summary.savingsTotal)}
             </AppText>
           </View>
 
           <View style={styles.billRow}>
-            <AppText variant="bodySmall" color={COLORS.textSecondary}>
+            <AppText variant="bodySmall" color={colors.textSecondary}>
               Delivery Partner Fee
             </AppText>
             <AppText
               variant="bodySmall"
-              color={summary.estimatedDeliveryFee === 0 ? '#15803D' : COLORS.textPrimary}
+              color={summary.estimatedDeliveryFee === 0 ? colors.success : colors.textPrimary}
               weight="600"
             >
               {summary.estimatedDeliveryFee === 0 ? 'FREE' : formatCurrency(summary.estimatedDeliveryFee)}
@@ -322,28 +324,28 @@ export const CartScreen: React.FC = () => {
           </View>
 
           <View style={styles.billRow}>
-            <AppText variant="bodySmall" color={COLORS.textSecondary}>
+            <AppText variant="bodySmall" color={colors.textSecondary}>
               Pharmacy Handling &amp; GST
             </AppText>
-            <AppText variant="bodySmall" color={COLORS.textPrimary}>
+            <AppText variant="bodySmall" color={colors.textPrimary}>
               {formatCurrency(summary.taxesAndHandling)}
             </AppText>
           </View>
 
-          <View style={styles.billDivider} />
+          <View style={[styles.billDivider, { backgroundColor: colors.border }]} />
 
           <View style={styles.billRow}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
               Estimated Total
             </AppText>
-            <AppText variant="titleLarge" color={COLORS.primary} weight="600">
+            <AppText variant="titleLarge" color={colors.primary} weight="600">
               {formatCurrency(summary.estimatedFinalTotal)}
             </AppText>
           </View>
 
-          <View style={styles.estimateNoticeBox}>
-            <Ionicons name="information-circle-outline" size={16} color={COLORS.primary} />
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ marginLeft: 6, flex: 1, fontSize: 11 }}>
+          <View style={[styles.estimateNoticeBox, { backgroundColor: colors.primarySubtle }]}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
+            <AppText variant="caption" color={colors.textSecondary} style={{ marginLeft: 6, flex: 1, fontSize: 11 }}>
               {isStoreSpecificCart
                 ? 'Final order bill from this store.'
                 : 'Final price will be determined when nearby pharmacies submit competitive bids.'}
@@ -353,12 +355,12 @@ export const CartScreen: React.FC = () => {
       </ScrollView>
 
       {/* Sticky Bottom Action */}
-      <View style={[styles.bottomBar, SHADOWS.modal]}>
+      <View style={[styles.bottomBar, { backgroundColor: colors.surface, borderTopColor: colors.border }, SHADOWS.modal]}>
         <View style={styles.bottomTotalCol}>
-          <AppText variant="caption" color={COLORS.textMuted}>
+          <AppText variant="caption" color={colors.textMuted}>
             Cart Total ({summary.totalQuantity} items)
           </AppText>
-          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
+          <AppText variant="titleLarge" color={colors.primary} weight="600">
             {formatCurrency(summary.estimatedFinalTotal)}
           </AppText>
         </View>

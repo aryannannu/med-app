@@ -21,7 +21,7 @@ export const TabBarScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
       toValue: isCollapsed ? 1 : 0,
       duration: 280,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   }, [isCollapsed, collapseAnim]);
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 
 export interface QuantitySelectorProps {
@@ -23,15 +24,29 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   minQuantity = 0,
   maxQuantity = 20,
   size = 'md',
-  color = '#15803D',
-  minusColor = '#DC2626',
+  color,
+  minusColor,
   style,
 }) => {
+  const { colors } = useAppTheme();
+
+  // Use theme-aware defaults if not explicitly provided
+  const resolvedColor = color ?? colors.success;
+  const resolvedMinusColor = minusColor ?? colors.danger;
+
   const btnSize = size === 'sm' ? 26 : size === 'md' ? 32 : 38;
   const iconSize = size === 'sm' ? 14 : size === 'md' ? 16 : 18;
 
   return (
-    <View style={[styles.container, size === 'sm' && styles.containerSm, { borderColor: color }, style]}>
+    <View style={[
+      styles.container,
+      size === 'sm' && styles.containerSm,
+      {
+        borderColor: resolvedColor,
+        backgroundColor: colors.surface,
+      },
+      style,
+    ]}>
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={onDecrement}
@@ -46,14 +61,14 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         <Ionicons
           name="remove"
           size={iconSize}
-          color={minusColor}
+          color={resolvedMinusColor}
         />
       </TouchableOpacity>
 
       <View style={styles.countContainer}>
         <AppText
           variant={size === 'sm' ? 'caption' : size === 'md' ? 'bodyMedium' : 'titleMedium'}
-          color={color}
+          color={resolvedColor}
           weight="600"
           align="center"
         >
@@ -72,7 +87,7 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           quantity >= maxQuantity && styles.btnDisabled,
         ]}
       >
-        <Ionicons name="add" size={iconSize} color={color} />
+        <Ionicons name="add" size={iconSize} color={resolvedColor} />
       </TouchableOpacity>
     </View>
   );
@@ -82,10 +97,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1.5,
-    borderColor: '#15803D',
     padding: 1,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },

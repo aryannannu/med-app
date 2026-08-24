@@ -1,6 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export interface AppIconButtonProps {
   icon: React.ReactNode;
@@ -21,6 +22,7 @@ export const AppIconButton: React.FC<AppIconButtonProps> = ({
   disabled = false,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -51,3 +53,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+
+

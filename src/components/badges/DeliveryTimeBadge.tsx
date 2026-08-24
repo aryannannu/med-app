@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { formatDeliveryTime } from '../../utils/formatters';
 
@@ -16,6 +17,7 @@ export const DeliveryTimeBadge: React.FC<DeliveryTimeBadgeProps> = ({
   isExpress = false,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View
       style={[
@@ -64,3 +66,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
 });
+
+
+

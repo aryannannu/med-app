@@ -1,6 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { COLORS, SPACING } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export interface DividerProps {
   color?: string;
@@ -15,6 +16,7 @@ export const Divider: React.FC<DividerProps> = ({
   marginVertical = SPACING.sm,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View
       style={[
@@ -35,3 +37,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
+
+

@@ -18,7 +18,93 @@ export const PRIMARY_SCALE = {
   950: '#100A2A',  // Ultra dark contrast
 } as const;
 
-export const COLORS = {
+export interface ThemeColors {
+  primaryScale: typeof PRIMARY_SCALE;
+  primary: string;
+  primaryDark: string;
+  primaryLight: string;
+  primarySubtle: string;
+  primaryMuted: string;
+  primaryBorder: string;
+
+  secondary: string;
+  secondaryLight: string;
+  secondaryDark: string;
+
+  background: string;
+  surface: string;
+  surfaceElevated: string;
+  surfaceSubtle: string;
+  surfaceMuted: string;
+
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  textInverse: string;
+  textPrimaryBrand: string;
+
+  border: string;
+  borderLight: string;
+  borderFocus: string;
+  borderError: string;
+
+  success: string;
+  successLight: string;
+  successDark: string;
+
+  warning: string;
+  warningLight: string;
+  warningDark: string;
+
+  danger: string;
+  dangerLight: string;
+  dangerDark: string;
+
+  info: string;
+  infoLight: string;
+  infoDark: string;
+
+  rxRed: string;
+  rxRedLight: string;
+  rxRedBorder: string;
+
+  tagRecommended: string;
+  tagRecommendedBg: string;
+  tagRecommendedBorder: string;
+
+  tagLowestPrice: string;
+  tagLowestPriceBg: string;
+  tagLowestPriceBorder: string;
+
+  tagFastestDelivery: string;
+  tagFastestDeliveryBg: string;
+  tagFastestDeliveryBorder: string;
+
+  tagBestRated: string;
+  tagBestRatedBg: string;
+  tagBestRatedBorder: string;
+
+  priceGreen: string;
+  priceGreenLight: string;
+  priceGreenDark: string;
+  savingsGreen: string;
+  savingsGreenLight: string;
+  savingsGreenBorder: string;
+  brandAction: string;
+  brandActionPressed: string;
+  cardBorderSubtle: string;
+  chipInactiveBg: string;
+  chipInactiveText: string;
+  skeletonBg: string;
+  skeletonHighlight: string;
+
+  overlay: string;
+  overlayLight: string;
+  starGold: string;
+  starGoldLight: string;
+}
+
+export const LIGHT_COLORS: ThemeColors = {
   // Primary Brand & Complete Scale
   primaryScale: PRIMARY_SCALE,
   primary: PRIMARY_SCALE[500],       // #3A2986 (Base Primary Brand Color)
@@ -115,7 +201,109 @@ export const COLORS = {
   overlayLight: 'rgba(15, 23, 42, 0.20)',
   starGold: '#F59E0B',
   starGoldLight: '#FEF3C7',
-} as const;
+};
 
-export type ColorKey = keyof typeof COLORS;
+export const DARK_COLORS: ThemeColors = {
+  // Primary Brand & Scale for Dark Mode
+  primaryScale: PRIMARY_SCALE,
+  primary: '#8B74E6',                // Vibrant primary tint on dark background
+  primaryDark: '#A18ED5',
+  primaryLight: '#C3B7E5',
+  primarySubtle: '#1E1838',          // Dark subtle purple highlight
+  primaryMuted: '#281F4A',           // Dark purple pill/surface
+  primaryBorder: '#43327A',          // Purple border on dark surface
+
+  // Secondary Support
+  secondary: '#2DD4BF',
+  secondaryLight: '#115E59',
+  secondaryDark: '#0F766E',
+
+  // Neutrals (calm, deep healthcare dark theme)
+  background: '#0F0F14',             // App Background: #0F0F14
+  surface: '#181822',                // Surface/Card: #181822
+  surfaceElevated: '#222230',        // Elevated Card/Modal: #222230
+  surfaceSubtle: '#1D1D2B',
+  surfaceMuted: '#272738',
+
+  // Typography & Text Colors
+  textPrimary: '#F5F5FA',            // Primary Text: #F5F5FA
+  textSecondary: '#A0A0B2',          // Secondary Text: #A0A0B2
+  textMuted: '#6E6E82',
+  textInverse: '#151515',
+  textPrimaryBrand: '#9B84EC',
+
+  // Borders & Dividers
+  border: '#272738',                 // Border: #272738
+  borderLight: '#1F1F2E',
+  borderFocus: '#8B74E6',
+  borderError: '#EF4444',
+
+  // Semantic Colors
+  success: '#22C55E',
+  successLight: '#052E16',
+  successDark: '#166534',
+
+  // Amber Warning
+  warning: '#F59E0B',
+  warningLight: '#451A03',
+  warningDark: '#92400E',
+
+  // Red Error / Danger
+  danger: '#EF4444',
+  dangerLight: '#450A0A',
+  dangerDark: '#991B1B',
+
+  // Informational
+  info: '#3B82F6',
+  infoLight: '#172554',
+  infoDark: '#1E40AF',
+
+  // Rx Prescription Badges
+  rxRed: '#EF4444',
+  rxRedLight: '#3B1317',
+  rxRedBorder: '#5C1D24',
+
+  // Marketplace Offer Tags
+  tagRecommended: '#9B84EC',
+  tagRecommendedBg: '#221840',
+  tagRecommendedBorder: '#3D2E6D',
+
+  tagLowestPrice: '#22C55E',
+  tagLowestPriceBg: '#052E16',
+  tagLowestPriceBorder: '#14532D',
+
+  tagFastestDelivery: '#3B82F6',
+  tagFastestDeliveryBg: '#172554',
+  tagFastestDeliveryBorder: '#1E3A8A',
+
+  tagBestRated: '#F59E0B',
+  tagBestRatedBg: '#451A03',
+  tagBestRatedBorder: '#78350F',
+
+  // Quick-Commerce Shopping Tokens
+  priceGreen: '#22C55E',
+  priceGreenLight: '#052E16',
+  priceGreenDark: '#166534',
+  savingsGreen: '#34D399',
+  savingsGreenLight: '#064E3B',
+  savingsGreenBorder: '#065F46',
+  brandAction: '#8B74E6',
+  brandActionPressed: '#A18ED5',
+  cardBorderSubtle: '#252536',
+  chipInactiveBg: '#1E1E2C',
+  chipInactiveText: '#A0A0B2',
+  skeletonBg: '#242436',
+  skeletonHighlight: '#32324A',
+
+  // Overlays & Accents
+  overlay: 'rgba(0, 0, 0, 0.75)',
+  overlayLight: 'rgba(0, 0, 0, 0.45)',
+  starGold: '#F59E0B',
+  starGoldLight: '#451A03',
+};
+
+// Default export alias for backwards compatibility
+export const COLORS = LIGHT_COLORS;
+
+export type ColorKey = keyof ThemeColors;
 export type PrimaryScaleKey = keyof typeof PRIMARY_SCALE;

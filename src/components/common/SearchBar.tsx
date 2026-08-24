@@ -1,8 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../../theme';
 import { AppText } from './AppText';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export interface SearchBarProps {
   value: string;
@@ -25,15 +26,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   isClickableOnly = false,
   containerStyle,
 }) => {
+  const { colors } = useAppTheme();
+
   if (isClickableOnly) {
     return (
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={onPress}
-        style={[styles.container, SHADOWS.subtle, containerStyle]}
+        style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle, containerStyle]}
       >
-        <Ionicons name="search" size={20} color={COLORS.primary} style={styles.searchIcon} />
-        <AppText variant="bodyMedium" color={COLORS.textMuted} style={styles.placeholderText}>
+        <Ionicons name="search" size={20} color={colors.primary} style={styles.searchIcon} />
+        <AppText variant="bodyMedium" color={colors.textMuted} style={styles.placeholderText}>
           {placeholder}
         </AppText>
       </TouchableOpacity>
@@ -41,15 +44,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   }
 
   return (
-    <View style={[styles.container, SHADOWS.subtle, containerStyle]}>
-      <Ionicons name="search" size={20} color={COLORS.primary} style={styles.searchIcon} />
+    <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle, containerStyle]}>
+      <Ionicons name="search" size={20} color={colors.primary} style={styles.searchIcon} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.textMuted}
+        placeholderTextColor={colors.textMuted}
         autoFocus={autoFocus}
-        style={styles.input}
+        style={[styles.input, { color: colors.textPrimary }]}
         returnKeyType="search"
       />
       {value.length > 0 && (
@@ -61,7 +64,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.clearBtn}
         >
-          <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+          <Ionicons name="close-circle" size={18} color={colors.textMuted} />
         </TouchableOpacity>
       )}
     </View>
@@ -95,3 +98,4 @@ const styles = StyleSheet.create({
     padding: SPACING.xxs,
   },
 });
+

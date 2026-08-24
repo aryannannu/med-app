@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { AppButton } from '../common/AppButton';
 
@@ -22,17 +23,18 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   style,
   fullScreen = false,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
       <View style={styles.iconWrapper}>
-        <Ionicons name="alert-circle" size={40} color={COLORS.danger} />
+        <Ionicons name="alert-circle" size={40} color={colors.danger} />
       </View>
 
-      <AppText variant="h3" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
+      <AppText variant="h3" color={colors.textPrimary} weight="600" align="center" style={styles.title}>
         {title}
       </AppText>
 
-      <AppText variant="bodyMedium" color={COLORS.textSecondary} align="center" style={styles.message}>
+      <AppText variant="bodyMedium" color={colors.textSecondary} align="center" style={styles.message}>
         {message}
       </AppText>
 
@@ -80,3 +82,6 @@ const styles = StyleSheet.create({
     minWidth: 160,
   },
 });
+
+
+

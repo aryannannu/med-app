@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAddress } from '../../store/AddressContext';
 import { useCart } from '../../store/CartContext';
 import { useTabBarScroll } from '../../store/TabBarScrollContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 
 interface CategoryItem {
@@ -162,6 +163,7 @@ export const CategoriesScreen: React.FC = () => {
   const { selectedAddress } = useAddress();
   const { summary, totalItemCount } = useCart();
   const { onScroll, collapseAnim } = useTabBarScroll();
+  const { colors, isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   const floatingCartBottom = collapseAnim.interpolate({
@@ -180,12 +182,12 @@ export const CategoriesScreen: React.FC = () => {
   }, [searchQuery]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface }]}>
           <View style={{ flex: 1 }}>
-            <AppText variant="titleLarge" color={COLORS.textPrimary} weight="700">
+            <AppText variant="titleLarge" color={colors.textPrimary} weight="700">
               Categories
             </AppText>
             <TouchableOpacity
@@ -193,29 +195,29 @@ export const CategoriesScreen: React.FC = () => {
               onPress={() => navigation.navigate('AddressSelection', { isSelectingForCheckout: false })}
               style={styles.locationRow}
             >
-              <Ionicons name="location-sharp" size={13} color={COLORS.primary} />
-              <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1} style={{ marginLeft: 3, fontSize: 11 }}>
-                Delivering to {selectedAddress?.label || 'Home'} • {selectedAddress?.city || 'Punjab'}
+              <Ionicons name="location-sharp" size={13} color={colors.primary} />
+              <AppText variant="caption" color={colors.textSecondary} numberOfLines={1} style={{ marginLeft: 3, fontSize: 11 }}>
+                Delivering to {selectedAddress?.label || 'Home'} â€¢ {selectedAddress?.city || 'Punjab'}
               </AppText>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Search Bar */}
-        <View style={styles.searchWrapper}>
-          <View style={[styles.searchBar, SHADOWS.subtle]}>
-            <Ionicons name="search" size={18} color={COLORS.primary} style={{ marginRight: SPACING.xs }} />
+        <View style={[styles.searchWrapper, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <View style={[styles.searchBar, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }, SHADOWS.subtle]}>
+            <Ionicons name="search" size={18} color={colors.primary} style={{ marginRight: SPACING.xs }} />
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Search categories (e.g. Pain, Diabetes, Baby)"
-              placeholderTextColor={COLORS.textMuted}
-              style={styles.searchInput}
+              placeholderTextColor={colors.textMuted}
+              style={[styles.searchInput, { color: colors.textPrimary }]}
               clearButtonMode="while-editing"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')} style={{ padding: 4 }}>
-                <Ionicons name="close-circle" size={16} color={COLORS.textMuted} />
+                <Ionicons name="close-circle" size={16} color={colors.textMuted} />
               </TouchableOpacity>
             )}
           </View>
@@ -232,72 +234,82 @@ export const CategoriesScreen: React.FC = () => {
           scrollEventThrottle={16}
         >
           <View style={styles.sectionHeaderRow}>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="700">
+            <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
               Shop by Category
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary}>
+            <AppText variant="caption" color={colors.textSecondary}>
               {filteredCategories.length} Categories Available
             </AppText>
           </View>
 
           <View style={styles.categoriesGrid}>
-            {filteredCategories.map((cat) => (
-              <TouchableOpacity
-                key={cat.id}
-                activeOpacity={0.88}
-                onPress={() =>
-                  navigation.navigate('CategoryListing', {
-                    categorySlug: cat.slug,
-                    categoryName: cat.name,
-                  })
-                }
-                style={[styles.categoryGridCard, { backgroundColor: cat.bg }]}
-              >
-                {/* Top Row: Icon circle + Count badge */}
-                <View style={styles.cardTopRow}>
-                  <View style={styles.categoryIconCircle}>
-                    <Ionicons name={cat.icon} size={22} color={cat.color} />
-                  </View>
-                  <View style={styles.countBadge}>
-                    <AppText style={[styles.countBadgeText, { color: cat.color }]}>
-                      {cat.itemCount}
-                    </AppText>
-                  </View>
-                </View>
+            {filteredCategories.map((cat) => {
+              const cardBg = isDark ? colors.surfaceElevated : cat.bg;
+              const cardBorder = isDark ? colors.border : 'transparent';
+              const cardTextCol = isDark ? colors.textPrimary : cat.color;
+              const cardBadgeTextCol = isDark ? colors.primary : cat.color;
 
-                {/* Category Title */}
-                <AppText style={[styles.categoryTitleText, { color: cat.color }]} numberOfLines={2}>
-                  {cat.name}
-                </AppText>
-
-                {/* Subcategory Pills */}
-                <View style={styles.subcatsRow}>
-                  {cat.popularSubcats.map((sub, idx) => (
-                    <View key={idx} style={styles.subcatPill}>
-                      <AppText style={styles.subcatPillText} numberOfLines={1}>
-                        {sub}
+              return (
+                <TouchableOpacity
+                  key={cat.id}
+                  activeOpacity={0.88}
+                  onPress={() =>
+                    navigation.navigate('CategoryListing', {
+                      categorySlug: cat.slug,
+                      categoryName: cat.name,
+                    })
+                  }
+                  style={[
+                    styles.categoryGridCard,
+                    { backgroundColor: cardBg, borderWidth: isDark ? 1 : 0, borderColor: cardBorder },
+                  ]}
+                >
+                  {/* Top Row: Icon circle + Count badge */}
+                  <View style={styles.cardTopRow}>
+                    <View style={[styles.categoryIconCircle, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+                      <Ionicons name={cat.icon} size={22} color={isDark ? colors.primary : cat.color} />
+                    </View>
+                    <View style={[styles.countBadge, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+                      <AppText style={[styles.countBadgeText, { color: cardBadgeTextCol }]}>
+                        {cat.itemCount}
                       </AppText>
                     </View>
-                  ))}
-                </View>
+                  </View>
 
-                {/* Explore Link */}
-                <View style={styles.exploreRow}>
-                  <AppText style={[styles.exploreText, { color: cat.color }]}>
-                    Explore →
+                  {/* Category Title */}
+                  <AppText style={[styles.categoryTitleText, { color: cardTextCol }]} numberOfLines={2}>
+                    {cat.name}
                   </AppText>
-                </View>
-              </TouchableOpacity>
-            ))}
+
+                  {/* Subcategory Pills */}
+                  <View style={styles.subcatsRow}>
+                    {cat.popularSubcats.map((sub, idx) => (
+                      <View key={idx} style={[styles.subcatPill, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+                        <AppText style={[styles.subcatPillText, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {sub}
+                        </AppText>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Explore Link */}
+                  <View style={styles.exploreRow}>
+                    <AppText style={[styles.exploreText, { color: cardBadgeTextCol }]}>
+                      Explore â†’
+                    </AppText>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {filteredCategories.length === 0 && (
             <View style={styles.emptyContainer}>
-              <Ionicons name="search-outline" size={48} color={COLORS.textMuted} />
-              <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: 12 }}>
+              <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+              <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginTop: 12 }}>
                 No categories found
               </AppText>
-              <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 4 }}>
+              <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginTop: 4 }}>
                 Try searching for "Pain", "Diabetes", or "Vitamins"
               </AppText>
             </View>
@@ -471,3 +483,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+

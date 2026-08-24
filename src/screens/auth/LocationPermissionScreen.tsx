@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,9 +8,11 @@ import { AppText } from '../../components/common/AppText';
 import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../store/AuthContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const LocationPermissionScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, 'LocationPermission'>>();
+  const { colors, isDark } = useAppTheme();
   const { grantLocationPermission } = useAuth();
 
   const handleAllowLocation = () => {
@@ -24,28 +26,28 @@ export const LocationPermissionScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.iconCircle}>
-            <Ionicons name="location" size={60} color={COLORS.primary} />
+            <Ionicons name="location" size={60} color={colors.primary} />
           </View>
 
-          <AppText variant="h1" color={COLORS.textPrimary} weight="600" align="center" style={styles.title}>
+          <AppText variant="h1" color={colors.textPrimary} weight="600" align="center" style={styles.title}>
             Find Nearby Pharmacies
           </AppText>
 
-          <AppText variant="bodyMedium" color={COLORS.textSecondary} align="center" style={styles.description}>
+          <AppText variant="bodyMedium" color={colors.textSecondary} align="center" style={styles.description}>
             HEALIT uses your delivery location to match your medicine requirements with verified pharmacies in your local area and compute accurate delivery times.
           </AppText>
 
           <View style={styles.trustCard}>
             <Ionicons name="shield-checkmark" size={24} color={COLORS.secondary} style={styles.trustIcon} />
             <View style={styles.trustTextContainer}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 100% Privacy Protected
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Your location is used solely to find nearby verified pharmacies and coordinate doorstep delivery.
               </AppText>
             </View>
@@ -130,3 +132,4 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
 });
+

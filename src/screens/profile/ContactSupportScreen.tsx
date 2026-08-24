@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   ScrollView,
@@ -15,12 +15,14 @@ import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrders } from '../../store/OrderContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const ContactSupportScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'ContactSupport'>>();
   const { activeOrders, orders } = useOrders();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const orderIdParam = route.params?.orderId;
   const selectedOrder =
@@ -41,17 +43,17 @@ export const ContactSupportScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Contact Support
         </AppText>
         <View style={{ width: 40 }} />
@@ -62,10 +64,10 @@ export const ContactSupportScreen: React.FC = () => {
         {selectedOrder && (
           <View style={[styles.orderContextCard, SHADOWS.subtle]}>
             <View style={styles.orderContextLeft}>
-              <AppText variant="caption" color={COLORS.textMuted} weight="600">
+              <AppText variant="caption" color={colors.textMuted} weight="600">
                 REFERRED ORDER
               </AppText>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 #{selectedOrder?.id?.toUpperCase()} • {selectedOrder?.selectedPharmacy?.name || selectedOrder?.selectedOffer?.pharmacy?.name || 'Local Pharmacy'}
               </AppText>
             </View>
@@ -78,7 +80,7 @@ export const ContactSupportScreen: React.FC = () => {
         )}
 
         {/* Support Channels List */}
-        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+        <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
           Available Channels
         </AppText>
 
@@ -90,11 +92,11 @@ export const ContactSupportScreen: React.FC = () => {
             style={[styles.channelCard, SHADOWS.subtle]}
           >
             <View style={[styles.channelIconBox, { backgroundColor: '#ECE8F7' }]}>
-              <Ionicons name="chatbubbles" size={24} color={COLORS.primary} />
+              <Ionicons name="chatbubbles" size={24} color={colors.primary} />
             </View>
             <View style={styles.channelInfo}>
               <View style={styles.titleRow}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   24x7 Live Chat Support
                 </AppText>
                 <View style={styles.onlineBadge}>
@@ -104,11 +106,11 @@ export const ContactSupportScreen: React.FC = () => {
                   </AppText>
                 </View>
               </View>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 Instant agent response • Ideal for live tracking &amp; medicines
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
 
           {/* Channel 2: Phone Helpline */}
@@ -121,14 +123,14 @@ export const ContactSupportScreen: React.FC = () => {
               <Ionicons name="call" size={24} color="#15803D" />
             </View>
             <View style={styles.channelInfo}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Toll-Free Customer Helpline
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 1800-420-HEALIT • Mon-Sun 7:00 AM to 11:00 PM
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
 
           {/* Channel 3: Email Support */}
@@ -141,14 +143,14 @@ export const ContactSupportScreen: React.FC = () => {
               <Ionicons name="mail" size={24} color="#2563EB" />
             </View>
             <View style={styles.channelInfo}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Priority Email Support
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 support@healitapp.com • Replies within 2 hours
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
 
           {/* Channel 4: Report Issue */}
@@ -161,14 +163,14 @@ export const ContactSupportScreen: React.FC = () => {
               <Ionicons name="alert-circle" size={24} color="#D97706" />
             </View>
             <View style={styles.channelInfo}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Report a Specific Issue
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 File ticket for damaged medicine, refund, or rider dispute
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -297,3 +299,6 @@ const styles = StyleSheet.create({
     borderColor: '#FECACA',
   },
 });
+
+
+

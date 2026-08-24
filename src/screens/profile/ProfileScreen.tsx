@@ -31,7 +31,7 @@ export const ProfileScreen: React.FC = () => {
   const { addresses } = useAddress();
   const { prescriptions } = usePrescription();
   const { savedPharmacies } = useSavedPharmacies();
-  const { themeMode } = useAppTheme();
+  const { themeMode, colors } = useAppTheme();
   const { onScroll } = useTabBarScroll();
 
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
@@ -45,10 +45,10 @@ export const ProfileScreen: React.FC = () => {
   const userPhone = user?.phoneNumber ? formatPhoneNumber(user.phoneNumber) : '+91 98765 43210';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Profile Header (Clean, no cart/notification) */}
-      <View style={styles.header}>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      {/* Profile Header */}
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <AppText variant="titleLarge" color={colors.textPrimary} weight="600">
           Profile
         </AppText>
       </View>
@@ -62,7 +62,7 @@ export const ProfileScreen: React.FC = () => {
         {/* =========================================================================
             1. USER IDENTITY CARD
            ========================================================================= */}
-        <View style={[styles.userCard, SHADOWS.card]}>
+        <View style={[styles.userCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.card]}>
           {user?.avatarUrl ? (
             <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
           ) : (
@@ -74,10 +74,10 @@ export const ProfileScreen: React.FC = () => {
           )}
 
           <View style={styles.userInfo}>
-            <AppText variant="h3" color={COLORS.textPrimary} weight="600">
+            <AppText variant="h3" color={colors.textPrimary} weight="600">
               {userName}
             </AppText>
-            <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+            <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginTop: 2 }}>
               {userPhone}
             </AppText>
 
@@ -86,8 +86,8 @@ export const ProfileScreen: React.FC = () => {
               onPress={() => navigation.navigate('EditProfile')}
               style={styles.editProfileLink}
             >
-              <AppText variant="caption" color={COLORS.primary} weight="600">
-                Edit Profile →
+              <AppText variant="caption" color={colors.primary} weight="600">
+                Edit Profile â†’
               </AppText>
             </TouchableOpacity>
           </View>
@@ -100,15 +100,15 @@ export const ProfileScreen: React.FC = () => {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => navigation.navigate('MainTabs', { screen: 'OrdersTab' } as any)}
-            style={[styles.quickActionCard, SHADOWS.subtle]}
+            style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
           >
-            <View style={[styles.quickIconCircle, { backgroundColor: '#ECE8F7' }]}>
-              <Ionicons name="receipt" size={20} color={COLORS.primary} />
+            <View style={[styles.quickIconCircle, { backgroundColor: colors.primaryMuted }]}>
+              <Ionicons name="receipt" size={20} color={colors.primary} />
             </View>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.xs }}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.xs }}>
               My Orders
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ fontSize: 11 }}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 11 }}>
               Track &amp; Invoices
             </AppText>
           </TouchableOpacity>
@@ -116,15 +116,15 @@ export const ProfileScreen: React.FC = () => {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => navigation.navigate('AddressSelection', { isSelectingForCheckout: false })}
-            style={[styles.quickActionCard, SHADOWS.subtle]}
+            style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
           >
-            <View style={[styles.quickIconCircle, { backgroundColor: '#EFF6FF' }]}>
-              <Ionicons name="location" size={20} color="#2563EB" />
+            <View style={[styles.quickIconCircle, { backgroundColor: colors.infoLight }]}>
+              <Ionicons name="location" size={20} color={colors.info} />
             </View>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.xs }}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.xs }}>
               Addresses
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ fontSize: 11 }}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 11 }}>
               {addresses.length} Saved
             </AppText>
           </TouchableOpacity>
@@ -132,15 +132,15 @@ export const ProfileScreen: React.FC = () => {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => navigation.navigate('SavedPharmacies')}
-            style={[styles.quickActionCard, SHADOWS.subtle]}
+            style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
           >
-            <View style={[styles.quickIconCircle, { backgroundColor: '#FEE2E2' }]}>
-              <Ionicons name="heart" size={20} color="#DC2626" />
+            <View style={[styles.quickIconCircle, { backgroundColor: colors.dangerLight }]}>
+              <Ionicons name="heart" size={20} color={colors.danger} />
             </View>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.xs }}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.xs }}>
               Pharmacies
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ fontSize: 11 }}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 11 }}>
               {savedPharmacies.length} Saved
             </AppText>
           </TouchableOpacity>
@@ -149,25 +149,25 @@ export const ProfileScreen: React.FC = () => {
         {/* =========================================================================
             3. ACCOUNT SECTION
            ========================================================================= */}
-        <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionHeading}>
+        <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionHeading}>
           ACCOUNT
         </AppText>
 
-        <View style={[styles.menuCard, SHADOWS.subtle]}>
+        <View style={[styles.menuCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('EditProfile')}
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="person-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="person-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Personal Information
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -178,14 +178,14 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="receipt-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="receipt-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 My Orders
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -196,17 +196,17 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="document-text-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="document-text-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 My Prescriptions
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 {prescriptions.length} uploaded records
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -217,17 +217,17 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#ECE8F7' }]}>
-              <Ionicons name="wallet-outline" size={20} color={COLORS.primary} />
+              <Ionicons name="wallet-outline" size={20} color={colors.primary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 HEALIT Wallet
               </AppText>
               <AppText variant="caption" color="#15803D" weight="600">
                 {formatCurrency(balance)} available
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -238,24 +238,24 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="card-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="card-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Payment Methods
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
+              <AppText variant="caption" color={colors.textSecondary}>
                 Saved UPI &amp; Cards
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
         {/* =========================================================================
             4. SAVED SECTION
            ========================================================================= */}
-        <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionHeading}>
+        <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionHeading}>
           SAVED
         </AppText>
 
@@ -266,14 +266,14 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="location-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="location-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Saved Addresses
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -284,106 +284,23 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="heart-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="heart-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Saved Pharmacies
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
-        {/* =========================================================================
-            5. PREFERENCES SECTION
-           ========================================================================= */}
-        <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionHeading}>
-          PREFERENCES
-        </AppText>
 
-        <View style={[styles.menuCard, SHADOWS.subtle]}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('Appearance')}
-            style={styles.menuRow}
-          >
-            <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="color-palette-outline" size={20} color={COLORS.textPrimary} />
-            </View>
-            <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
-                Appearance
-              </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
-                {themeMode === 'system' ? 'System Default' : themeMode === 'dark' ? 'Dark' : 'Light'}
-              </AppText>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('NotificationPreferences')}
-            style={styles.menuRow}
-          >
-            <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="notifications-outline" size={20} color={COLORS.textPrimary} />
-            </View>
-            <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
-                Notifications
-              </AppText>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('PrivacySecurity')}
-            style={styles.menuRow}
-          >
-            <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="shield-outline" size={20} color={COLORS.textPrimary} />
-            </View>
-            <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
-                Privacy &amp; Security
-              </AppText>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => (navigation as any).navigate('HeaderShowcase')}
-            style={styles.menuRow}
-          >
-            <View style={[styles.menuIconCircle, { backgroundColor: '#ECE8F7' }]}>
-              <Ionicons name="color-palette-outline" size={20} color={COLORS.primary} />
-            </View>
-            <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.primary} weight="700">
-                Header UI Design System
-              </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary}>
-                20 Master Adaptive Variants
-              </AppText>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.primary} />
-          </TouchableOpacity>
-        </View>
 
         {/* =========================================================================
             6. SUPPORT SECTION
            ========================================================================= */}
-        <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionHeading}>
+        <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionHeading}>
           SUPPORT
         </AppText>
 
@@ -394,14 +311,14 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="help-circle-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="help-circle-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Help Center
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -412,17 +329,17 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="headset-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="headset-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Contact Support
               </AppText>
               <AppText variant="caption" color="#15803D" weight="600">
                 24x7 Live Chat &amp; Call
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -433,21 +350,21 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={[styles.menuIconCircle, { backgroundColor: '#F8F8FC' }]}>
-              <Ionicons name="alert-circle-outline" size={20} color={COLORS.textPrimary} />
+              <Ionicons name="alert-circle-outline" size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Report an Issue
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
         {/* =========================================================================
             7. ABOUT & LEGAL SECTION
            ========================================================================= */}
-        <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionHeading}>
+        <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionHeading}>
           ABOUT &amp; LEGAL
         </AppText>
 
@@ -458,11 +375,11 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Terms &amp; Conditions
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -473,11 +390,11 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Privacy Policy
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -488,11 +405,11 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Refund / Cancellation Policy
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -503,40 +420,25 @@ export const ProfileScreen: React.FC = () => {
             style={styles.menuRow}
           >
             <View style={styles.menuTextCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Medicine Ordering Policy
               </AppText>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
-        {/* App Version */}
-        <AppText variant="caption" color={COLORS.textMuted} align="center" style={styles.versionText}>
-          HEALIT Version 1.0.0
-        </AppText>
-
         {/* =========================================================================
-            8. BOTTOM ACTIONS (LOG OUT & DELETE ACCOUNT)
+            8. BOTTOM ACTIONS (LOG OUT)
            ========================================================================= */}
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => setLogoutModalVisible(true)}
-          style={styles.logoutBtn}
+          style={[styles.logoutBtn, { marginBottom: 40 }]}
         >
-          <Ionicons name="log-out-outline" size={20} color={COLORS.danger} />
-          <AppText variant="button" color={COLORS.danger} weight="600" style={{ marginLeft: 8 }}>
+          <Ionicons name="log-out-outline" size={20} color={colors.danger} />
+          <AppText variant="button" color={colors.danger} weight="600" style={{ marginLeft: 8 }}>
             Log Out
-          </AppText>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('DeleteAccount')}
-          style={styles.deleteAccountBtn}
-        >
-          <AppText variant="caption" color={COLORS.textMuted} weight="600">
-            Delete Account
           </AppText>
         </TouchableOpacity>
       </ScrollView>
@@ -680,3 +582,4 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
   },
 });
+

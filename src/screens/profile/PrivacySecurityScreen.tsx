@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   ScrollView,
@@ -13,23 +13,25 @@ import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const PrivacySecurityScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Privacy &amp; Security
         </AppText>
         <View style={{ width: 40 }} />
@@ -37,21 +39,21 @@ export const PrivacySecurityScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Section 1: Account Security */}
-        <View style={styles.section}>
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionTitle}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionTitle}>
             ACCOUNT SECURITY
           </AppText>
 
-          <View style={[styles.card, SHADOWS.subtle]}>
+          <View style={[styles.card, SHADOWS.subtle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.row}>
               <View style={[styles.iconCircle, { backgroundColor: '#DCFCE7' }]}>
                 <Ionicons name="shield-checkmark" size={20} color="#15803D" />
               </View>
               <View style={styles.textCol}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Two-Factor OTP Login
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Encrypted SMS authentication enabled for your account
                 </AppText>
               </View>
@@ -70,37 +72,37 @@ export const PrivacySecurityScreen: React.FC = () => {
               style={styles.row}
             >
               <View style={[styles.iconCircle, { backgroundColor: '#ECE8F7' }]}>
-                <Ionicons name="key-outline" size={20} color={COLORS.primary} />
+                <Ionicons name="key-outline" size={20} color={colors.primary} />
               </View>
               <View style={styles.textCol}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Active Login Sessions
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   1 device currently logged in
                 </AppText>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Section 2: App Permissions */}
-        <View style={styles.section}>
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionTitle}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionTitle}>
             APP PERMISSIONS
           </AppText>
 
-          <View style={[styles.card, SHADOWS.subtle]}>
+          <View style={[styles.card, SHADOWS.subtle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.row}>
               <View style={[styles.iconCircle, { backgroundColor: '#EFF6FF' }]}>
                 <Ionicons name="location-outline" size={20} color="#2563EB" />
               </View>
               <View style={styles.textCol}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Location Access
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Required for discovering nearby 10-15 min pharmacy inventory
                 </AppText>
               </View>
@@ -118,10 +120,10 @@ export const PrivacySecurityScreen: React.FC = () => {
                 <Ionicons name="camera-outline" size={20} color="#D97706" />
               </View>
               <View style={styles.textCol}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Camera Access
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Used for real-time doctor prescription scanning
                 </AppText>
               </View>
@@ -136,13 +138,13 @@ export const PrivacySecurityScreen: React.FC = () => {
 
             <View style={styles.row}>
               <View style={[styles.iconCircle, { backgroundColor: '#F3E8FF' }]}>
-                <Ionicons name="images-outline" size={20} color={COLORS.primary} />
+                <Ionicons name="images-outline" size={20} color={colors.primary} />
               </View>
               <View style={styles.textCol}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Photo &amp; Document Storage
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Used to upload saved PDF &amp; JPG prescriptions
                 </AppText>
               </View>
@@ -156,29 +158,29 @@ export const PrivacySecurityScreen: React.FC = () => {
         </View>
 
         {/* Section 3: Data & Privacy */}
-        <View style={styles.section}>
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionTitle}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionTitle}>
             DATA &amp; PRIVACY
           </AppText>
 
-          <View style={[styles.card, SHADOWS.subtle]}>
+          <View style={[styles.card, SHADOWS.subtle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => navigation.navigate('LegalDocument', { docType: 'privacy' })}
               style={styles.row}
             >
               <View style={[styles.iconCircle, { backgroundColor: '#F8F8FC' }]}>
-                <Ionicons name="document-text-outline" size={20} color={COLORS.textPrimary} />
+                <Ionicons name="document-text-outline" size={20} color={colors.textPrimary} />
               </View>
               <View style={styles.textCol}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Privacy Policy
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Learn how HEALIT encrypts and protects your health data
                 </AppText>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
 
             <View style={styles.divider} />
@@ -189,17 +191,17 @@ export const PrivacySecurityScreen: React.FC = () => {
               style={styles.row}
             >
               <View style={[styles.iconCircle, { backgroundColor: '#F8F8FC' }]}>
-                <Ionicons name="download-outline" size={20} color={COLORS.textPrimary} />
+                <Ionicons name="download-outline" size={20} color={colors.textPrimary} />
               </View>
               <View style={styles.textCol}>
-                <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                   Download My Data
                 </AppText>
-                <AppText variant="caption" color={COLORS.textSecondary}>
+                <AppText variant="caption" color={colors.textSecondary}>
                   Export order history, invoices, and prescription records
                 </AppText>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
@@ -286,3 +288,6 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.md,
   },
 });
+
+
+

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,9 +19,12 @@ import { BottomSheet } from '../../components/modals/BottomSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrders } from '../../store/OrderContext';
 import { useToast } from '../../store/ToastContext';
-import { Order } from '../../types/order';
+import { useAppTheme } from '../../store/ThemeContext';
+import { Order, OrderStatus } from '../../types/order';
 import { formatCurrency } from '../../utils/currency';
 import { formatDateTime } from '../../utils/formatters';
+
+import { LiveOrderMap } from '../../components/maps/LiveOrderMap';
 
 const CANCEL_REASONS = [
   'Ordered by mistake',
@@ -28,6 +32,46 @@ const CANCEL_REASONS = [
   'Found alternative at local clinic',
   'Incorrect delivery address entered',
   'Other reasons',
+];
+
+// Clean Google Maps silver/light mode styling
+const silverMapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [{ "color": "#f5f5f5" }]
+  },
+  {
+    "elementType": "labels.icon",
+    "stylers": [{ "visibility": "off" }]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [{ "color": "#616161" }]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [{ "color": "#f5f5f5" }]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [{ "color": "#eeeeee" }]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [{ "color": "#ffffff" }]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [{ "color": "#dadada" }]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [{ "color": "#c9c9c9" }]
+  }
 ];
 
 export const OrderDetailsScreen: React.FC = () => {
@@ -40,9 +84,11 @@ export const OrderDetailsScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(!initialOrder);
   const [cancelSheetVisible, setCancelSheetVisible] = useState(false);
   const [selectedReason, setSelectedReason] = useState(CANCEL_REASONS[0]);
+  const [showItemsDetails, setShowItemsDetails] = useState(false);
 
   const { getOrderById, cancelOrder, reorder } = useOrders();
   const { showToast } = useToast();
+  const { colors } = useAppTheme();
 
   useEffect(() => {
     if (!order) {
@@ -53,7 +99,90 @@ export const OrderDetailsScreen: React.FC = () => {
     }
   }, [orderId, order, getOrderById]);
 
-  if (isLoading || !order) {
+  // Dynamic Status Mapper for UI
+  const statusInfo = useMemo(() => {
+    if (!order) return null;
+    
+    switch (order.status) {
+      case 'request_created':
+      case 'finding_pharmacy':
+        return {
+          title: 'Order Placed',
+          subtitle: 'Your order has been received.',
+          step: 0,
+          showMap: false,
+        };
+      case 'offers_received':
+      case 'offer_selected':
+        return {
+          title: 'Pharmacy Confirmed',
+          subtitle: 'Your pharmacy has accepted the order.',
+          step: 1,
+          showMap: false,
+        };
+      case 'preparing':
+        return {
+          title: 'Preparing your order',
+          subtitle: 'Your medicines are being packed.',
+          step: 1,
+          showMap: false,
+        };
+      case 'packed':
+        return {
+          title: 'Ready for pickup',
+          subtitle: 'Your order is ready for the delivery partner.',
+          step: 1,
+          showMap: false,
+        };
+      case 'out_for_delivery':
+        return {
+          title: 'Out for Delivery',
+          subtitle: order.rider ? `Your rider ${order.rider.name} is on the way.` : 'Your order is on the way.',
+          step: 2,
+          showMap: true,
+        };
+      case 'delivered':
+        return {
+          title: 'Delivered',
+          subtitle: `Your order was delivered.`,
+          step: 3,
+          showMap: false,
+        };
+      case 'cancelled':
+        return {
+          title: 'Order Cancelled',
+          subtitle: order.cancellationReason || 'This order was cancelled.',
+          step: -1,
+          showMap: false,
+        };
+      default:
+        return {
+          title: 'Processing',
+          subtitle: 'Updating order status...',
+          step: 0,
+          showMap: false,
+        };
+    }
+  }, [order]);
+
+  const pharmacyCoords = useMemo(() => {
+    return {
+      latitude: order?.selectedPharmacy?.address?.latitude || 31.1512,
+      longitude: order?.selectedPharmacy?.address?.longitude || 75.3489,
+    };
+  }, [order]);
+
+  const homeCoords = {
+    latitude: 31.1445,
+    longitude: 75.3398,
+  };
+
+  const riderCoords = {
+    latitude: 31.1478,
+    longitude: 75.3443,
+  };
+
+  if (isLoading || !order || !statusInfo) {
     return <LoadingState fullScreen message="Loading order details..." />;
   }
 
@@ -75,283 +204,469 @@ export const OrderDetailsScreen: React.FC = () => {
     navigation.navigate('Cart');
   };
 
+  const hasRider = !!order.rider;
+
   return (
     <AppScreen
       scrollable
       header={
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary} />
+            <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
           </TouchableOpacity>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
             Track Order
           </AppText>
           <View style={{ width: 40 }} />
         </View>
       }
     >
-      {/* 1. Green Hero Order Banner matching Image 3 Step 14 */}
-      <View style={[styles.orderHeroBanner, SHADOWS.subtle]}>
-        <View style={styles.heroTopRow}>
-          <View>
-            <AppText variant="titleMedium" color="#FFFFFF" weight="600">
-              Order ID: #{order.orderNumber}
-            </AppText>
-            <AppText variant="caption" color={COLORS.primaryMuted} style={{ marginTop: 2 }}>
-              Placed on {formatDateTime(order.createdAt)}
-            </AppText>
-          </View>
-          <View style={styles.statusPillHero}>
-            <AppText variant="caption" color={COLORS.successDark} weight="600" style={{ fontSize: 10 }}>
-              {order.status.toUpperCase()}
-            </AppText>
-          </View>
-        </View>
-      </View>
-
-      {/* 2. Step-by-Step Status Timeline */}
-      <View style={[styles.timelineCard, SHADOWS.subtle]}>
-        {order.timeline.map((step, idx) => {
-          const isLast = idx === order.timeline.length - 1;
-          return (
-            <View key={step.id || idx} style={styles.timelineRow}>
-              <View style={styles.timelineIconCol}>
-                <View
-                  style={[
-                    styles.timelineDot,
-                    step.isCompleted && styles.dotCompleted,
-                    step.isCurrent && styles.dotCurrent,
-                    !step.isCompleted && !step.isCurrent && styles.dotPending,
-                  ]}
-                >
-                  {step.isCompleted ? (
-                    <Ionicons name="checkmark" size={12} color="#FFFFFF" />
-                  ) : step.isCurrent ? (
-                    <View style={styles.dotCurrentInner} />
-                  ) : null}
-                </View>
-                {!isLast && (
-                  <View
-                    style={[
-                      styles.timelineLine,
-                      step.isCompleted ? styles.lineCompleted : styles.linePending,
-                    ]}
-                  />
-                )}
-              </View>
-
-              <View style={styles.timelineContentCol}>
-                <View style={styles.timelineTitleRow}>
-                  <AppText
-                    variant="titleSmall"
-                    color={step.isCurrent ? COLORS.primary : step.isCompleted ? COLORS.textPrimary : COLORS.textMuted}
-                    weight={step.isCurrent || step.isCompleted ? '600' : '400'}
-                  >
-                    {step.title}
-                  </AppText>
-                  {step.timestamp > 0 && (
-                    <AppText variant="caption" color={COLORS.textMuted}>
-                      {formatDateTime(step.timestamp)}
-                    </AppText>
-                  )}
-                </View>
-                <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
-                  {step.description}
+      <View style={styles.pageContent}>
+        {/* =========================================================================
+            LEVEL 1 — CURRENT STATUS HERO
+           ========================================================================= */}
+        <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.heroRow}>
+            <View style={{ flex: 1 }}>
+              <AppText variant="titleSmall" color={colors.textSecondary} weight="500">
+                {statusInfo.title}
+              </AppText>
+              
+              {/* Dynamic ETA Text display */}
+              {order.status === 'out_for_delivery' ? (
+                <AppText variant="h2" color={colors.success} weight="700" style={styles.heroEtaText}>
+                  Arriving in 8–12 min
                 </AppText>
+              ) : order.status === 'delivered' ? (
+                <AppText variant="h2" color={colors.success} weight="700" style={styles.heroEtaText}>
+                  Delivered at {order.deliveredAt ? formatDateTime(order.deliveredAt) : '9:12 PM'}
+                </AppText>
+              ) : order.estimatedDeliveryTimestamp ? (
+                <AppText variant="h2" color={colors.primary} weight="700" style={styles.heroEtaText}>
+                  ETA: {formatDateTime(order.estimatedDeliveryTimestamp)}
+                </AppText>
+              ) : (
+                <AppText variant="bodyMedium" color={colors.textSecondary} weight="600" style={{ marginTop: 4 }}>
+                  Estimated time will appear shortly
+                </AppText>
+              )}
+              
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: SPACING.xs }}>
+                {statusInfo.subtitle}
+              </AppText>
+            </View>
+
+            <View style={[styles.orderIdBadge, { backgroundColor: colors.primaryMuted }]}>
+              <AppText variant="caption" color={colors.textPrimaryBrand} weight="700">
+                #{order.orderNumber}
+              </AppText>
+            </View>
+          </View>
+        </View>
+
+        {/* =========================================================================
+            LEVEL 2 — DUAL CAPSULE HORIZONTAL TRACKER
+           ========================================================================= */}
+        <View style={[styles.horizontalTrackerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.trackerTrack}>
+            <View style={[styles.trackerLineBg, { backgroundColor: colors.border }]} />
+            <View 
+              style={[
+                styles.trackerLineActive, 
+                { 
+                  backgroundColor: colors.primary,
+                  width: `${statusInfo.step >= 0 ? (statusInfo.step / 3) * 100 : 0}%` 
+                }
+              ]} 
+            />
+
+            <View style={styles.trackerNodesRow}>
+              {/* Node 1: Placed */}
+              <View style={[
+                styles.trackerNode, 
+                statusInfo.step >= 0 ? { backgroundColor: colors.primary } : { backgroundColor: colors.border }
+              ]}>
+                <Ionicons name="receipt" size={12} color="#FFFFFF" />
+              </View>
+
+              {/* Node 2: Preparing */}
+              <View style={[
+                styles.trackerNode, 
+                statusInfo.step >= 1 ? { backgroundColor: colors.primary } : { backgroundColor: colors.border }
+              ]}>
+                <Ionicons name="cube" size={12} color="#FFFFFF" />
+              </View>
+
+              {/* Node 3: On The Way */}
+              <View style={[
+                styles.trackerNode, 
+                statusInfo.step >= 2 ? { backgroundColor: colors.primary } : { backgroundColor: colors.border }
+              ]}>
+                <Ionicons name="bicycle" size={12} color="#FFFFFF" />
+              </View>
+
+              {/* Node 4: Delivered */}
+              <View style={[
+                styles.trackerNode, 
+                statusInfo.step >= 3 ? { backgroundColor: colors.primary } : { backgroundColor: colors.border }
+              ]}>
+                <Ionicons name="checkmark-circle" size={12} color="#FFFFFF" />
               </View>
             </View>
-          );
-        })}
-      </View>
-
-      {/* 3. Delivery Partner Info Card */}
-      {order.rider && (
-        <View style={[styles.riderCard, SHADOWS.subtle]}>
-          <View style={styles.riderAvatar}>
-            <Ionicons name="person" size={24} color={COLORS.primary} />
           </View>
-
-          <View style={styles.riderInfoCol}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
-              {order.rider.name}
-            </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary}>
-              Delivery Partner • ★ {order.rider.rating || 4.8}
-            </AppText>
-          </View>
-
-          <View style={styles.riderActionButtons}>
-            <TouchableOpacity
-              onPress={() => showToast(`Calling ${order.rider?.name}...`, 'info')}
-              style={styles.riderCallBtn}
-            >
-              <Ionicons name="call" size={16} color={COLORS.primary} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => showToast(`Opening chat with ${order.rider?.name}...`, 'info')}
-              style={[styles.riderCallBtn, { marginLeft: 8 }]}
-            >
-              <Ionicons name="chatbubble-ellipses" size={16} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      {/* 4. Live Map / ETA Simulation Card */}
-      <View style={[styles.mapPreviewCard, SHADOWS.subtle]}>
-        <View style={styles.mapHeaderRow}>
-          <Ionicons name="navigate-circle" size={18} color={COLORS.primary} />
-          <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
-            LIVE LOCATION • 2 MINS AWAY
-          </AppText>
-        </View>
-        <View style={styles.mapRouteVisual}>
-          <View style={styles.pharmacyNode}>
-            <Ionicons name="business" size={14} color={COLORS.primary} />
-          </View>
-          <View style={styles.routeDottedLine} />
-          <View style={styles.riderBikeNode}>
-            <Ionicons name="bicycle" size={18} color={COLORS.success} />
-          </View>
-          <View style={styles.routeDottedLine} />
-          <View style={styles.homeNode}>
-            <Ionicons name="home" size={14} color={COLORS.primary} />
-          </View>
-        </View>
-      </View>
-
-      {/* 5. Order Items & Pharmacy Details */}
-      <View style={[styles.itemsCard, SHADOWS.subtle]}>
-        <View style={styles.pharmacyHeaderRow}>
-          <View style={styles.pharmLogoBox}>
-            <Ionicons name="medical" size={18} color={COLORS.primary} />
-          </View>
-          <View style={{ marginLeft: 8 }}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
-              {order.selectedPharmacy?.name || 'Local Verified Pharmacy'}
-            </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary}>
-              Fulfilled by verified local licensed pharmacy
-            </AppText>
+          
+          <View style={styles.trackerLabelsRow}>
+            <AppText variant="caption" color={statusInfo.step >= 0 ? colors.textPrimary : colors.textMuted} weight={statusInfo.step === 0 ? '700' : '500'} style={styles.trackerLabel}>Placed</AppText>
+            <AppText variant="caption" color={statusInfo.step >= 1 ? colors.textPrimary : colors.textMuted} weight={statusInfo.step === 1 ? '700' : '500'} style={styles.trackerLabel}>Preparing</AppText>
+            <AppText variant="caption" color={statusInfo.step >= 2 ? colors.textPrimary : colors.textMuted} weight={statusInfo.step === 2 ? '700' : '500'} style={styles.trackerLabel}>On the Way</AppText>
+            <AppText variant="caption" color={statusInfo.step >= 3 ? colors.textPrimary : colors.textMuted} weight={statusInfo.step === 3 ? '700' : '500'} style={styles.trackerLabel}>Delivered</AppText>
           </View>
         </View>
 
-        <View style={styles.itemsDivider} />
-
-        {order.items.map((item, idx) => (
-          <View key={item.medicineId || idx} style={styles.orderItemRow}>
-            <Image
-              source={{ uri: item.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&q=80' }}
-              style={styles.orderItemImg}
-              resizeMode="contain"
-            />
-            <View style={styles.orderItemInfo}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
-                {item.medicineName}
-              </AppText>
-              <AppText variant="caption" color={COLORS.textMuted}>
-                Qty: {item.quantity} • {item.packForm}
+        {/* =========================================================================
+            LEVEL 3 — LIVE TRACKING VISUAL (MAP VIEW FOR ACTIVE ORDER)
+           ========================================================================= */}
+        {statusInfo.showMap ? (
+          <View style={[styles.mapCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={styles.mapHeaderRow}>
+              <View style={styles.pulseIndicator}>
+                <View style={[styles.pulseCore, { backgroundColor: colors.success }]} />
+                <View style={[styles.pulseWave, { borderColor: colors.success }]} />
+              </View>
+              <AppText variant="caption" color={colors.textSecondary} weight="600" style={{ marginLeft: 8 }}>
+                Live Location Active
               </AppText>
             </View>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
-              {formatCurrency(item.unitPrice * item.quantity)}
+            
+            <View style={styles.mapContainer}>
+              <LiveOrderMap
+                colors={colors}
+                pharmacyCoords={pharmacyCoords}
+                homeCoords={homeCoords}
+                riderCoords={riderCoords}
+                silverMapStyle={silverMapStyle}
+              />
+            </View>
+          </View>
+        ) : (
+          /* Detailed Vertical progress timeline for early/completed states */
+          <View style={[styles.vTimelineCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="700" style={{ marginBottom: SPACING.md }}>
+              Fulfillment Status
+            </AppText>
+            {order.timeline.map((event, index) => {
+              const isCompleted = event.isCompleted;
+              const isCurrent = event.isCurrent;
+              const isLast = index === order.timeline.length - 1;
+              return (
+                <View key={event.id || index} style={styles.vTimelineRow}>
+                  <View style={styles.vTimelineDotColumn}>
+                    <View style={[
+                      styles.vTimelineDot,
+                      isCompleted ? { backgroundColor: colors.success } : isCurrent ? { backgroundColor: colors.primary } : { backgroundColor: colors.border }
+                    ]}>
+                      {isCompleted ? (
+                        <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+                      ) : isCurrent ? (
+                        <View style={[styles.vTimelineDotInner, { backgroundColor: '#FFFFFF' }]} />
+                      ) : null}
+                    </View>
+                    {!isLast && <View style={[styles.vTimelineConnector, { backgroundColor: isCompleted ? colors.success : colors.border }]} />}
+                  </View>
+                  <View style={styles.vTimelineContent}>
+                    <View style={styles.vTimelineHeader}>
+                      <AppText variant="bodySmall" color={isCurrent ? colors.textPrimary : isCompleted ? colors.textPrimary : colors.textMuted} weight={isCurrent ? '700' : '500'}>
+                        {event.title}
+                      </AppText>
+                      {event.timestamp > 0 && (
+                        <AppText variant="caption" color={colors.textMuted}>
+                          {formatDateTime(event.timestamp)}
+                        </AppText>
+                      )}
+                    </View>
+                    <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                      {event.description}
+                    </AppText>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
+        {/* =========================================================================
+            LEVEL 4 — LIVE DELIVERY INFORMATION (RIDER CARD)
+           ========================================================================= */}
+        {hasRider ? (
+          <View style={[styles.riderDetailsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={styles.riderProfileSection}>
+              {order.rider?.photoUrl ? (
+                <Image source={{ uri: order.rider.photoUrl }} style={styles.riderAvatarImg} />
+              ) : (
+                <View style={[styles.riderAvatarFallback, { backgroundColor: colors.primarySubtle }]}>
+                  <Ionicons name="person" size={20} color={colors.primary} />
+                </View>
+              )}
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <AppText variant="caption" color={colors.textSecondary} weight="500">
+                  Your Delivery Partner
+                </AppText>
+                <AppText variant="bodyMedium" color={colors.textPrimary} weight="700">
+                  {order.rider?.name}
+                </AppText>
+                <View style={styles.riderRatingRow}>
+                  <Ionicons name="star" size={12} color="#F59E0B" />
+                  <AppText variant="caption" color={colors.textSecondary} style={{ marginLeft: 4 }}>
+                    {order.rider?.rating || '4.9'} • Delivering your order
+                  </AppText>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.riderActionRow}>
+              <TouchableOpacity
+                onPress={() => showToast(`Calling ${order.rider?.name}...`, 'info')}
+                style={[styles.riderActionBtn, { backgroundColor: colors.primarySubtle }]}
+              >
+                <Ionicons name="call" size={16} color={colors.primary} />
+                <AppText variant="caption" color={colors.primary} weight="700" style={{ marginLeft: 6 }}>
+                  Call Partner
+                </AppText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => showToast(`Opening chat with ${order.rider?.name}...`, 'info')}
+                style={[styles.riderActionBtn, { backgroundColor: colors.primarySubtle, marginLeft: 10 }]}
+              >
+                <Ionicons name="chatbubble-ellipses" size={16} color={colors.primary} />
+                <AppText variant="caption" color={colors.primary} weight="700" style={{ marginLeft: 6 }}>
+                  Chat
+                </AppText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <View style={[styles.emptyRiderCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="bicycle" size={18} color={colors.textMuted} />
+            <AppText variant="caption" color={colors.textSecondary} style={{ marginLeft: 10, flex: 1 }}>
+              Delivery partner will be assigned once your order is ready.
             </AppText>
           </View>
-        ))}
-      </View>
+        )}
 
-      {/* 6. Payment & Delivery Breakdown */}
-      <View style={[styles.billCard, SHADOWS.subtle]}>
-        <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
-          Payment Summary
-        </AppText>
-
-        <View style={styles.billRow}>
-          <AppText variant="bodySmall" color={COLORS.textSecondary}>
-            Items Total (MRP)
-          </AppText>
-          <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600">
-            {formatCurrency(order.totalAmount + (order.savingsTotal || 118))}
-          </AppText>
+        {/* =========================================================================
+            LEVEL 5 — PHARMACY CARD
+           ========================================================================= */}
+        <View style={[styles.pharmacyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.pharmacyIconContainer, { backgroundColor: colors.primarySubtle }]}>
+            <Ionicons name="storefront" size={18} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <AppText variant="caption" color={colors.textSecondary}>
+              Preparing Pharmacy
+            </AppText>
+            <AppText variant="bodySmall" color={colors.textPrimary} weight="700">
+              {order.selectedPharmacy?.name || 'Verified HEALIT Partner'}
+            </AppText>
+            <AppText variant="caption" color={colors.textMuted} style={{ marginTop: 2 }}>
+              {order.selectedPharmacy?.distanceKm ? `${order.selectedPharmacy.distanceKm} km away` : 'Licensed Store'} • Verified Doctor Approved
+            </AppText>
+          </View>
         </View>
 
-        <View style={styles.billRow}>
-          <AppText variant="bodySmall" color={COLORS.success}>
-            Marketplace Discount
-          </AppText>
-          <AppText variant="bodySmall" color={COLORS.success} weight="600">
-            -{formatCurrency(order.savingsTotal || 118)}
-          </AppText>
+        {/* =========================================================================
+            LEVEL 6 — EXPANDABLE ORDER SUMMARY CARD
+           ========================================================================= */}
+        <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setShowItemsDetails(!showItemsDetails)}
+            style={styles.summaryHeaderRow}
+          >
+            <View style={{ flex: 1 }}>
+              <AppText variant="caption" color={colors.textSecondary}>
+                Order Summary
+              </AppText>
+              <AppText variant="bodySmall" color={colors.textPrimary} weight="700">
+                {order.items.length} {order.items.length === 1 ? 'medicine' : 'medicines'} • {formatCurrency(order.totalAmount)}
+              </AppText>
+            </View>
+            <View style={styles.expandAction}>
+              <AppText variant="caption" color={colors.primary} weight="700">
+                {showItemsDetails ? 'Hide Details' : 'View Details'}
+              </AppText>
+              <Ionicons name={showItemsDetails ? 'chevron-up' : 'chevron-down'} size={14} color={colors.primary} style={{ marginLeft: 4 }} />
+            </View>
+          </TouchableOpacity>
+
+          {showItemsDetails && (
+            <View style={styles.summaryDetailsList}>
+              <View style={[styles.itemDivider, { backgroundColor: colors.borderLight }]} />
+              {order.items.map((item, idx) => (
+                <View key={item.medicineId || idx} style={styles.medicationRow}>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodySmall" color={colors.textPrimary} weight="600">
+                      {item.medicineName}
+                    </AppText>
+                    <AppText variant="caption" color={colors.textMuted}>
+                      Qty: {item.quantity} • {item.packForm}
+                    </AppText>
+                  </View>
+                  <AppText variant="bodySmall" color={colors.textPrimary} weight="700">
+                    {formatCurrency(item.unitPrice * item.quantity)}
+                  </AppText>
+                </View>
+              ))}
+
+              <View style={[styles.itemDivider, { backgroundColor: colors.borderLight }]} />
+              
+              <View style={styles.financialRow}>
+                <AppText variant="caption" color={colors.textSecondary}>Items Total (MRP)</AppText>
+                <AppText variant="caption" color={colors.textPrimary}>{formatCurrency(order.mrpTotal || order.totalAmount)}</AppText>
+              </View>
+              
+              {order.savingsTotal > 0 && (
+                <View style={styles.financialRow}>
+                  <AppText variant="caption" color={colors.success}>Discount Savings</AppText>
+                  <AppText variant="caption" color={colors.success} weight="600">-{formatCurrency(order.savingsTotal)}</AppText>
+                </View>
+              )}
+
+              <View style={styles.financialRow}>
+                <AppText variant="caption" color={colors.textSecondary}>Delivery Partner Fee</AppText>
+                <AppText variant="caption" color={colors.success} weight="600">FREE</AppText>
+              </View>
+
+              <View style={[styles.itemDivider, { backgroundColor: colors.borderLight }]} />
+
+              <View style={styles.financialRow}>
+                <AppText variant="bodySmall" color={colors.textPrimary} weight="700">Total Paid Amount</AppText>
+                <AppText variant="bodySmall" color={colors.primary} weight="700">{formatCurrency(order.totalAmount)}</AppText>
+              </View>
+            </View>
+          )}
         </View>
 
-        <View style={styles.billRow}>
-          <AppText variant="bodySmall" color={COLORS.textSecondary}>
-            Delivery Fee
-          </AppText>
-          <AppText variant="bodySmall" color={COLORS.success} weight="600">
-            FREE
-          </AppText>
+        {/* =========================================================================
+            LEVEL 7 — COMPACT DELIVERY ADDRESS CARD
+           ========================================================================= */}
+        <View style={[styles.addressCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.addressIconWrapper}>
+            <Ionicons name="location" size={18} color={colors.textSecondary} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <AppText variant="caption" color={colors.textSecondary}>
+              Delivering to
+            </AppText>
+            <AppText variant="bodySmall" color={colors.textPrimary} weight="700">
+              {order.deliveryAddress.label || 'Home Address'}
+            </AppText>
+            <AppText variant="caption" color={colors.textMuted} numberOfLines={1} style={{ marginTop: 2 }}>
+              {order.deliveryAddress.houseFlatNumber}, {order.deliveryAddress.streetAddress}, {order.deliveryAddress.city}
+            </AppText>
+          </View>
         </View>
 
-        <View style={styles.billDivider} />
-
-        <View style={styles.billRow}>
-          <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
-            Paid via UPI / Online
-          </AppText>
-          <AppText variant="titleLarge" color={COLORS.primary} weight="600">
-            {formatCurrency(order.totalAmount)}
-          </AppText>
-        </View>
-      </View>
-
-      {/* Actions: Reorder, Invoice & Cancel */}
-      <View style={styles.actionsFooter}>
-        <AppButton
-          title="Reorder All Items"
-          variant="primary"
-          onPress={handleReorder}
-          style={{ marginBottom: SPACING.sm }}
-          leftIcon={<Ionicons name="repeat" size={18} color="#FFFFFF" />}
-        />
-
-        <AppButton
-          title="View & Download Invoice"
-          variant="outline"
-          onPress={() => navigation.navigate('OrderInvoice', { orderId: order.id })}
-          style={{ marginBottom: SPACING.md }}
-          leftIcon={<Ionicons name="document-text-outline" size={18} color={COLORS.primary} />}
-        />
-
-        {order.status !== 'delivered' && order.status !== 'cancelled' && (
-          <TouchableOpacity onPress={() => setCancelSheetVisible(true)} style={styles.cancelLink}>
-            <AppText variant="caption" color={COLORS.danger} weight="600">
-              Cancel this Order
+        {/* =========================================================================
+            LEVEL 8 — COMPACT SUPPORT ENTRY POINT
+           ========================================================================= */}
+        <View style={[styles.supportEntryPointCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <AppText variant="bodySmall" color={colors.textPrimary} weight="700">
+              Need assistance?
+            </AppText>
+            <AppText variant="caption" color={colors.textSecondary}>
+              Help with missing medicines, delays, or invoices.
+            </AppText>
+          </View>
+          <TouchableOpacity
+            onPress={() => showToast('Connecting to HEALIT Live Care...', 'info')}
+            style={[styles.getHelpBtn, { borderColor: colors.primary }]}
+          >
+            <AppText variant="caption" color={colors.primary} weight="700">
+              Get Help
             </AppText>
           </TouchableOpacity>
-        )}
+        </View>
+
+        {/* Action button triggers depending on order state */}
+        <View style={styles.footerActionsArea}>
+          {order.status === 'preparing' && (
+            <AppButton
+              title="Contact Pharmacy"
+              variant="outline"
+              leftIcon={<Ionicons name="call-outline" size={16} color={colors.primary} />}
+              onPress={() => showToast(`Calling ${order.selectedPharmacy?.name || 'Pharmacy'}...`, 'info')}
+              style={{ marginBottom: SPACING.md }}
+            />
+          )}
+
+          {order.status === 'out_for_delivery' && (
+            <AppButton
+              title="Call Delivery Partner"
+              variant="primary"
+              leftIcon={<Ionicons name="call" size={16} color="#FFFFFF" />}
+              onPress={() => showToast(`Calling ${order.rider?.name || 'Rider'}...`, 'info')}
+              style={{ marginBottom: SPACING.md }}
+            />
+          )}
+
+          {order.status === 'delivered' && (
+            <View style={{ width: '100%' }}>
+              <AppButton
+                title="Reorder Medicines"
+                variant="primary"
+                leftIcon={<Ionicons name="refresh" size={16} color="#FFFFFF" />}
+                onPress={handleReorder}
+                style={{ marginBottom: SPACING.sm }}
+              />
+              <AppButton
+                title="Download Tax Invoice"
+                variant="outline"
+                leftIcon={<Ionicons name="document-text-outline" size={16} color={colors.primary} />}
+                onPress={() => navigation.navigate('OrderInvoice', { orderId: order.id })}
+                style={{ marginBottom: SPACING.md }}
+              />
+            </View>
+          )}
+
+          {order.status !== 'delivered' && order.status !== 'cancelled' && (
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              onPress={() => setCancelSheetVisible(true)} 
+              style={styles.cancelRequestBtn}
+            >
+              <AppText variant="caption" color={colors.danger} weight="700">
+                Cancel this Order
+              </AppText>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
-      {/* Cancel Order Reason Sheet */}
+      {/* Cancellation Reason Selector */}
       <BottomSheet
         visible={cancelSheetVisible}
         onClose={() => setCancelSheetVisible(false)}
-        title="Reason for Cancellation"
+        title="Cancel Order"
       >
-        <View style={{ paddingBottom: SPACING.lg }}>
-          {CANCEL_REASONS.map((reason, i) => (
+        <View style={{ paddingBottom: SPACING.xl }}>
+          <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginBottom: SPACING.md }}>
+            Please select the reason for cancellation:
+          </AppText>
+          
+          {CANCEL_REASONS.map((reason, idx) => (
             <TouchableOpacity
-              key={i}
+              key={idx}
               onPress={() => setSelectedReason(reason)}
-              style={styles.reasonRadioRow}
+              style={[styles.reasonSelectorRow, { borderBottomColor: colors.borderLight }]}
             >
               <Ionicons
                 name={selectedReason === reason ? 'radio-button-on' : 'radio-button-off'}
                 size={18}
-                color={COLORS.primary}
+                color={colors.primary}
               />
-              <AppText variant="bodySmall" color={COLORS.textPrimary} style={{ marginLeft: 8 }}>
+              <AppText variant="bodySmall" color={colors.textPrimary} style={{ marginLeft: 10 }}>
                 {reason}
               </AppText>
             </TouchableOpacity>
@@ -376,250 +691,368 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  orderHeroBanner: {
-    backgroundColor: COLORS.primary,
-    borderRadius: BORDER_RADIUS.xl,
+  pageContent: {
     padding: SPACING.lg,
-    marginTop: SPACING.md,
   },
-  heroTopRow: {
+  heroCard: {
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 10, // Adjusted margin spacing for rhythm
+  },
+  heroRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
-  statusPillHero: {
-    backgroundColor: '#DCFCE7',
+  heroEtaText: {
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  orderIdBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.md,
   },
-  timelineCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.lg,
-    marginTop: SPACING.md,
+  horizontalTrackerCard: {
+    borderRadius: 20,
+    padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    marginBottom: 10,
   },
-  timelineRow: {
+  trackerTrack: {
+    position: 'relative',
+    height: 24,
+    justifyContent: 'center',
+    marginHorizontal: SPACING.xs,
+  },
+  trackerLineBg: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 3,
+    borderRadius: 1.5,
+  },
+  trackerLineActive: {
+    position: 'absolute',
+    left: 0,
+    height: 3,
+    borderRadius: 1.5,
+  },
+  trackerNodesRow: {
     flexDirection: 'row',
-    minHeight: 52,
-  },
-  timelineIconCol: {
+    justifyContent: 'space-between',
     alignItems: 'center',
-    width: 24,
   },
-  timelineDot: {
+  trackerNode: {
     width: 20,
     height: 20,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotCompleted: {
-    backgroundColor: COLORS.success,
-  },
-  dotCurrent: {
-    backgroundColor: COLORS.primary,
-    borderWidth: 2,
-    borderColor: COLORS.primaryMuted,
-  },
-  dotCurrentInner: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#FFFFFF',
-  },
-  dotPending: {
-    backgroundColor: COLORS.surfaceSubtle,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  timelineLine: {
-    width: 2,
-    flex: 1,
-    marginVertical: 2,
-  },
-  lineCompleted: {
-    backgroundColor: COLORS.success,
-  },
-  linePending: {
-    backgroundColor: COLORS.border,
-  },
-  timelineContentCol: {
-    flex: 1,
-    marginLeft: SPACING.md,
-    paddingBottom: SPACING.sm,
-  },
-  timelineTitleRow: {
+  trackerLabelsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: SPACING.xs,
   },
-  riderCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.md,
-    marginTop: SPACING.md,
+  trackerLabel: {
+    width: 60,
+    textAlign: 'center',
+  },
+  mapCard: {
+    borderRadius: 20,
+    padding: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  riderAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.primarySubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  riderInfoCol: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  riderActionButtons: {
-    flexDirection: 'row',
-  },
-  riderCallBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.primarySubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mapPreviewCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.md,
-    marginTop: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    marginBottom: 10,
   },
   mapHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
   },
-  mapRouteVisual: {
-    flexDirection: 'row',
+  pulseIndicator: {
+    width: 14,
+    height: 14,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: SPACING.lg,
-    paddingHorizontal: SPACING.md,
+    justifyContent: 'center',
   },
-  pharmacyNode: {
-    width: 32,
-    height: 32,
+  pulseCore: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  pulseWave: {
+    position: 'absolute',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 1.5,
+    opacity: 0.6,
+  },
+  mapContainer: {
+    height: 210,
     borderRadius: 16,
-    backgroundColor: COLORS.primarySubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  riderBikeNode: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#DCFCE7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  homeNode: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.primarySubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  routeDottedLine: {
-    flex: 1,
-    height: 2,
-    backgroundColor: COLORS.border,
-    marginHorizontal: 8,
-  },
-  itemsCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.md,
-    marginTop: SPACING.md,
+    overflow: 'hidden',
+    marginTop: SPACING.xs,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#ECEAF3',
   },
-  pharmacyHeaderRow: {
-    flexDirection: 'row',
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  mapMarkerBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  pharmLogoBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.primarySubtle,
+  vTimelineCard: {
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  vTimelineRow: {
+    flexDirection: 'row',
+    minHeight: 48,
+  },
+  vTimelineDotColumn: {
+    alignItems: 'center',
+    width: 20,
+  },
+  vTimelineDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  itemsDivider: {
-    height: 1,
-    backgroundColor: COLORS.borderLight,
-    marginVertical: SPACING.md,
+  vTimelineDotInner: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
-  orderItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.xs,
+  vTimelineConnector: {
+    width: 2,
+    flex: 1,
+    marginVertical: 2,
   },
-  orderItemImg: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
-  },
-  orderItemInfo: {
+  vTimelineContent: {
     flex: 1,
     marginLeft: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
-  billCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.lg,
-    marginTop: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  billRow: {
+  vTimelineHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 4,
   },
-  billDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: SPACING.sm,
+  riderDetailsCard: {
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 10,
   },
-  actionsFooter: {
-    marginTop: SPACING.xl,
-    marginBottom: SPACING.xxxl,
-    alignItems: 'center',
-  },
-  cancelLink: {
-    padding: SPACING.sm,
-  },
-  reasonRadioRow: {
+  riderProfileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.sm,
+  },
+  riderAvatarImg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  riderAvatarFallback: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  riderRatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  riderActionRow: {
+    flexDirection: 'row',
+    marginTop: 14,
+  },
+  riderActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    height: 38,
+    borderRadius: BORDER_RADIUS.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyRiderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  pharmacyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  pharmacyIconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryCard: {
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  summaryHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  expandAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryDetailsList: {
+    marginTop: SPACING.xs,
+  },
+  itemDivider: {
+    height: 1,
+    marginVertical: SPACING.sm,
+  },
+  medicationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  financialRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 3,
+  },
+  addressCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  addressIconWrapper: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  supportEntryPointCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 16,
+  },
+  getHelpBtn: {
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  footerActionsArea: {
+    alignItems: 'center',
+    marginBottom: SPACING.xxxl,
+  },
+  cancelRequestBtn: {
+    paddingVertical: SPACING.xs,
+  },
+  reasonSelectorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
+  },
+  fallbackMapVisual: {
+    height: 110,
+    borderRadius: 16,
+    position: 'relative',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  routePathLine: {
+    position: 'absolute',
+    left: 48,
+    right: 48,
+    height: 2,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+  },
+  routeNodesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  routeNodeWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  routeRiderBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  nodeTag: {
+    position: 'absolute',
+    bottom: -18,
+    fontSize: 9,
+    fontFamily: 'LexendDeca_600SemiBold',
+    width: 60,
+    textAlign: 'center',
   },
 });

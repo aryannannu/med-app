@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -18,6 +18,7 @@ import { AppButton } from '../../components/common/AppButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useAddress } from '../../store/AddressContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { isValidPincode, isValidIndianPhoneNumber } from '../../utils/validators';
 
 export const AddEditAddressScreen: React.FC = () => {
@@ -41,6 +42,7 @@ export const AddEditAddressScreen: React.FC = () => {
 
   const { saveAddress } = useAddress();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
@@ -85,12 +87,12 @@ export const AddEditAddressScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600">
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
           {existing ? 'Edit Address' : 'Add New Address'}
         </AppText>
         <View style={{ width: 40 }} />
@@ -102,7 +104,7 @@ export const AddEditAddressScreen: React.FC = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Label Type Selector */}
-          <AppText variant="caption" color={COLORS.textSecondary} weight="600" style={styles.sectionLabel}>
+          <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionLabel}>
             ADDRESS TYPE
           </AppText>
           <View style={styles.labelRow}>
@@ -205,7 +207,7 @@ export const AddEditAddressScreen: React.FC = () => {
               size={22}
               color={isDefault ? COLORS.primary : COLORS.textMuted}
             />
-            <AppText variant="bodySmall" color={COLORS.textPrimary} weight="600" style={{ marginLeft: SPACING.sm }}>
+            <AppText variant="bodySmall" color={colors.textPrimary} weight="600" style={{ marginLeft: SPACING.sm }}>
               Make this my default delivery address
             </AppText>
           </TouchableOpacity>
@@ -283,3 +285,4 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
 });
+

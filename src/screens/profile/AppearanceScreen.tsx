@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   ScrollView,
@@ -17,7 +17,7 @@ import { useToast } from '../../store/ToastContext';
 
 export const AppearanceScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-  const { themeMode, setThemeMode } = useAppTheme();
+  const { themeMode, setThemeMode, colors } = useAppTheme();
   const { showToast } = useToast();
 
   const handleSelectTheme = (mode: ThemeMode) => {
@@ -47,24 +47,24 @@ export const AppearanceScreen: React.FC = () => {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Appearance
         </AppText>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginBottom: SPACING.md }}>
+        <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginBottom: SPACING.md }}>
           Choose your preferred appearance mode for HEALIT. Changes apply instantly.
         </AppText>
 
@@ -78,28 +78,32 @@ export const AppearanceScreen: React.FC = () => {
                 onPress={() => handleSelectTheme(t.id)}
                 style={[
                   styles.optionCard,
-                  isSelected && styles.optionCardActive,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                  },
+                  isSelected && { backgroundColor: colors.primarySubtle },
                   SHADOWS.subtle,
                 ]}
               >
                 <View
                   style={[
                     styles.iconCircle,
-                    { backgroundColor: isSelected ? '#ECE8F7' : '#F8F8FC' },
+                    { backgroundColor: isSelected ? colors.primaryMuted : colors.surfaceSubtle },
                   ]}
                 >
                   <Ionicons
                     name={t.icon as any}
                     size={22}
-                    color={isSelected ? COLORS.primary : COLORS.textSecondary}
+                    color={isSelected ? colors.primary : colors.textSecondary}
                   />
                 </View>
 
                 <View style={styles.infoCol}>
-                  <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+                  <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                     {t.title}
                   </AppText>
-                  <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                  <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                     {t.subtitle}
                   </AppText>
                 </View>
@@ -107,7 +111,7 @@ export const AppearanceScreen: React.FC = () => {
                 <Ionicons
                   name={isSelected ? 'radio-button-on' : 'radio-button-off'}
                   size={22}
-                  color={isSelected ? COLORS.primary : COLORS.textMuted}
+                  color={isSelected ? colors.primary : colors.textMuted}
                 />
               </TouchableOpacity>
             );
@@ -115,14 +119,14 @@ export const AppearanceScreen: React.FC = () => {
         </View>
 
         {/* Brand Theme Info Card */}
-        <View style={[styles.brandCard, SHADOWS.subtle]}>
+        <View style={[styles.brandCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
           <View style={styles.brandBadge}>
-            <Ionicons name="sparkles" size={16} color={COLORS.primary} />
-            <AppText variant="caption" color={COLORS.primary} weight="600" style={{ marginLeft: 4 }}>
+            <Ionicons name="sparkles" size={16} color={colors.primary} />
+            <AppText variant="caption" color={colors.primary} weight="600" style={{ marginLeft: 4 }}>
               HEALIT Design System
             </AppText>
           </View>
-          <AppText variant="bodySmall" color={COLORS.textSecondary} style={{ marginTop: SPACING.sm }}>
+          <AppText variant="bodySmall" color={colors.textSecondary} style={{ marginTop: SPACING.sm }}>
             HEALIT uses curated #3A2986 brand accents with Lexend Deca typography designed for clear medicine labeling and effortless readability.
           </AppText>
         </View>
@@ -134,7 +138,6 @@ export const AppearanceScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F8FC',
   },
   header: {
     flexDirection: 'row',
@@ -142,9 +145,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E8E8EE',
   },
   backBtn: {
     width: 40,
@@ -167,15 +168,9 @@ const styles = StyleSheet.create({
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1.5,
-    borderColor: '#E8E8EE',
-  },
-  optionCardActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: '#FAF9FF',
   },
   iconCircle: {
     width: 44,
@@ -190,14 +185,13 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   brandCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: '#E8E8EE',
   },
   brandBadge: {
     flexDirection: 'row',
     alignItems: 'center',
   },
 });
+

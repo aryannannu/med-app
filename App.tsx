@@ -26,11 +26,21 @@ import { TabBarScrollProvider } from './src/store/TabBarScrollContext';
 import { WalletProvider } from './src/store/WalletContext';
 import { PaymentMethodsProvider } from './src/store/PaymentMethodsContext';
 import { SavedPharmaciesProvider } from './src/store/SavedPharmaciesContext';
-import { ThemeProvider } from './src/store/ThemeContext';
+import { ThemeProvider, useAppTheme } from './src/store/ThemeContext';
 import { SupportProvider } from './src/store/SupportContext';
 
 // Navigation
 import { RootNavigator } from './src/navigation/RootNavigator';
+
+const AppContent: React.FC = () => {
+  const { isDark } = useAppTheme();
+  return (
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <RootNavigator />
+    </>
+  );
+};
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -67,8 +77,7 @@ export default function App() {
                             <SavedPharmaciesProvider>
                               <SupportProvider>
                                 <TabBarScrollProvider>
-                                  <StatusBar style="dark" />
-                                  <RootNavigator />
+                                  <AppContent />
                                 </TabBarScrollProvider>
                               </SupportProvider>
                             </SavedPharmaciesProvider>

@@ -1,6 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { COLORS, SPACING } from '../../theme';
+import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from '../common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -19,14 +20,15 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   onActionPress,
   style,
 }) => {
+  const { colors } = useAppTheme();
   return (
     <View style={[styles.container, style]}>
       <View style={styles.titleContainer}>
-        <AppText variant="h4" color={COLORS.textPrimary} weight="600">
+        <AppText variant="h4" color={colors.textPrimary} weight="600">
           {title}
         </AppText>
         {subtitle && (
-          <AppText variant="bodySmall" color={COLORS.textSecondary} style={styles.subtitle}>
+          <AppText variant="bodySmall" color={colors.textSecondary} style={styles.subtitle}>
             {subtitle}
           </AppText>
         )}
@@ -39,10 +41,10 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.actionBtn}
         >
-          <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
+          <AppText variant="buttonSmall" color={colors.primary} weight="600">
             {actionText}
           </AppText>
-          <Ionicons name="chevron-forward" size={14} color={COLORS.primary} style={styles.actionIcon} />
+          <Ionicons name="chevron-forward" size={14} color={colors.primary} style={styles.actionIcon} />
         </TouchableOpacity>
       )}
     </View>
@@ -72,3 +74,6 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
 });
+
+
+

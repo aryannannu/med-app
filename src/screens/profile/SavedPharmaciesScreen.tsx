@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -17,11 +17,13 @@ import { ConfirmationModal } from '../../components/modals/ConfirmationModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useSavedPharmacies } from '../../store/SavedPharmaciesContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const SavedPharmaciesScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { savedPharmacies, removeSavedPharmacy } = useSavedPharmacies();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
@@ -33,17 +35,17 @@ export const SavedPharmaciesScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Saved Pharmacies ({savedPharmacies.length})
         </AppText>
         <View style={{ width: 40 }} />
@@ -53,14 +55,14 @@ export const SavedPharmaciesScreen: React.FC = () => {
         {savedPharmacies.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Ionicons name="heart-outline" size={48} color={COLORS.primary} />
+              <Ionicons name="heart-outline" size={48} color={colors.primary} />
             </View>
-            <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={{ marginTop: SPACING.md }}>
+            <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginTop: SPACING.md }}>
               No Saved Pharmacies Yet
             </AppText>
             <AppText
               variant="bodySmall"
-              color={COLORS.textSecondary}
+              color={colors.textSecondary}
               align="center"
               style={{ marginTop: SPACING.xs, paddingHorizontal: SPACING.xl }}
             >
@@ -82,30 +84,30 @@ export const SavedPharmaciesScreen: React.FC = () => {
                   <Image source={{ uri: pharmacy.logo }} style={styles.pharmacyLogo} />
                   <View style={styles.pharmacyInfo}>
                     <View style={styles.nameRow}>
-                      <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600" numberOfLines={1}>
+                      <AppText variant="titleSmall" color={colors.textPrimary} weight="600" numberOfLines={1}>
                         {pharmacy.name}
                       </AppText>
                       {pharmacy.isVerified && (
                         <Ionicons name="checkmark-circle" size={16} color="#15803D" style={{ marginLeft: 4 }} />
                       )}
                     </View>
-                    <AppText variant="caption" color={COLORS.textSecondary} numberOfLines={1} style={{ marginTop: 2 }}>
+                    <AppText variant="caption" color={colors.textSecondary} numberOfLines={1} style={{ marginTop: 2 }}>
                       {pharmacy.address.line1}, {pharmacy.address.city}
                     </AppText>
                     <View style={styles.metaRow}>
                       <View style={styles.metaItem}>
                         <Ionicons name="star" size={12} color="#F59E0B" />
-                        <AppText variant="caption" color={COLORS.textPrimary} weight="600" style={{ marginLeft: 3 }}>
+                        <AppText variant="caption" color={colors.textPrimary} weight="600" style={{ marginLeft: 3 }}>
                           {pharmacy.rating}
                         </AppText>
                       </View>
-                      <AppText variant="caption" color={COLORS.textMuted}>
+                      <AppText variant="caption" color={colors.textMuted}>
                         •
                       </AppText>
-                      <AppText variant="caption" color={COLORS.textSecondary}>
+                      <AppText variant="caption" color={colors.textSecondary}>
                         {pharmacy.distanceKm} km away
                       </AppText>
-                      <AppText variant="caption" color={COLORS.textMuted}>
+                      <AppText variant="caption" color={colors.textMuted}>
                         •
                       </AppText>
                       <AppText variant="caption" color="#15803D" weight="600">
@@ -143,10 +145,10 @@ export const SavedPharmaciesScreen: React.FC = () => {
                     }
                     style={styles.viewStoreBtn}
                   >
-                    <AppText variant="buttonSmall" color={COLORS.primary} weight="600">
+                    <AppText variant="buttonSmall" color={colors.primary} weight="600">
                       View Store Inventory
                     </AppText>
-                    <Ionicons name="arrow-forward" size={14} color={COLORS.primary} style={{ marginLeft: 4 }} />
+                    <Ionicons name="arrow-forward" size={14} color={colors.primary} style={{ marginLeft: 4 }} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -278,3 +280,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+
+

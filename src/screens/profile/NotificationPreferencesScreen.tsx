@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   ScrollView,
@@ -16,11 +16,13 @@ import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useSupport } from '../../store/SupportContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const NotificationPreferencesScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { notificationSettings, updateNotificationSetting } = useSupport();
   const { showToast } = useToast();
+  const { colors, isDark } = useAppTheme();
 
   const handleToggle = (key: keyof typeof notificationSettings, value: boolean) => {
     updateNotificationSetting(key, value);
@@ -28,17 +30,17 @@ export const NotificationPreferencesScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <AppText variant="titleMedium" color={COLORS.textPrimary} weight="600" style={styles.headerTitle}>
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={styles.headerTitle}>
           Notification Preferences
         </AppText>
         <View style={{ width: 40 }} />
@@ -51,31 +53,31 @@ export const NotificationPreferencesScreen: React.FC = () => {
             <Ionicons name="notifications" size={20} color="#15803D" />
           </View>
           <View style={styles.osTextCol}>
-            <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
               System Notifications Active
             </AppText>
-            <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+            <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
               HEALIT has permission to send order alerts on this device.
             </AppText>
           </View>
         </View>
 
         {/* Toggles Container */}
-        <View style={[styles.card, SHADOWS.subtle]}>
+        <View style={[styles.card, SHADOWS.subtle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {/* Order Updates */}
           <View style={styles.row}>
             <View style={styles.textCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Order &amp; Prescription Updates
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 Confirmed, packing, prescription verification &amp; rider assignment
               </AppText>
             </View>
             <Switch
               value={notificationSettings.orderUpdates}
               onValueChange={(val) => handleToggle('orderUpdates', val)}
-              trackColor={{ false: '#E8E8EE', true: COLORS.primary }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined}
             />
           </View>
@@ -85,17 +87,17 @@ export const NotificationPreferencesScreen: React.FC = () => {
           {/* Delivery Updates */}
           <View style={styles.row}>
             <View style={styles.textCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Live Delivery Alerts
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 Rider arrival notifications, ETA countdown, doorstep delivery pin
               </AppText>
             </View>
             <Switch
               value={notificationSettings.deliveryUpdates}
               onValueChange={(val) => handleToggle('deliveryUpdates', val)}
-              trackColor={{ false: '#E8E8EE', true: COLORS.primary }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined}
             />
           </View>
@@ -105,17 +107,17 @@ export const NotificationPreferencesScreen: React.FC = () => {
           {/* Offers & Discounts */}
           <View style={styles.row}>
             <View style={styles.textCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Pharmacy Offers &amp; Discounts
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 Promotional coupons, free delivery vouchers, wallet cashbacks
               </AppText>
             </View>
             <Switch
               value={notificationSettings.offersAndDiscounts}
               onValueChange={(val) => handleToggle('offersAndDiscounts', val)}
-              trackColor={{ false: '#E8E8EE', true: COLORS.primary }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined}
             />
           </View>
@@ -125,17 +127,17 @@ export const NotificationPreferencesScreen: React.FC = () => {
           {/* Medicine Reminders */}
           <View style={styles.row}>
             <View style={styles.textCol}>
-              <AppText variant="titleSmall" color={COLORS.textPrimary} weight="600">
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
                 Medicine Refill Reminders
               </AppText>
-              <AppText variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
                 Smart refill alerts for chronic medicines before your stock runs out
               </AppText>
             </View>
             <Switch
               value={notificationSettings.medicineReminders}
               onValueChange={(val) => handleToggle('medicineReminders', val)}
-              trackColor={{ false: '#E8E8EE', true: COLORS.primary }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined}
             />
           </View>
@@ -218,3 +220,6 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.lg,
   },
 });
+
+
+

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,9 +8,11 @@ import { AppText } from '../../components/common/AppText';
 import { HealitLogo } from '../../components/common/HealitLogo';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../store/AuthContext';
+import { useAppTheme } from '../../store/ThemeContext';
 
 export const SplashScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, 'Splash'>>();
+  const { colors, isDark } = useAppTheme();
   const { isAuthenticated, isOnboarded } = useAuth();
 
   useEffect(() => {
@@ -91,3 +93,4 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
 });
+

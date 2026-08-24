@@ -20,6 +20,7 @@ import { MedicineService } from '../../services/medicineService';
 import { Medicine } from '../../types/medicine';
 import { useCart } from '../../store/CartContext';
 import { useToast } from '../../store/ToastContext';
+import { useAppTheme } from '../../store/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
 const RECENT_SEARCHES = ['Dolo 650', 'Amoxicillin 500mg', 'Paracetamol', 'Pantoprazole', 'Vitamin C'];
@@ -28,6 +29,7 @@ const POPULAR_SUGGESTIONS = ['Dolo 650', 'Augmentin 625', 'Pan-D', 'Telma 40', '
 export const SearchScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<any>();
+  const { colors, isDark } = useAppTheme();
 
   const [query, setQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'rx' | 'otc'>('all');
@@ -84,9 +86,9 @@ export const SearchScreen: React.FC = () => {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Search Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <SearchBar
           value={query}
           onChangeText={(txt) => {
