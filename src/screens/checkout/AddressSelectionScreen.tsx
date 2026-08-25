@@ -209,18 +209,38 @@ export const AddressSelectionScreen: React.FC = () => {
                   style={[
                     styles.addressCard,
                     { backgroundColor: colors.surface, borderColor: colors.border },
-                    isSelected && [styles.addressCardSelected, { borderColor: '#10B981' }],
+                    isSelected && [
+                      styles.addressCardSelected,
+                      {
+                        backgroundColor: isDark ? 'rgba(58, 41, 134, 0.18)' : '#F5F3FE',
+                        borderColor: colors.primary,
+                      },
+                    ],
                     SHADOWS.subtle,
                   ]}
                 >
                   {/* Left Column: Icon & Distance */}
-                  <View style={[styles.leftCol, { backgroundColor: isDark ? colors.surfaceElevated : '#F3F4F6' }]}>
+                  <View
+                    style={[
+                      styles.leftCol,
+                      {
+                        backgroundColor: isSelected
+                          ? (isDark ? 'rgba(58, 41, 134, 0.35)' : '#EDE9FE')
+                          : (isDark ? colors.surfaceElevated : '#F3F4F6'),
+                      },
+                    ]}
+                  >
                     <Ionicons
                       name={isHome ? 'home-outline' : isWork ? 'briefcase-outline' : 'location-outline'}
                       size={20}
-                      color="#4B5563"
+                      color={isSelected ? colors.primary : '#4B5563'}
                     />
-                    <AppText variant="caption" color="#4B5563" weight="600" style={styles.distanceText}>
+                    <AppText
+                      variant="caption"
+                      color={isSelected ? colors.primary : '#4B5563'}
+                      weight="600"
+                      style={styles.distanceText}
+                    >
                       {getMockDistance(idx)}
                     </AppText>
                   </View>
@@ -232,8 +252,15 @@ export const AddressSelectionScreen: React.FC = () => {
                         {address.recipientName}
                       </AppText>
                       {isSelected && (
-                        <View style={styles.selectedBadge}>
-                          <AppText variant="caption" color="#047857" weight="700" style={{ fontSize: 9 }}>
+                        <View
+                          style={[
+                            styles.selectedBadge,
+                            {
+                              backgroundColor: isDark ? 'rgba(139, 116, 230, 0.25)' : '#EDE9FE',
+                            },
+                          ]}
+                        >
+                          <AppText variant="caption" color={colors.primary} weight="700" style={{ fontSize: 9 }}>
                             SELECTED
                           </AppText>
                         </View>
@@ -355,7 +382,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   addressCardSelected: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#F5F3FE',
   },
   leftCol: {
     width: 48,
@@ -379,7 +406,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectedBadge: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
