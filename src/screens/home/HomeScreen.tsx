@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   Platform,
   Animated,
+  StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -645,17 +646,22 @@ export const HomeScreen: React.FC = () => {
     : ['#431EAF', '#5223C7', '#6933DC', '#F8F8FC'];
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        {/* =========================================================================
-            1. TOP HERO GRADIENT HEADER (Exact match to screenshot)
-           ========================================================================= */}
-        <LinearGradient
-          colors={headerGradientColors}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.gradientHeader}
-        >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      {/* =========================================================================
+          1. TOP HERO GRADIENT HEADER (Exact match to screenshot)
+         ========================================================================= */}
+      <LinearGradient
+        colors={headerGradientColors}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={[
+          styles.gradientHeader,
+          {
+            paddingTop: insets.top + (Platform.OS === 'android' ? 8 : 4),
+          },
+        ]}
+      >
           {/* Location & Toggle Row */}
           <View style={styles.headerLocationRow}>
             <TouchableOpacity
@@ -1464,7 +1470,6 @@ export const HomeScreen: React.FC = () => {
           onClose={() => setSelectedMedicineForVariant(null)}
         />
       </View>
-    </SafeAreaView>
   );
 };
 
