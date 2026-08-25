@@ -738,22 +738,10 @@ export const HomeScreen: React.FC = () => {
                   </AppText>
                 </TouchableOpacity>
               </View>
-
-              {/* Notification Bell Badge Button */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('Notifications')}
-                style={styles.notificationBellBtn}
-              >
-                <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
-                <View style={styles.notificationBadgeDot}>
-                  <AppText style={styles.notificationBadgeText}>3</AppText>
-                </View>
-              </TouchableOpacity>
             </View>
           </View>
 
-          {/* Search Bar Row (Pill shape with Search & Scanner icons) */}
+          {/* Search Bar Row (Clean pill shape) */}
           <View style={styles.searchRow}>
             <TouchableOpacity
               activeOpacity={0.9}
@@ -770,15 +758,6 @@ export const HomeScreen: React.FC = () => {
                   ? 'Search medicines, health products...'
                   : STORE_SEARCH_PROMPTS[placeholderIndex % STORE_SEARCH_PROMPTS.length]}
               </AppText>
-              <TouchableOpacity
-                onPress={(e) => {
-                  e.stopPropagation();
-                  navigation.navigate('UploadPrescription', { fromCart: false });
-                }}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Ionicons name="qr-code-outline" size={20} color={colors.primary} />
-              </TouchableOpacity>
             </TouchableOpacity>
           </View>
 
