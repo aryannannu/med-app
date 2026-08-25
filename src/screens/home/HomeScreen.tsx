@@ -844,11 +844,11 @@ export const HomeScreen: React.FC = () => {
                   <View style={styles.activePulseDot} />
                 </View>
                 <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-                  {activeOrder.items.length} medicines â€¢ Arriving in 10â€“15 min
+                  {activeOrder.items.length} medicines • Arriving in 10–15 min
                 </AppText>
               </View>
               <AppText variant="buttonSmall" color={colors.primary} weight="600">
-                Track â†’
+                Track →
               </AppText>
             </TouchableOpacity>
           )}
@@ -1142,7 +1142,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1164,7 +1164,7 @@ export const HomeScreen: React.FC = () => {
                     </View>
                     <TouchableOpacity onPress={() => setActiveMode('stores')}>
                       <AppText variant="bodySmall" color={colors.primary} weight="600">
-                        View all â†’
+                        View all →
                       </AppText>
                     </TouchableOpacity>
                   </View>
@@ -1192,7 +1192,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1247,7 +1247,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1270,7 +1270,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1291,7 +1291,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1310,9 +1310,9 @@ export const HomeScreen: React.FC = () => {
                       <AppText style={styles.comboTitle}>{combo.name}</AppText>
                       <AppText style={styles.comboItemsText}>{combo.items}</AppText>
                       <View style={styles.comboPriceRow}>
-                        <AppText style={styles.comboPriceText}>â‚¹{combo.price}</AppText>
-                        <AppText style={styles.comboMrpText}>â‚¹{combo.originalPrice}</AppText>
-                        <AppText style={styles.comboSavingsText}>Save â‚¹{combo.savings}</AppText>
+                        <AppText style={styles.comboPriceText}>₹{combo.price}</AppText>
+                        <AppText style={styles.comboMrpText}>₹{combo.originalPrice}</AppText>
+                        <AppText style={styles.comboSavingsText}>Save ₹{combo.savings}</AppText>
                       </View>
                     </View>
                     <TouchableOpacity
@@ -1339,7 +1339,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1361,7 +1361,7 @@ export const HomeScreen: React.FC = () => {
                           {article.subtitle}
                         </AppText>
                       </View>
-                      <AppText style={[styles.wellnessExploreText, { color: article.color }]}>Explore â†’</AppText>
+                      <AppText style={[styles.wellnessExploreText, { color: article.color }]}>Explore →</AppText>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -1380,7 +1380,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>

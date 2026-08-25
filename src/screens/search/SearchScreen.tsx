@@ -112,11 +112,14 @@ export const SearchScreen: React.FC = () => {
         <View style={styles.filterRow}>
           <TouchableOpacity
             onPress={() => setSelectedFilter('all')}
-            style={[styles.filterPill, selectedFilter === 'all' && styles.filterPillActive]}
+            style={[
+              styles.filterPill,
+              { backgroundColor: selectedFilter === 'all' ? colors.primarySubtle : colors.surfaceSubtle, borderColor: selectedFilter === 'all' ? colors.primary : colors.border }
+            ]}
           >
             <AppText
               variant="caption"
-              color={selectedFilter === 'all' ? COLORS.primary : COLORS.textSecondary}
+              color={selectedFilter === 'all' ? colors.primary : colors.textSecondary}
               weight="600"
             >
               All Medicines
@@ -125,11 +128,14 @@ export const SearchScreen: React.FC = () => {
 
           <TouchableOpacity
             onPress={() => setSelectedFilter('otc')}
-            style={[styles.filterPill, selectedFilter === 'otc' && styles.filterPillActive]}
+            style={[
+              styles.filterPill,
+              { backgroundColor: selectedFilter === 'otc' ? colors.primarySubtle : colors.surfaceSubtle, borderColor: selectedFilter === 'otc' ? colors.primary : colors.border }
+            ]}
           >
             <AppText
               variant="caption"
-              color={selectedFilter === 'otc' ? COLORS.primary : COLORS.textSecondary}
+              color={selectedFilter === 'otc' ? colors.primary : colors.textSecondary}
               weight="600"
             >
               OTC (No Rx)
@@ -138,11 +144,14 @@ export const SearchScreen: React.FC = () => {
 
           <TouchableOpacity
             onPress={() => setSelectedFilter('rx')}
-            style={[styles.filterPill, selectedFilter === 'rx' && styles.filterPillActive]}
+            style={[
+              styles.filterPill,
+              { backgroundColor: selectedFilter === 'rx' ? colors.primarySubtle : colors.surfaceSubtle, borderColor: selectedFilter === 'rx' ? colors.primary : colors.border }
+            ]}
           >
             <AppText
               variant="caption"
-              color={selectedFilter === 'rx' ? COLORS.primary : COLORS.textSecondary}
+              color={selectedFilter === 'rx' ? colors.primary : colors.textSecondary}
               weight="600"
             >
               Rx Required

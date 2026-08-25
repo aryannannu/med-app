@@ -149,9 +149,21 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
           </View>
         </View>
 
-        {/* 2. Dosage & Pack Size Pill Tag */}
+        {/* 2. Manufacturer Brand Name */}
+        <AppText style={styles.manufacturerText} color={colors.textSecondary} numberOfLines={1}>
+          {(medicine.manufacturer || 'CIPLA').toUpperCase()}
+        </AppText>
+
+        {/* 3. Product Title */}
+        <View style={styles.titleWrapper}>
+          <AppText weight="700" style={styles.productTitle} color={colors.textPrimary} numberOfLines={2}>
+            {medicine.name}
+          </AppText>
+        </View>
+
+        {/* 4. Dosage & Pack Size Pill Tag */}
         <View style={[styles.dosagePillTag, { backgroundColor: colors.primarySubtle, borderColor: colors.primaryBorder }]}>
-          <Ionicons name="bandage" size={13} color={colors.primary} style={{ marginRight: 4 }} />
+          <Ionicons name="bandage-outline" size={11} color={colors.primary} style={{ marginRight: 3 }} />
           <AppText style={[styles.dosagePillText, { color: colors.primary }]} numberOfLines={1}>
             {hasMultipleVariants
               ? 'Multiple Options'
@@ -159,33 +171,21 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
           </AppText>
         </View>
 
-        {/* 3. Delivery ETA & Rating Row */}
+        {/* 5. Delivery ETA & Rating Row */}
         <View style={styles.metaRow}>
           <View style={styles.etaBadge}>
-            <Ionicons name="flash" size={11} color="#D97706" style={{ marginRight: 2 }} />
+            <Ionicons name="flash" size={10} color="#D97706" style={{ marginRight: 2 }} />
             <AppText style={styles.etaText}>
               4MINS{storeAttribution ? ' • 1.1KM' : ''}
             </AppText>
           </View>
 
           <View style={styles.ratingBadge}>
-            <Ionicons name="star" size={11} color={colors.success} style={{ marginRight: 2 }} />
+            <Ionicons name="star" size={10} color={colors.success} style={{ marginRight: 2 }} />
             <AppText style={[styles.ratingText, { color: colors.success }]}>
-              {medicine.rating || '4.2'}({medicine.reviewCount ? `${(medicine.reviewCount/1000).toFixed(1)}k` : '2.k'})
+              {medicine.rating || '4.2'}
             </AppText>
           </View>
-        </View>
-
-        {/* 4. Manufacturer Brand Name */}
-        <AppText style={styles.manufacturerText} color={colors.textSecondary} numberOfLines={1}>
-          {(medicine.manufacturer || 'CIPLA').toUpperCase()}
-        </AppText>
-
-        {/* 5. Product Title */}
-        <View style={styles.titleWrapper}>
-          <AppText weight="700" style={styles.productTitle} color={colors.textPrimary} numberOfLines={2}>
-            {medicine.name}
-          </AppText>
         </View>
 
         {/* 6. Price & Discount Row */}
@@ -197,7 +197,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({
             {formatCurrency(medicine.discountPrice)}
           </AppText>
           <AppText style={styles.discountText} color={colors.success}>
-            {medicine.discountPercentage || 15}%off
+            {medicine.discountPercentage || 15}% OFF
           </AppText>
         </View>
       </TouchableOpacity>

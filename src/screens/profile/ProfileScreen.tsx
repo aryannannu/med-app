@@ -87,7 +87,7 @@ export const ProfileScreen: React.FC = () => {
               style={styles.editProfileLink}
             >
               <AppText variant="caption" color={colors.primary} weight="600">
-                Edit Profile â†’
+                Edit Profile →
               </AppText>
             </TouchableOpacity>
           </View>

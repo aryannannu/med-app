@@ -131,7 +131,7 @@ export const CartScreen: React.FC = () => {
                 Universal Medicine Request
               </AppText>
               <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2, lineHeight: 18 }}>
-                You don't need to pick a pharmacy now. After you tap below, eligible local pharmacies will send you competing prices &amp; express delivery bids.
+                You don't need to pick a pharmacy now. After you tap below, eligible local pharmacies will send you competing prices & express delivery bids.
               </AppText>
             </View>
           </View>
@@ -241,91 +241,115 @@ export const CartScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {items.map((item) => (
-            <View key={item.id} style={[styles.itemCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
-              <Image source={{ uri: item.medicine.image }} style={styles.itemImage} resizeMode="cover" />
+          {items.map((item) => {
+            const isUnavailable = item.medicine?.inStock === false;
+            const itemPrice = (item.selectedVariant ? item.selectedVariant.discountPrice : item.medicine?.discountPrice) || 0;
+            const itemMrp = (item.selectedVariant ? item.selectedVariant.mrp : item.medicine?.mrp) || 0;
 
-              <View style={styles.itemInfo}>
-                <View style={styles.itemHeader}>
-                  <View style={{ flex: 1, marginRight: SPACING.sm }}>
-                    <AppText variant="titleSmall" color={colors.textPrimary} weight="600" numberOfLines={1}>
-                      {item.medicine.name}
-                    </AppText>
-                    <AppText variant="caption" color={colors.textSecondary} numberOfLines={1} style={{ marginTop: 1 }}>
-                      {item.medicine.saltComposition}
-                    </AppText>
+            return (
+              <View
+                key={item.id}
+                style={[
+                  styles.itemCard,
+                  { backgroundColor: colors.surface, borderColor: isUnavailable ? '#FCA5A5' : colors.border },
+                  isUnavailable && { backgroundColor: '#FEF2F2' },
+                  SHADOWS.subtle,
+                ]}
+              >
+                <Image source={{ uri: item.medicine.image }} style={styles.itemImage} resizeMode="cover" />
+
+                <View style={styles.itemInfo}>
+                  <View style={styles.itemHeader}>
+                    <View style={{ flex: 1, marginRight: SPACING.sm }}>
+                      <AppText variant="titleSmall" color={colors.textPrimary} weight="600" numberOfLines={2}>
+                        {item.medicine.name}
+                      </AppText>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setItemToRemove(item.id)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      style={styles.deleteIconBtn}
+                    >
+                      <Ionicons name="trash-outline" size={16} color={colors.textMuted} />
+                    </TouchableOpacity>
                   </View>
 
-                  <TouchableOpacity
-                    onPress={() => setItemToRemove(item.id)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    style={styles.deleteIconBtn}
-                  >
-                    <Ionicons name="trash-outline" size={16} color={colors.textMuted} />
-                  </TouchableOpacity>
-                </View>
+                  <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                    {item.selectedVariant ? item.selectedVariant.label : item.medicine.packForm}
+                  </AppText>
 
-                {item.rxRequired && <RxBadge style={{ marginTop: 3 }} />}
+                  {isUnavailable && (
+                    <AppText variant="caption" color="#DC2626" weight="600" style={{ marginTop: 2 }}>
+                      Out of stock at nearby pharmacy
+                    </AppText>
+                  )}
 
-                <View style={styles.itemBottomRow}>
-                  <PriceDisplay
-                    price={item.selectedVariant?.discountPrice ?? item.medicine.discountPrice}
-                    mrp={item.selectedVariant?.mrp ?? item.medicine.mrp}
-                    size="sm"
-                  />
+                  <View style={styles.itemBottomRow}>
+                    <PriceDisplay
+                      price={itemPrice}
+                      mrp={itemMrp}
+                      size="sm"
+                    />
 
-                  <QuantitySelector
-                    quantity={item.quantity}
-                    onIncrement={() => updateQuantity(item.id, item.quantity + 1)}
-                    onDecrement={() => updateQuantity(item.id, item.quantity - 1)}
-                    size="sm"
-                  />
+                    <QuantitySelector
+                      quantity={item.quantity}
+                      onIncrement={() => updateQuantity(item.id, item.quantity + 1)}
+                      onDecrement={() => {
+                        if (item.quantity === 1) {
+                          setItemToRemove(item.id);
+                        } else {
+                          updateQuantity(item.id, item.quantity - 1);
+                        }
+                      }}
+                      minQuantity={1}
+                      maxQuantity={10}
+                      size="sm"
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
 
-        {/* Bill Estimate Summary */}
+        {/* Bill Summary Card */}
         <View style={[styles.billCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
-          <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.md }}>
-            Price &amp; Bill Estimate
+          <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ marginBottom: SPACING.sm }}>
+            Price & Bill Estimate
           </AppText>
 
           <View style={styles.billRow}>
             <AppText variant="bodySmall" color={colors.textSecondary}>
-              Item Total (MRP)
+              Items Total ({summary.totalQuantity} items)
             </AppText>
-            <AppText variant="bodySmall" color={colors.textPrimary}>
-              {formatCurrency(summary.mrpTotal)}
+            <AppText variant="bodySmall" color={colors.textPrimary} weight="600">
+              {formatCurrency(summary.itemTotal)}
             </AppText>
           </View>
 
+          {summary.savingsTotal > 0 && (
+            <View style={styles.billRow}>
+              <AppText variant="bodySmall" color={colors.success}>
+                Item Savings
+              </AppText>
+              <AppText variant="bodySmall" color={colors.success} weight="600">
+                -{formatCurrency(summary.savingsTotal)}
+              </AppText>
+            </View>
+          )}
+
           <View style={styles.billRow}>
-            <AppText variant="bodySmall" color={colors.success} weight="600">
-              Estimated Marketplace Savings
+            <AppText variant="bodySmall" color={colors.textSecondary}>
+              Estimated Delivery Fee
             </AppText>
-            <AppText variant="bodySmall" color={colors.success} weight="600">
-              - {formatCurrency(summary.savingsTotal)}
+            <AppText variant="bodySmall" color={summary.isEligibleForFreeDelivery ? colors.success : colors.textPrimary} weight="600">
+              {summary.isEligibleForFreeDelivery ? 'FREE' : formatCurrency(35)}
             </AppText>
           </View>
 
           <View style={styles.billRow}>
             <AppText variant="bodySmall" color={colors.textSecondary}>
-              Delivery Partner Fee
-            </AppText>
-            <AppText
-              variant="bodySmall"
-              color={summary.estimatedDeliveryFee === 0 ? colors.success : colors.textPrimary}
-              weight="600"
-            >
-              {summary.estimatedDeliveryFee === 0 ? 'FREE' : formatCurrency(summary.estimatedDeliveryFee)}
-            </AppText>
-          </View>
-
-          <View style={styles.billRow}>
-            <AppText variant="bodySmall" color={colors.textSecondary}>
-              Pharmacy Handling &amp; GST
+              Pharmacy Handling & GST
             </AppText>
             <AppText variant="bodySmall" color={colors.textPrimary}>
               {formatCurrency(summary.taxesAndHandling)}
