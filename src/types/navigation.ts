@@ -60,6 +60,14 @@ export type AppStackParamList = {
   OrderInvoice: { orderId: string };
   OrderConfirmation: { order: Order };
   HeaderShowcase: undefined;
+  BrandDetail: {
+    brandId: string;
+    brandName: string;
+    brandQuery: string;
+    brandBg: string;
+    brandImage: string;
+    brandCount: string;
+  };
 };
 
 export type RootStackParamList = {

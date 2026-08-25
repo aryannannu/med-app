@@ -196,6 +196,25 @@ export class MedicineService {
     return [];
   }
 
+  static async getMedicinesByBrand(brandQuery: string): Promise<Medicine[]> {
+    await this.delay(200);
+    const q = brandQuery.toLowerCase().trim();
+    const cleanQ = q.replace(/[^a-z0-9]/g, '');
+    const list = this.getMedicinesList();
+    return list.filter((m) => {
+      const brand = (m.brandName || '').toLowerCase();
+      const mfg = (m.manufacturer || '').toLowerCase();
+      const cleanMfg = mfg.replace(/[^a-z0-9]/g, '');
+      const cleanBrand = brand.replace(/[^a-z0-9]/g, '');
+      return (
+        brand.includes(q) ||
+        mfg.includes(q) ||
+        cleanMfg.includes(cleanQ) ||
+        cleanBrand.includes(cleanQ)
+      );
+    });
+  }
+
   static async getCategories(): Promise<MedicineCategory[]> {
     try {
       const response = await apiClient.get<MedicineCategory[]>('/categories');

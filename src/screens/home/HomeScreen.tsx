@@ -955,8 +955,13 @@ export const HomeScreen: React.FC = () => {
                       key={brand.id}
                       activeOpacity={0.88}
                       onPress={() =>
-                        navigation.navigate('Search', {
-                          initialQuery: brand.brandQuery || brand.name.replace('\n', ' '),
+                        navigation.navigate('BrandDetail', {
+                          brandId: brand.id,
+                          brandName: brand.name,
+                          brandQuery: brand.brandQuery || brand.name.replace('\n', ' '),
+                          brandBg: brand.bg,
+                          brandImage: brand.image,
+                          brandCount: brand.count,
                         })
                       }
                       style={[styles.brandCardNew, { backgroundColor: brand.bg }, SHADOWS.card]}
