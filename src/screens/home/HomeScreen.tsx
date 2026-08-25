@@ -662,78 +662,83 @@ export const HomeScreen: React.FC = () => {
           },
         ]}
       >
-          {/* Location & Toggle Row */}
+          {/* Location & Toggle Row (Refined to match Reference UI anatomy) */}
           <View style={styles.headerLocationRow}>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => navigation.navigate('AddressSelection', { isSelectingForCheckout: false })}
               style={styles.locationContainer}
             >
+              <AppText style={styles.deliverToCaptionText}>
+                Deliver to
+              </AppText>
               <View style={styles.locationTitleRow}>
-                <Ionicons name="location-sharp" size={20} color="#FFFFFF" />
+                <Ionicons name="location-sharp" size={16} color="#FFFFFF" />
                 <AppText style={styles.locationTitleText}>
                   {selectedAddress?.label || 'Office'}
                 </AppText>
-                <Ionicons name="chevron-down" size={16} color="#FFFFFF" style={{ marginLeft: 4 }} />
+                <Ionicons name="chevron-down" size={14} color="#FFFFFF" style={{ marginLeft: 3 }} />
               </View>
               <AppText style={styles.locationSubtitleText} numberOfLines={1}>
                 {displayAddress}
               </AppText>
             </TouchableOpacity>
 
-            {/* By Medicine / By Store Pill Toggle */}
-            <View style={styles.togglePillContainer}>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => setActiveMode('medicines')}
-                style={[
-                  styles.togglePillBtn,
-                  activeMode === 'medicines' && styles.togglePillBtnActive,
-                ]}
-              >
-                <Ionicons
-                  name="bandage"
-                  size={14}
-                  color={activeMode === 'medicines' ? '#FFFFFF' : '#351682'}
-                  style={{ marginRight: 4 }}
-                />
-                <AppText
+            {/* By Medicine / By Store Pill Toggle + Notification Icon */}
+            <View style={styles.headerRightActionsRow}>
+              <View style={styles.togglePillContainer}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setActiveMode('medicines')}
                   style={[
-                    styles.togglePillText,
-                    activeMode === 'medicines' ? styles.togglePillTextActive : styles.togglePillTextInactive,
+                    styles.togglePillBtn,
+                    activeMode === 'medicines' && styles.togglePillBtnActive,
                   ]}
                 >
-                  By Medicine
-                </AppText>
-              </TouchableOpacity>
+                  <AppText
+                    style={[
+                      styles.togglePillText,
+                      activeMode === 'medicines' ? styles.togglePillTextActive : styles.togglePillTextInactive,
+                    ]}
+                  >
+                    Shop by Medicine
+                  </AppText>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => setActiveMode('stores')}
-                style={[
-                  styles.togglePillBtn,
-                  activeMode === 'stores' && styles.togglePillBtnActive,
-                ]}
-              >
-                <Ionicons
-                  name="storefront-outline"
-                  size={14}
-                  color={activeMode === 'stores' ? '#FFFFFF' : '#351682'}
-                  style={{ marginRight: 4 }}
-                />
-                <AppText
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setActiveMode('stores')}
                   style={[
-                    styles.togglePillText,
-                    activeMode === 'stores' ? styles.togglePillTextActive : styles.togglePillTextInactive,
+                    styles.togglePillBtn,
+                    activeMode === 'stores' && styles.togglePillBtnActive,
                   ]}
                 >
-                  By Store
-                </AppText>
+                  <AppText
+                    style={[
+                      styles.togglePillText,
+                      activeMode === 'stores' ? styles.togglePillTextActive : styles.togglePillTextInactive,
+                    ]}
+                  >
+                    Shop by Store
+                  </AppText>
+                </TouchableOpacity>
+              </View>
+
+              {/* Notification Bell Badge Button */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('Notifications')}
+                style={styles.notificationBellBtn}
+              >
+                <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
+                <View style={styles.notificationBadgeDot}>
+                  <AppText style={styles.notificationBadgeText}>3</AppText>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Search Bar Row (Clean full width) */}
+          {/* Search Bar Row (Pill shape with Search & Scanner icons) */}
           <View style={styles.searchRow}>
             <TouchableOpacity
               activeOpacity={0.9}
@@ -747,24 +752,30 @@ export const HomeScreen: React.FC = () => {
               <Ionicons name="search-outline" size={20} color="#666666" style={{ marginRight: 8 }} />
               <AppText style={styles.searchPlaceholderText} numberOfLines={1}>
                 {activeMode === 'medicines'
-                  ? MEDICINE_SEARCH_PROMPTS[placeholderIndex % MEDICINE_SEARCH_PROMPTS.length]
+                  ? 'Search medicines, health products...'
                   : STORE_SEARCH_PROMPTS[placeholderIndex % STORE_SEARCH_PROMPTS.length]}
               </AppText>
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate('UploadPrescription', { fromCart: false });
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="qr-code-outline" size={20} color={colors.primary} />
+              </TouchableOpacity>
             </TouchableOpacity>
           </View>
 
-          {/* Quick Filter Category Icons Horizontal Bar */}
+          {/* Quick Filter Category White Tile Cards Horizontal Bar (Exact reference match) */}
           <View style={styles.quickFilterSection}>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.quickFilterBar}
             >
-              {QUICK_FILTER_TABS.map((tab) => {
+              {QUICK_FILTER_TABS.map((tab, idx) => {
                 const isSelected = selectedFilter === tab.id;
-                const activeBg = isDark ? colors.surfaceElevated : '#FFFFFF';
-                const activeColor = isDark ? colors.primary : '#3A2986';
-                const inactiveColor = isDark ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.95)';
 
                 return (
                   <TouchableOpacity
@@ -772,21 +783,31 @@ export const HomeScreen: React.FC = () => {
                     activeOpacity={0.8}
                     onPress={() => setSelectedFilter(tab.id)}
                     style={[
-                      styles.quickFilterItemContainer,
-                      isSelected && [styles.quickFilterItemActiveCard, { backgroundColor: activeBg, borderColor: isDark ? colors.primary : 'transparent' }],
+                      styles.quickFilterCardRef,
+                      { backgroundColor: '#FFFFFF' },
+                      isSelected && styles.quickFilterCardRefActive,
+                      SHADOWS.subtle,
                     ]}
                   >
-                    <Ionicons
-                      name={(isSelected ? tab.activeIcon : tab.icon) as any}
-                      size={22}
-                      color={isSelected ? activeColor : inactiveColor}
-                    />
+                    {idx === 0 ? (
+                      <View style={styles.allCategoriesGridIconBg}>
+                        <Ionicons name="grid" size={16} color={colors.primary} />
+                      </View>
+                    ) : (
+                      <View style={styles.categoryTileIconWrapper}>
+                        <Ionicons
+                          name={(isSelected ? tab.activeIcon : tab.icon) as any}
+                          size={22}
+                          color={colors.primary}
+                        />
+                      </View>
+                    )}
                     <AppText
                       style={[
-                        styles.quickFilterText,
-                        { color: isSelected ? activeColor : inactiveColor },
-                        isSelected ? styles.quickFilterTextActive : styles.quickFilterTextInactive,
+                        styles.quickFilterCardRefText,
+                        isSelected ? { color: colors.primary, fontWeight: '700' } : { color: '#334155' },
                       ]}
+                      numberOfLines={2}
                     >
                       {tab.name}
                     </AppText>
@@ -843,6 +864,58 @@ export const HomeScreen: React.FC = () => {
              ========================================================================= */}
           {activeMode === 'medicines' && (
             <>
+              {/* 1. Promo Banners Carousel (Exact Reference UI Match) */}
+              <View style={styles.promoCarouselSectionRef}>
+                <ScrollView
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: SPACING.md }}
+                >
+                  {PROMO_OFFERS.map((promo) => (
+                    <View
+                      key={promo.id}
+                      style={[styles.promoCardRef, { backgroundColor: promo.bg }]}
+                    >
+                      <View style={styles.promoContentLeft}>
+                        <View style={[styles.promoBadgePill, { backgroundColor: promo.color }]}>
+                          <AppText variant="caption" color="#FFFFFF" weight="700" style={{ fontSize: 9 }}>
+                            {promo.badge}
+                          </AppText>
+                        </View>
+                        <AppText variant="titleSmall" color="#1E1B4B" weight="700" style={{ marginTop: 6 }}>
+                          {promo.title}
+                        </AppText>
+                        <AppText variant="caption" color="#475569" style={{ marginTop: 2, fontSize: 11 }}>
+                          {promo.subtitle}
+                        </AppText>
+                        <AppText variant="caption" color={promo.color} weight="600" style={{ marginTop: 2, fontSize: 10 }}>
+                          Code: {promo.code}
+                        </AppText>
+
+                        <TouchableOpacity
+                          activeOpacity={0.85}
+                          onPress={() => showToast(`Offer applied: ${promo.code}!`, 'success')}
+                          style={[styles.promoCtaBtnRef, { backgroundColor: promo.color }]}
+                        >
+                          <AppText variant="caption" color="#FFFFFF" weight="700" style={{ fontSize: 11 }}>
+                            Order Now →
+                          </AppText>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={styles.promoIllustrationRight}>
+                        <Ionicons name={promo.icon as any} size={48} color={promo.color} style={{ opacity: 0.85 }} />
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+                <View style={styles.carouselPageDotsRow}>
+                  <View style={[styles.carouselDotRef, styles.carouselDotActiveRef]} />
+                  <View style={styles.carouselDotRef} />
+                  <View style={styles.carouselDotRef} />
+                </View>
+              </View>
               {/* Dynamic Filter Selected Category Section (Shown when a specific category tab is selected) */}
               {selectedFilter !== 'all' && (
                 <View style={styles.dynamicFilterSection}>
@@ -2675,6 +2748,127 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.textMuted,
     fontFamily: 'LexendDeca_400Regular',
+  },
+
+  // Reference UI matching styles
+  deliverToCaptionText: {
+    fontSize: 10,
+    color: 'rgba(255, 255, 255, 0.78)',
+    fontFamily: 'LexendDeca_500Medium',
+  },
+  headerRightActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  notificationBellBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  notificationBadgeDot: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#EF4444',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  notificationBadgeText: {
+    fontSize: 8,
+    color: '#FFFFFF',
+    fontFamily: 'LexendDeca_700Bold',
+  },
+  quickFilterCardRef: {
+    width: 74,
+    height: 82,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 6,
+    marginRight: 8,
+  },
+  quickFilterCardRefActive: {
+    borderWidth: 1.5,
+    borderColor: '#3A2986',
+  },
+  allCategoriesGridIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#F3E8FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  categoryTileIconWrapper: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  quickFilterCardRefText: {
+    fontSize: 10,
+    textAlign: 'center',
+    fontFamily: 'LexendDeca_500Medium',
+  },
+  promoCarouselSectionRef: {
+    marginTop: 14,
+    marginBottom: 10,
+  },
+  promoCardRef: {
+    width: 310,
+    height: 145,
+    borderRadius: 20,
+    padding: 14,
+    flexDirection: 'row',
+    marginRight: 12,
+  },
+  promoContentLeft: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  promoBadgePill: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  promoCtaBtnRef: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    marginTop: 8,
+  },
+  promoIllustrationRight: {
+    width: 70,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  carouselPageDotsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  carouselDotRef: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#CBD5E1',
+    marginHorizontal: 3,
+  },
+  carouselDotActiveRef: {
+    width: 16,
+    backgroundColor: '#3A2986',
   },
 });
 
