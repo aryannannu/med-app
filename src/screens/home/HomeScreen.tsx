@@ -1277,7 +1277,28 @@ export const HomeScreen: React.FC = () => {
              ========================================================================= */}
           {activeMode === 'stores' && (
             <>
-              {/* 1ST SECTION IN STORE MODE: Shop by Brand (Exact same 3D dark cards carousel) */}
+              {/* 1ST SECTION IN STORE MODE: Nearby Pharmacies (Zomato / Blinkit style full-width cards) */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
+                <View style={styles.sectionHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 8 }}>
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                      Nearby Pharmacies
+                    </AppText>
+                    <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                      Verified licensed chemist shops fulfilling orders
+                    </AppText>
+                  </View>
+                  <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'SearchTab', params: { initialQuery: 'pharmacy' } } as any)}>
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all →
+                    </AppText>
+                  </TouchableOpacity>
+                </View>
+
+                {nearbyPharmacies.map((pharmacy) => renderLargeStoreCard(pharmacy))}
+              </View>
+
+              {/* 2ND SECTION IN STORE MODE: Shop by Brand (Exact same 3D dark cards carousel) */}
               <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
                   <View>
@@ -1290,7 +1311,7 @@ export const HomeScreen: React.FC = () => {
                   </View>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
+                      View all →
                     </AppText>
                   </TouchableOpacity>
                 </View>
@@ -1326,27 +1347,6 @@ export const HomeScreen: React.FC = () => {
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
-              </View>
-
-              {/* 2ND SECTION IN STORE MODE: Nearby Pharmacies (Zomato / Blinkit style full-width cards) */}
-              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
-                <View style={styles.sectionHeaderRow}>
-                  <View style={{ flex: 1, paddingRight: 8 }}>
-                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                      Nearby Pharmacies
-                    </AppText>
-                    <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-                      Verified licensed chemist shops fulfilling orders
-                    </AppText>
-                  </View>
-                  <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'SearchTab', params: { initialQuery: 'pharmacy' } } as any)}>
-                    <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all â†’
-                    </AppText>
-                  </TouchableOpacity>
-                </View>
-
-                {nearbyPharmacies.map((pharmacy) => renderLargeStoreCard(pharmacy))}
               </View>
 
               {/* 3. Store Deals & Offers */}
