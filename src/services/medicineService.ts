@@ -150,15 +150,48 @@ export class MedicineService {
     if (ENV.ENABLE_MOCK_FALLBACK) {
       await this.delay(150);
       const q = query.toLowerCase().trim();
+      const cleanQ = q.replace(/[^a-z0-9]/g, '');
+      const words = q.split(/\s+/).filter(Boolean);
       const list = this.getMedicinesList();
-      return list.filter(
-        (m) =>
-          m.name.toLowerCase().includes(q) ||
-          m.genericName.toLowerCase().includes(q) ||
-          m.brandName.toLowerCase().includes(q) ||
-          m.manufacturer.toLowerCase().includes(q) ||
-          m.category.toLowerCase().includes(q)
-      );
+      return list.filter((m) => {
+        const name = (m.name || '').toLowerCase();
+        const generic = (m.genericName || '').toLowerCase();
+        const brand = (m.brandName || '').toLowerCase();
+        const mfg = (m.manufacturer || '').toLowerCase();
+        const cat = (m.category || '').toLowerCase();
+        const desc = (m.description || '').toLowerCase();
+        const salt = (m.saltComposition || '').toLowerCase();
+
+        // Direct exact or substring match
+        if (
+          name.includes(q) ||
+          generic.includes(q) ||
+          brand.includes(q) ||
+          mfg.includes(q) ||
+          cat.includes(q) ||
+          desc.includes(q) ||
+          salt.includes(q)
+        ) {
+          return true;
+        }
+
+        // Clean match (e.g., "Dr. Reddy's" vs "dr reddy" vs "Dr. Reddy")
+        if (cleanQ.length >= 3) {
+          const cleanMfg = mfg.replace(/[^a-z0-9]/g, '');
+          const cleanBrand = brand.replace(/[^a-z0-9]/g, '');
+          const cleanName = name.replace(/[^a-z0-9]/g, '');
+          if (cleanMfg.includes(cleanQ) || cleanBrand.includes(cleanQ) || cleanName.includes(cleanQ)) {
+            return true;
+          }
+        }
+
+        // Match if any significant word matches brand or manufacturer
+        return words.some(
+          (w) =>
+            w.length > 2 &&
+            (brand.includes(w) || mfg.includes(w) || name.includes(w))
+        );
+      });
     }
     return [];
   }

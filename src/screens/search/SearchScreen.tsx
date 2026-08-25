@@ -69,15 +69,19 @@ export const SearchScreen: React.FC = () => {
     }
   }, [recentList]);
 
-  // Handle route params if opened with a category
+  // Handle route params if opened with initial query or category
   useEffect(() => {
-    if (route.params?.categorySlug) {
+    if (route.params?.initialQuery) {
+      const q = route.params.initialQuery;
+      setQuery(q);
+      executeSearch(q);
+    } else if (route.params?.categorySlug) {
       MedicineService.getMedicinesByCategory(route.params.categorySlug).then((meds) => {
         setSearchResults({ medicines: meds, bySaltMatches: [], byGenericMatches: [], byBrandMatches: meds });
         setHasSearched(true);
       });
     }
-  }, [route.params]);
+  }, [route.params, executeSearch]);
 
   const filteredMedicines = searchResults.medicines.filter((m) => {
     if (selectedFilter === 'rx') return m.rxRequired;

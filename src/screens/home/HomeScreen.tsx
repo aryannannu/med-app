@@ -166,6 +166,7 @@ const TOP_BRANDS = [
   {
     id: 'cipla',
     name: 'Cipla\nHealth',
+    brandQuery: 'Cipla',
     count: '85+ Products',
     bg: '#2C1D54',
     image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80',
@@ -173,6 +174,7 @@ const TOP_BRANDS = [
   {
     id: 'sun',
     name: 'Sun\nPharma',
+    brandQuery: 'Sun Pharma',
     count: '110+ Products',
     bg: '#4A2810',
     image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300&q=80',
@@ -180,6 +182,7 @@ const TOP_BRANDS = [
   {
     id: 'abbott',
     name: 'Abbott\nCare',
+    brandQuery: 'Abbott',
     count: '95+ Products',
     bg: '#0F2C4A',
     image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=300&q=80',
@@ -187,6 +190,7 @@ const TOP_BRANDS = [
   {
     id: 'drreddy',
     name: "Dr. Reddy's\nLabs",
+    brandQuery: "Dr. Reddy",
     count: '75+ Products',
     bg: '#4C1026',
     image: 'https://images.unsplash.com/photo-1550572017-edb79a557451?w=300&q=80',
@@ -194,6 +198,7 @@ const TOP_BRANDS = [
   {
     id: 'himalaya',
     name: 'Himalaya\nHerbal',
+    brandQuery: 'Himalaya',
     count: '65+ Products',
     bg: '#0E3A2F',
     image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&q=80',
@@ -201,6 +206,7 @@ const TOP_BRANDS = [
   {
     id: 'mankind',
     name: 'Mankind\nPharma',
+    brandQuery: 'Mankind',
     count: '90+ Products',
     bg: '#1E293B',
     image: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&q=80',
@@ -944,7 +950,7 @@ export const HomeScreen: React.FC = () => {
                       activeOpacity={0.88}
                       onPress={() =>
                         navigation.navigate('Search', {
-                          initialQuery: brand.name.replace('\n', ' '),
+                          initialQuery: brand.brandQuery || brand.name.replace('\n', ' '),
                         })
                       }
                       style={[styles.brandCardNew, { backgroundColor: brand.bg }, SHADOWS.card]}
@@ -1296,7 +1302,7 @@ export const HomeScreen: React.FC = () => {
                       activeOpacity={0.88}
                       onPress={() =>
                         navigation.navigate('Search', {
-                          initialQuery: brand.name.replace('\n', ' '),
+                          initialQuery: brand.brandQuery || brand.name.replace('\n', ' '),
                         })
                       }
                       style={[styles.brandCardNew, { backgroundColor: brand.bg }, SHADOWS.card]}
