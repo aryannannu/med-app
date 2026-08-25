@@ -107,6 +107,21 @@ const HEALTH_NEEDS = [
   { id: 'bp', name: 'Blood Pressure', icon: 'heart-outline', bg: '#DCFCE7', color: '#166534', slug: 'heart-bp' },
 ];
 
+const SHOP_BY_CATEGORIES = [
+  { id: 'pain', name: 'Pain Relief', icon: 'fitness-outline', color: '#7C3AED', bg: '#F5F5F8', slug: 'pain-relief', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&q=80' },
+  { id: 'diabetes', name: 'Diabetes Care', icon: 'water-outline', color: '#D97706', bg: '#F5F5F8', slug: 'diabetes', image: 'https://images.unsplash.com/photo-1550572017-edb79a557451?w=200&q=80' },
+  { id: 'vitamins', name: 'Vitamins', icon: 'sunny-outline', color: '#059669', bg: '#F5F5F8', slug: 'vitamins', image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=200&q=80' },
+  { id: 'immunity', name: 'Immunity', icon: 'shield-checkmark-outline', color: '#2563EB', bg: '#F5F5F8', slug: 'vitamins', image: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=200&q=80' },
+  { id: 'baby', name: 'Baby Care', icon: 'happy-outline', color: '#0891B2', bg: '#F5F5F8', slug: 'baby', image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=200&q=80' },
+  { id: 'firstaid', name: 'First Aid', icon: 'medkit-outline', color: '#DC2626', bg: '#F5F5F8', slug: 'pain-relief', image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=200&q=80' },
+  { id: 'cold', name: 'Cold & Cough', icon: 'thermometer-outline', color: '#2563EB', bg: '#F5F5F8', slug: 'cold-flu', image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=200&q=80' },
+  { id: 'digestive', name: 'Digestive Care', icon: 'heart-outline', color: '#DC2626', bg: '#F5F5F8', slug: 'digestive', image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200&q=80' },
+  { id: 'skin', name: 'Skin Care', icon: 'sparkles-outline', color: '#DB2777', bg: '#F5F5F8', slug: 'skin', image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&q=80' },
+  { id: 'womens', name: "Women's Health", icon: 'female-outline', color: '#EC4899', bg: '#F5F5F8', slug: 'vitamins', image: 'https://images.unsplash.com/photo-1512069772995-ec65ed45afd6?w=200&q=80' },
+  { id: 'devices', name: 'Health Devices', icon: 'pulse-outline', color: '#0D9488', bg: '#F5F5F8', slug: 'vitamins', image: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=200&q=80' },
+  { id: 'ayurveda', name: 'Ayurvedic', icon: 'leaf-outline', color: '#166534', bg: '#F5F5F8', slug: 'ayurveda', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=200&q=80' },
+];
+
 const CATEGORIES = [
   { id: 'pain', name: 'Pain Relief', icon: 'fitness-outline', color: '#7C3AED', bg: '#F3E8FF', slug: 'pain-relief' },
   { id: 'cold', name: 'Cold & Flu', icon: 'thermometer-outline', color: '#2563EB', bg: '#EFF6FF', slug: 'cold-flu' },
@@ -1002,6 +1017,81 @@ export const HomeScreen: React.FC = () => {
                 </View>
 
                 {renderTwoRowHorizontal(popularMedicines, (med) => renderMedicineCard(med))}
+              </View>
+
+              {/* Shop by Category (Exact Reference UI — 2-row horizontal grid with image cards) */}
+              <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
+                <View style={styles.sectionHeaderRow}>
+                  <View>
+                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                      Shop by Category
+                    </AppText>
+                  </View>
+                  <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+                    <AppText variant="bodySmall" color={colors.primary} weight="600">
+                      View all →
+                    </AppText>
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: SPACING.md }}
+                >
+                  {/* Build 6 columns × 2 rows */}
+                  {Array.from({ length: Math.ceil(SHOP_BY_CATEGORIES.length / 2) }).map((_, colIdx) => {
+                    const topItem = SHOP_BY_CATEGORIES[colIdx * 2];
+                    const bottomItem = SHOP_BY_CATEGORIES[colIdx * 2 + 1];
+                    return (
+                      <View key={colIdx} style={{ marginRight: 10 }}>
+                        {/* Top card */}
+                        <TouchableOpacity
+                          activeOpacity={0.85}
+                          onPress={() =>
+                            navigation.navigate('CategoryListing', {
+                              categorySlug: topItem.slug,
+                              categoryName: topItem.name,
+                            })
+                          }
+                          style={styles.shopByCatCard}
+                        >
+                          <AppText style={styles.shopByCatCardName} numberOfLines={2}>
+                            {topItem.name}
+                          </AppText>
+                          <Image
+                            source={{ uri: topItem.image }}
+                            style={styles.shopByCatCardImage}
+                            resizeMode="cover"
+                          />
+                        </TouchableOpacity>
+
+                        {/* Bottom card */}
+                        {bottomItem && (
+                          <TouchableOpacity
+                            activeOpacity={0.85}
+                            onPress={() =>
+                              navigation.navigate('CategoryListing', {
+                                categorySlug: bottomItem.slug,
+                                categoryName: bottomItem.name,
+                              })
+                            }
+                            style={[styles.shopByCatCard, { marginTop: 10 }]}
+                          >
+                            <AppText style={styles.shopByCatCardName} numberOfLines={2}>
+                              {bottomItem.name}
+                            </AppText>
+                            <Image
+                              source={{ uri: bottomItem.image }}
+                              style={styles.shopByCatCardImage}
+                              resizeMode="cover"
+                            />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    );
+                  })}
+                </ScrollView>
               </View>
 
               {/* 2ND SECTION (or 1st when 'All'): Shop by Brand */}
@@ -2869,6 +2959,35 @@ const styles = StyleSheet.create({
   carouselDotActiveRef: {
     width: 16,
     backgroundColor: '#3A2986',
+  },
+
+  // Shop by Category — Reference UI matching cards
+  shopByCatCard: {
+    width: 142,
+    height: 92,
+    borderRadius: 16,
+    backgroundColor: '#F5F5F8',
+    paddingTop: 12,
+    paddingLeft: 12,
+    paddingRight: 6,
+    paddingBottom: 6,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  shopByCatCardName: {
+    fontSize: 12,
+    fontFamily: 'LexendDeca_600SemiBold',
+    color: '#3A2986',
+    fontStyle: 'italic',
+    zIndex: 2,
+  },
+  shopByCatCardImage: {
+    width: 60,
+    height: 52,
+    borderRadius: 8,
+    position: 'absolute',
+    bottom: 6,
+    right: 6,
   },
 });
 
