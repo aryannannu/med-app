@@ -100,12 +100,10 @@ export const MedicineDetailsScreen: React.FC = () => {
 
             <TouchableOpacity
               onPress={() => showToast('Medicine link copied to clipboard', 'info')}
-              style={styles.headerBtn}
+              style={[styles.headerBtn, { marginLeft: 8 }]}
             >
               <Ionicons name="share-social-outline" size={22} color={COLORS.textPrimary} />
             </TouchableOpacity>
-
-            <CartBadge count={totalItemCount} onPress={() => navigation.navigate('Cart')} />
           </View>
         </View>
       }
@@ -614,6 +612,9 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
+    backgroundColor: '#F8F8FC',
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
     alignItems: 'center',
     justifyContent: 'center',
   },

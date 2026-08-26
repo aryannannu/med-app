@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   View,
   ScrollView,
@@ -17,14 +17,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSupport } from '../../store/SupportContext';
 import { useToast } from '../../store/ToastContext';
 import { useAppTheme } from '../../store/ThemeContext';
+import { haptics } from '../../services/hapticService';
 
 export const NotificationPreferencesScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { notificationSettings, updateNotificationSetting } = useSupport();
   const { showToast } = useToast();
   const { colors, isDark } = useAppTheme();
+  const [hapticEnabled, setHapticEnabled] = React.useState<boolean>(haptics.isEnabled());
 
   const handleToggle = (key: keyof typeof notificationSettings, value: boolean) => {
+    haptics.selection();
     updateNotificationSetting(key, value);
     showToast('Preferences updated', 'info');
   };
@@ -141,6 +144,33 @@ export const NotificationPreferencesScreen: React.FC = () => {
               thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined}
             />
           </View>
+
+          <View style={styles.divider} />
+
+          {/* Haptic Feedback Setting */}
+          <View style={styles.row}>
+            <View style={styles.textCol}>
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
+                Haptic Feedback
+              </AppText>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                Tactile vibrations for buttons, selections, order placement &amp; status updates
+              </AppText>
+            </View>
+            <Switch
+              value={hapticEnabled}
+              onValueChange={(val) => {
+                setHapticEnabled(val);
+                haptics.setEnabled(val);
+                if (val) {
+                  haptics.selection();
+                }
+                showToast(val ? 'Haptic feedback enabled' : 'Haptic feedback disabled', 'info');
+              }}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -163,8 +193,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8E8EE',
   },
   backBtn: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F8F8FC',
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
     alignItems: 'center',
     justifyContent: 'center',
   },

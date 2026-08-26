@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Toast, ToastType } from '../components/feedback/Toast';
+import { haptics } from '../services/hapticService';
 
 interface ToastContextType {
   showToast: (
@@ -36,6 +37,19 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       actionLabel?: string,
       onAction?: () => void
     ) => {
+      // Trigger haptic feedback for meaningful toasts
+      if (type === 'success') {
+        haptics.success();
+      } else if (type === 'error') {
+        haptics.error();
+      } else if (type === 'warning') {
+        haptics.warning();
+      } else if (type === 'info') {
+        if (message.toLowerCase().includes('copied') || message.toLowerCase().includes('saved')) {
+          haptics.light();
+        }
+      }
+
       setToastState({
         visible: true,
         message,

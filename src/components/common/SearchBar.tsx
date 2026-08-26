@@ -1,9 +1,11 @@
-﻿import React from 'react';
+import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../../theme';
 import { AppText } from './AppText';
 import { useAppTheme } from '../../store/ThemeContext';
+
+import { haptics } from '../../services/hapticService';
 
 export interface SearchBarProps {
   value: string;
@@ -32,7 +34,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     return (
       <TouchableOpacity
         activeOpacity={0.85}
-        onPress={onPress}
+        onPress={() => {
+          haptics.light();
+          if (onPress) onPress();
+        }}
         style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle, containerStyle]}
       >
         <Ionicons name="search" size={20} color={colors.primary} style={styles.searchIcon} />
@@ -58,6 +63,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       {value.length > 0 && (
         <TouchableOpacity
           onPress={() => {
+            haptics.light();
             onChangeText?.('');
             onClear?.();
           }}

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -745,15 +745,6 @@ export const AdaptiveHeader: React.FC<AdaptiveHeaderProps> = ({
                 size={20}
                 color={internalWishlist ? '#E11D48' : COLORS.textPrimary}
               />
-            </TouchableOpacity>
-
-            <TouchableOpacity activeOpacity={0.8} onPress={handleCartClick} style={[styles.headerIconButtonLight, { marginLeft: 8 }]}>
-              <Ionicons name="cart-outline" size={20} color={COLORS.textPrimary} />
-              {cartBadgeCount > 0 && (
-                <View style={styles.actionCartBadge}>
-                  <AppText style={styles.badgeTextSmall}>{cartBadgeCount}</AppText>
-                </View>
-              )}
             </TouchableOpacity>
           </View>
         );

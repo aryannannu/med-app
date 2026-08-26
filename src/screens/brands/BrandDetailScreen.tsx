@@ -94,6 +94,8 @@ export const BrandDetailScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'BrandDetail'>>();
   const { brandId, brandName, brandQuery, brandBg, brandImage, brandCount } = route.params;
+  const safeBg = brandBg || '#2C1D54';
+  const safeImage = brandImage || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80';
 
   const { colors, isDark } = useAppTheme();
   const { addToCart, getItemQuantity, updateQuantity } = useCart();
@@ -391,19 +393,19 @@ export const BrandDetailScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* ─── HERO BANNER ─── */}
-        <View style={[styles.heroBanner, { backgroundColor: brandBg }]}>
+        <View style={[styles.heroBanner, { backgroundColor: safeBg }]}>
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.65)']}
             style={StyleSheet.absoluteFillObject}
           />
           <Image
-            source={{ uri: brandImage }}
+            source={{ uri: safeImage }}
             style={styles.heroImage}
             resizeMode="cover"
             blurRadius={Platform.OS === 'android' ? 2 : 4}
           />
           <LinearGradient
-            colors={['transparent', brandBg + 'EE', brandBg]}
+            colors={['transparent', safeBg + 'EE', safeBg]}
             locations={[0, 0.6, 1]}
             style={styles.heroOverlay}
           />

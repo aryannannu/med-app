@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -28,6 +28,7 @@ import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatPhoneNumber } from '../../utils/formatters';
 import { PharmacyOffer } from '../../types/offer';
+import { haptics } from '../../services/hapticService';
 
 type PaymentMode = 'upi' | 'card' | 'cod';
 
@@ -61,17 +62,20 @@ export const CheckoutReviewScreen: React.FC = () => {
     if (isPlacingOrder) return; // Double-tap protection
 
     if (!selectedAddress) {
+      haptics.warning();
       showToast('Please select a delivery address', 'warning');
       navigation.navigate('AddressSelection', { isSelectingForCheckout: true });
       return;
     }
 
     if (summary.hasRxItems && !activePrescription) {
+      haptics.warning();
       showToast('Please upload prescription for Rx medicines', 'warning');
       navigation.navigate('UploadPrescription', { fromCart: true });
       return;
     }
 
+    haptics.medium();
     setIsPlacingOrder(true);
 
     try {
@@ -538,8 +542,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8E8EE',
   },
   backBtn: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F8F8FC',
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
     alignItems: 'center',
     justifyContent: 'center',
   },

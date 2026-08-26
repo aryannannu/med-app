@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useCallback } from
 import { CartItem, CartSummary } from '../types/cart';
 import { Medicine, MedicineVariant } from '../types/medicine';
 import { CartService } from '../services/cartService';
+import { haptics } from '../services/hapticService';
 
 interface CartContextType {
   cartId: string;
@@ -134,6 +135,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [...prev, newItem];
       });
 
+      if (success) {
+        haptics.medium();
+      }
       triggerInvalidation();
       return success;
     },
@@ -153,11 +157,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (removedIdx > -1) {
             setLastRemovedItem({ item: prev[removedIdx], index: removedIdx });
           }
-          return prev.filter(
-            (it, idx) => idx !== removedIdx
-          );
+          const nextItems = prev.filter((it, idx) => idx !== removedIdx);
+          if (nextItems.length === 0) {
+            haptics.medium();
+          } else {
+            haptics.light();
+          }
+          return nextItems;
         }
 
+        haptics.light();
         return prev.map((it) => {
           const isMatch =
             it.id === cartItemIdOrMedicineId ||
@@ -188,7 +197,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
         if (removedIdx > -1) {
           setLastRemovedItem({ item: prev[removedIdx], index: removedIdx });
-          return prev.filter((_, idx) => idx !== removedIdx);
+          const nextItems = prev.filter((_, idx) => idx !== removedIdx);
+          if (nextItems.length === 0) {
+            haptics.medium();
+          } else {
+            haptics.light();
+          }
+          return nextItems;
         }
         return prev;
       });
@@ -205,6 +220,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return restored;
     });
     setLastRemovedItem(null);
+    haptics.light();
     triggerInvalidation();
     return true;
   }, [lastRemovedItem, triggerInvalidation]);
@@ -213,6 +229,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems([]);
     setCartId(`cart-${Date.now()}`);
     setLastRemovedItem(null);
+    haptics.medium();
     triggerInvalidation();
   }, [triggerInvalidation]);
 

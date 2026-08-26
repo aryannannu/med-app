@@ -10,6 +10,8 @@ import {
   SafeAreaView,
   Platform,
   Animated,
+  Easing,
+  Dimensions,
   StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,6 +40,7 @@ import { useTabBarScroll } from '../../store/TabBarScrollContext';
 import { useAppTheme } from '../../store/ThemeContext';
 import { formatCurrency } from '../../utils/currency';
 import { formatDistance, formatDeliveryTime } from '../../utils/formatters';
+import { haptics } from '../../services/hapticService';
 
 type DiscoveryMode = 'medicines' | 'stores';
 
@@ -181,51 +184,73 @@ const MEDICINE_TYPES = [
 const TOP_BRANDS = [
   {
     id: 'cipla',
-    name: 'Cipla\nHealth',
+    name: 'Cipla',
     brandQuery: 'Cipla',
     count: '85+ Products',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Cipla_logo.svg/512px-Cipla_logo.svg.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Cipla_logo.svg/512px-Cipla_logo.svg.png',
     bg: '#2C1D54',
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80',
+    hasHeart: false,
   },
   {
     id: 'sun',
-    name: 'Sun\nPharma',
+    name: 'Sun Pharma',
     brandQuery: 'Sun Pharma',
     count: '110+ Products',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Sun_Pharma_logo.svg/512px-Sun_Pharma_logo.svg.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Sun_Pharma_logo.svg/512px-Sun_Pharma_logo.svg.png',
     bg: '#4A2810',
-    image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300&q=80',
+    hasHeart: false,
   },
   {
     id: 'abbott',
-    name: 'Abbott\nCare',
+    name: 'Abbott',
     brandQuery: 'Abbott',
     count: '95+ Products',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Abbott_Laboratories_logo.svg/512px-Abbott_Laboratories_logo.svg.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Abbott_Laboratories_logo.svg/512px-Abbott_Laboratories_logo.svg.png',
     bg: '#0F2C4A',
-    image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=300&q=80',
+    hasHeart: true,
   },
   {
     id: 'drreddy',
-    name: "Dr. Reddy's\nLabs",
+    name: "Dr. Reddy's",
     brandQuery: "Dr. Reddy",
     count: '75+ Products',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Dr._Reddy%27s_Laboratories_logo.svg/512px-Dr._Reddy%27s_Laboratories_logo.svg.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Dr._Reddy%27s_Laboratories_logo.svg/512px-Dr._Reddy%27s_Laboratories_logo.svg.png',
     bg: '#4C1026',
-    image: 'https://images.unsplash.com/photo-1550572017-edb79a557451?w=300&q=80',
-  },
-  {
-    id: 'himalaya',
-    name: 'Himalaya\nHerbal',
-    brandQuery: 'Himalaya',
-    count: '65+ Products',
-    bg: '#0E3A2F',
-    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&q=80',
+    hasHeart: true,
   },
   {
     id: 'mankind',
-    name: 'Mankind\nPharma',
+    name: 'Mankind',
     brandQuery: 'Mankind',
     count: '90+ Products',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Mankind_Pharma_Logo.svg/512px-Mankind_Pharma_Logo.svg.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Mankind_Pharma_Logo.svg/512px-Mankind_Pharma_Logo.svg.png',
     bg: '#1E293B',
-    image: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&q=80',
+    hasHeart: false,
+  },
+  {
+    id: 'himalaya',
+    name: 'Himalaya',
+    brandQuery: 'Himalaya',
+    count: '65+ Products',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/The_Himalaya_Drug_Company_logo.svg/512px-The_Himalaya_Drug_Company_logo.svg.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/The_Himalaya_Drug_Company_logo.svg/512px-The_Himalaya_Drug_Company_logo.svg.png',
+    bg: '#0E3A2F',
+    hasHeart: true,
+  },
+  {
+    id: 'gsk',
+    name: 'GSK',
+    brandQuery: 'GSK',
+    count: '70+ Products',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/GlaxoSmithKline_logo.svg/512px-GlaxoSmithKline_logo.svg.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/GlaxoSmithKline_logo.svg/512px-GlaxoSmithKline_logo.svg.png',
+    bg: '#312E81',
+    hasHeart: true,
   },
 ];
 
@@ -238,12 +263,120 @@ const TOP_COMPOSITIONS = [
 ];
 
 const PROMO_OFFERS = [
-  { id: 'p1', title: 'Flat 20% OFF', subtitle: 'On all essential medicines', code: 'MED20', bg: '#F3E8FF', color: '#3A2986', badge: '20% OFF', icon: 'pricetag' },
-  { id: 'p2', title: 'Free Delivery', subtitle: 'On orders above â‚¹299', code: 'FREEDEL', bg: '#DCFCE7', color: '#166534', badge: 'FREE DEL', icon: 'bicycle' },
-  { id: 'p3', title: 'Extra â‚¹100 OFF', subtitle: 'First order special discount', code: 'WELCOME100', bg: '#FEF3C7', color: '#D97706', badge: 'SAVE â‚¹100', icon: 'gift' },
-  { id: 'p4', title: 'Wellness Sale', subtitle: 'Up to 35% OFF vitamins', code: 'WELLNESS35', bg: '#FDF2F8', color: '#DB2777', badge: '35% OFF', icon: 'sparkles' },
-  { id: 'p5', title: 'Rx Upload Bonus', subtitle: 'Get â‚¹50 cashback on Rx upload', code: 'RX50', bg: '#EFF6FF', color: '#2563EB', badge: 'CASHBACK', icon: 'document-text' },
-  { id: 'p6', title: 'Chronic Care Savings', subtitle: 'Flat 18% OFF monthly refills', code: 'REFILL18', bg: '#ECFEFF', color: '#0891B2', badge: '18% OFF', icon: 'repeat' },
+  // BANNER 01 — DISCOUNT / SAVINGS
+  {
+    id: 'banner_savings',
+    type: 'savings',
+    tag: 'LIMITED OFFER',
+    title: 'Save More on Healthcare Essentials',
+    subtitle: 'Exclusive savings on medicines, wellness & personal care',
+    cta: 'Shop Offers',
+    badgeText: 'UP TO\n25% OFF',
+    bgColors: ['#2E1065', '#3B0764', '#4C1D95'] as [string, string, string],
+    textColor: '#FFFFFF',
+    subColor: '#E9D5FF',
+    btnBg: '#FFFFFF',
+    btnColor: '#3A2986',
+    badgeBoxBg: '#6D28D9',
+    badgeBoxText: '#FFFFFF',
+    tagBg: 'rgba(255, 255, 255, 0.18)',
+    tagColor: '#FFFFFF',
+    targetScreen: 'Search',
+    targetParams: { initialQuery: 'medicine discount' },
+    iconName: 'pricetag',
+  },
+
+  // BANNER 02 — PRESCRIPTION UPLOAD
+  {
+    id: 'banner_rx_upload',
+    type: 'rx_upload',
+    tag: 'EASY ORDERING',
+    title: 'Have a Prescription?',
+    subtitle: 'Upload it and let us help you order your medicines',
+    cta: 'Upload Prescription',
+    processCue: 'Rx → Review → Delivery',
+    bgColors: ['#064E3B', '#047857', '#059669'] as [string, string, string],
+    textColor: '#FFFFFF',
+    subColor: '#A7F3D0',
+    btnBg: '#FFFFFF',
+    btnColor: '#047857',
+    badgeBoxBg: '#047857',
+    badgeBoxText: '#FFFFFF',
+    tagBg: 'rgba(255, 255, 255, 0.2)',
+    tagColor: '#FFFFFF',
+    targetScreen: 'UploadPrescription',
+    targetParams: { fromCart: false },
+    iconName: 'document-text',
+  },
+
+  // BANNER 03 — MEDICINE REFILL
+  {
+    id: 'banner_refill',
+    type: 'refill',
+    tag: 'EASY REORDER',
+    title: 'Running Low on Your Medicines?',
+    subtitle: 'Refill your regular medicines before you run out',
+    cta: 'Refill Now',
+    badgeText: 'REFILL\nCARE',
+    bgColors: ['#1E1B4B', '#312E81', '#4338CA'] as [string, string, string],
+    textColor: '#FFFFFF',
+    subColor: '#C7D2FE',
+    btnBg: '#FFFFFF',
+    btnColor: '#312E81',
+    badgeBoxBg: '#3730A3',
+    badgeBoxText: '#FFFFFF',
+    tagBg: 'rgba(255, 255, 255, 0.18)',
+    tagColor: '#FFFFFF',
+    targetScreen: 'Orders',
+    targetParams: {},
+    iconName: 'sync-circle',
+  },
+
+  // BANNER 04 — DELIVERY BENEFIT
+  {
+    id: 'banner_delivery',
+    type: 'delivery',
+    tag: 'DOORSTEP EXPRESS',
+    title: 'Your Medicines, Delivered to Your Door',
+    subtitle: 'Order healthcare essentials from the comfort of home',
+    cta: 'Order Now',
+    processCue: '⚡ 10-Min Express',
+    bgColors: ['#0C4A6E', '#0369A1', '#0284C7'] as [string, string, string],
+    textColor: '#FFFFFF',
+    subColor: '#BAE6FD',
+    btnBg: '#FFFFFF',
+    btnColor: '#0369A1',
+    badgeBoxBg: '#0284C7',
+    badgeBoxText: '#FFFFFF',
+    tagBg: 'rgba(255, 255, 255, 0.2)',
+    tagColor: '#FFFFFF',
+    targetScreen: 'Search',
+    targetParams: { initialQuery: 'delivery' },
+    iconName: 'bicycle',
+  },
+
+  // BANNER 05 — SEASONAL HEALTH CAMPAIGN
+  {
+    id: 'banner_seasonal',
+    type: 'seasonal',
+    tag: 'SEASONAL CARE',
+    title: 'Monsoon Care Essentials',
+    subtitle: 'Stay prepared with everyday healthcare & immunity items',
+    cta: 'Explore Now',
+    badgeText: 'MONSOON\nCARE',
+    bgColors: ['#78350F', '#92400E', '#B45309'] as [string, string, string],
+    textColor: '#FFFFFF',
+    subColor: '#FDE68A',
+    btnBg: '#FFFFFF',
+    btnColor: '#B45309',
+    badgeBoxBg: '#D97706',
+    badgeBoxText: '#FFFFFF',
+    tagBg: 'rgba(255, 255, 255, 0.2)',
+    tagColor: '#FFFFFF',
+    targetScreen: 'CategoryListing',
+    targetParams: { categorySlug: 'cold-flu', categoryName: 'Monsoon Care' },
+    iconName: 'shield-checkmark',
+  },
 ];
 
 const COMBO_BUNDLES = [
@@ -319,12 +452,70 @@ export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const [activeMode, setActiveMode] = useState<DiscoveryMode>('medicines');
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const SCREEN_WIDTH = Dimensions.get('window').width;
+  const categorySlideAnim = React.useRef(new Animated.Value(0)).current;
+  const categoryFadeAnim = React.useRef(new Animated.Value(1)).current;
+  const prevCategoryIndexRef = React.useRef(0);
+
+  const handleSelectCategoryTab = useCallback(
+    (newTabId: string) => {
+      if (newTabId === selectedFilter) return;
+
+      haptics.light();
+
+      const oldIndex = QUICK_FILTER_TABS.findIndex((t) => t.id === selectedFilter);
+      const newIndex = QUICK_FILTER_TABS.findIndex((t) => t.id === newTabId);
+
+      const isMovingRight = newIndex > oldIndex;
+      const startTranslateX = isMovingRight ? SCREEN_WIDTH * 0.35 : -SCREEN_WIDTH * 0.35;
+
+      categorySlideAnim.setValue(startTranslateX);
+      categoryFadeAnim.setValue(0.35);
+
+      setSelectedFilter(newTabId);
+      prevCategoryIndexRef.current = newIndex;
+
+      Animated.parallel([
+        Animated.timing(categorySlideAnim, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.out(Easing.poly(4)),
+          useNativeDriver: true,
+        }),
+        Animated.timing(categoryFadeAnim, {
+          toValue: 1,
+          duration: 300,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    },
+    [selectedFilter, SCREEN_WIDTH, categorySlideAnim, categoryFadeAnim]
+  );
+  const [activePromoIndex, setActivePromoIndex] = useState(0);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [allMedicines, setAllMedicines] = useState<Medicine[]>([]);
   const [nearbyPharmacies, setNearbyPharmacies] = useState<Pharmacy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const promoScrollViewRef = React.useRef<ScrollView>(null);
+  const isUserInteractingRef = React.useRef(false);
   const [selectedMedicineForVariant, setSelectedMedicineForVariant] = useState<Medicine | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Auto-play Banner Carousel (Switches every 4.5s unless user is touching/swiping)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isUserInteractingRef.current && promoScrollViewRef.current) {
+        setActivePromoIndex((prev) => {
+          const next = (prev + 1) % PROMO_OFFERS.length;
+          promoScrollViewRef.current?.scrollTo({ x: next * 340, animated: true });
+          return next;
+        });
+      }
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Rotating placeholder every 2 seconds
   useEffect(() => {
@@ -466,25 +657,96 @@ export const HomeScreen: React.FC = () => {
     );
   };
 
+  const renderBrandLogoContent = (brand: typeof TOP_BRANDS[0]) => {
+    switch (brand.id) {
+      case 'cipla':
+        return (
+          <AppText style={{ fontSize: 19, fontFamily: 'LexendDeca_700Bold', fontWeight: '800', color: '#004B93', letterSpacing: -0.5 }}>
+            Cipla
+          </AppText>
+        );
+      case 'sun':
+        return (
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="aperture" size={14} color="#E65100" style={{ marginBottom: 1 }} />
+            <AppText style={{ fontSize: 9.5, fontFamily: 'LexendDeca_700Bold', fontWeight: '800', color: '#4A2810', letterSpacing: 0.2 }}>
+              SUN PHARMA
+            </AppText>
+          </View>
+        );
+      case 'abbott':
+        return (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ width: 14, height: 14, borderRadius: 3, borderWidth: 2, borderColor: '#0072CE', alignItems: 'center', justifyContent: 'center', marginRight: 3 }}>
+              <AppText style={{ fontSize: 8.5, fontWeight: '800', color: '#0072CE', lineHeight: 11 }}>a</AppText>
+            </View>
+            <AppText style={{ fontSize: 14.5, fontFamily: 'LexendDeca_700Bold', fontWeight: '700', color: '#0072CE' }}>
+              Abbott
+            </AppText>
+          </View>
+        );
+      case 'drreddy':
+        return (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="heart" size={11} color="#4B286D" style={{ marginRight: 2 }} />
+            <AppText style={{ fontSize: 12.5, fontFamily: 'LexendDeca_700Bold', fontWeight: '700', color: '#4B286D' }}>
+              Dr.Reddy's
+            </AppText>
+          </View>
+        );
+      case 'mankind':
+        return (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: '#0A4D9C', alignItems: 'center', justifyContent: 'center', marginRight: 3 }}>
+              <Ionicons name="planet" size={9} color="#FFFFFF" />
+            </View>
+            <AppText style={{ fontSize: 13.5, fontFamily: 'LexendDeca_700Bold', fontWeight: '800', color: '#0A4D9C', fontStyle: 'italic' }}>
+              Mankind
+            </AppText>
+          </View>
+        );
+      case 'himalaya':
+        return (
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <AppText style={{ fontSize: 12.5, fontFamily: 'LexendDeca_700Bold', fontWeight: '700', color: '#00833E' }}>
+              Himalaya
+            </AppText>
+            <AppText style={{ fontSize: 6.5, fontFamily: 'LexendDeca_500Medium', color: '#00833E', letterSpacing: 0.6, marginTop: 1 }}>
+              SINCE 1930
+            </AppText>
+          </View>
+        );
+      case 'gsk':
+        return (
+          <View style={{ backgroundColor: '#E31B23', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 9 }}>
+            <AppText style={{ fontSize: 13, fontFamily: 'LexendDeca_700Bold', fontWeight: '800', color: '#FFFFFF' }}>
+              gsk
+            </AppText>
+          </View>
+        );
+      default:
+        return (
+          <AppText style={{ fontSize: 13.5, fontFamily: 'LexendDeca_700Bold', color: colors.textPrimary }}>
+            {brand.name}
+          </AppText>
+        );
+    }
+  };
+
   // Helper to render 2 rows of cards in a smooth horizontal ScrollView
   const renderTwoRowHorizontal = <T,>(
     dataArray: T[],
     renderCard: (item: T, index: number) => React.ReactNode
   ) => {
-    const columns: T[][] = [];
-    for (let i = 0; i < dataArray.length; i += 2) {
-      columns.push(dataArray.slice(i, i + 2));
-    }
     return (
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.horizontalList}
       >
-        {columns.map((col, colIdx) => (
-          <View key={colIdx} style={{ flexDirection: 'column' }}>
-            <View style={{ marginBottom: 12 }}>{renderCard(col[0], colIdx * 2)}</View>
-            {col[1] && <View>{renderCard(col[1], colIdx * 2 + 1)}</View>}
+        {dataArray.map((item, idx) => (
+          <View key={idx} style={{ marginRight: 12 }}>
+            {renderCard(item, idx)}
           </View>
         ))}
       </ScrollView>
@@ -704,7 +966,12 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.togglePillContainer}>
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => setActiveMode('medicines')}
+                  onPress={() => {
+                    if (activeMode !== 'medicines') {
+                      haptics.selection();
+                      setActiveMode('medicines');
+                    }
+                  }}
                   style={[
                     styles.togglePillBtn,
                     activeMode === 'medicines' && styles.togglePillBtnActive,
@@ -716,13 +983,18 @@ export const HomeScreen: React.FC = () => {
                       activeMode === 'medicines' ? styles.togglePillTextActive : styles.togglePillTextInactive,
                     ]}
                   >
-                    Shop by Medicine
+                    Medicines
                   </AppText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => setActiveMode('stores')}
+                  onPress={() => {
+                    if (activeMode !== 'stores') {
+                      haptics.selection();
+                      setActiveMode('stores');
+                    }
+                  }}
                   style={[
                     styles.togglePillBtn,
                     activeMode === 'stores' && styles.togglePillBtnActive,
@@ -734,7 +1006,7 @@ export const HomeScreen: React.FC = () => {
                       activeMode === 'stores' ? styles.togglePillTextActive : styles.togglePillTextInactive,
                     ]}
                   >
-                    Shop by Store
+                    Stores
                   </AppText>
                 </TouchableOpacity>
               </View>
@@ -761,7 +1033,7 @@ export const HomeScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Quick Filter Category White Tile Cards Horizontal Bar (Exact reference match) */}
+          {/* Quick Filter Category Tab Bar (Exact Reference Match — Icon + Label + Underline Indicator) */}
           <View style={styles.quickFilterSection}>
             <ScrollView
               horizontal
@@ -775,36 +1047,32 @@ export const HomeScreen: React.FC = () => {
                   <TouchableOpacity
                     key={tab.id}
                     activeOpacity={0.8}
-                    onPress={() => setSelectedFilter(tab.id)}
-                    style={[
-                      styles.quickFilterCardRef,
-                      { backgroundColor: '#FFFFFF' },
-                      isSelected && styles.quickFilterCardRefActive,
-                      SHADOWS.subtle,
-                    ]}
+                    onPress={() => handleSelectCategoryTab(tab.id)}
+                    style={styles.quickFilterTabItem}
                   >
-                    {idx === 0 ? (
-                      <View style={styles.allCategoriesGridIconBg}>
-                        <Ionicons name="grid" size={16} color={colors.primary} />
-                      </View>
-                    ) : (
-                      <View style={styles.categoryTileIconWrapper}>
-                        <Ionicons
-                          name={(isSelected ? tab.activeIcon : tab.icon) as any}
-                          size={22}
-                          color={colors.primary}
-                        />
-                      </View>
-                    )}
+                    <Ionicons
+                      name={(idx === 0 ? 'grid' : (isSelected ? tab.activeIcon : tab.icon)) as any}
+                      size={24}
+                      color={isSelected ? colors.primary : '#FFFFFF'}
+                      style={{ opacity: isSelected ? 1 : 0.82, marginBottom: 4 }}
+                    />
                     <AppText
                       style={[
-                        styles.quickFilterCardRefText,
-                        isSelected ? { color: colors.primary, fontWeight: '700' } : { color: '#334155' },
+                        styles.quickFilterTabText,
+                        isSelected ? [styles.quickFilterTabTextActive, { color: colors.primary }] : styles.quickFilterTabTextInactive,
                       ]}
-                      numberOfLines={2}
+                      numberOfLines={1}
                     >
                       {tab.name}
                     </AppText>
+
+                    {/* Underline Indicator Bar for Selected Item (Primary Color) */}
+                    <View
+                      style={[
+                        styles.activeIndicatorPill,
+                        { backgroundColor: isSelected ? colors.primary : 'transparent' },
+                      ]}
+                    />
                   </TouchableOpacity>
                 );
               })}
@@ -826,156 +1094,201 @@ export const HomeScreen: React.FC = () => {
             />
           }
         >
-          {/* Contextual Active Order Card (If any active) */}
-          {activeOrder && (
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={() => navigation.navigate('OrderDetails', { orderId: activeOrder.id })}
-              style={[styles.activeOrderCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
-            >
-              <View style={styles.activeOrderIconBox}>
-                <Ionicons name="bicycle" size={20} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                <View style={styles.activeOrderHeader}>
-                  <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
-                    Your order is on the way
-                  </AppText>
-                  <View style={styles.activePulseDot} />
-                </View>
-                <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-                  {activeOrder.items.length} medicines • Arriving in 10–15 min
-                </AppText>
-              </View>
-              <AppText variant="buttonSmall" color={colors.primary} weight="600">
-                Track →
-              </AppText>
-            </TouchableOpacity>
-          )}
+
 
           {/* =========================================================================
               MODE 1: MEDICINE DISCOVERY MODE CONTENT
              ========================================================================= */}
           {activeMode === 'medicines' && (
             <>
-              {/* 1. Promo Banners Carousel (Exact Reference UI Match) */}
+              {/* =========================================================================
+                  OFFERS & HEALTH HIGHLIGHTS (Production-Grade Healthcare Carousel)
+                 ========================================================================= */}
               <View style={styles.promoCarouselSectionRef}>
                 <ScrollView
+                  ref={promoScrollViewRef}
                   horizontal
-                  pagingEnabled
                   showsHorizontalScrollIndicator={false}
+                  snapToInterval={340}
+                  decelerationRate="fast"
                   contentContainerStyle={{ paddingHorizontal: SPACING.md }}
+                  onTouchStart={() => { isUserInteractingRef.current = true; }}
+                  onTouchEnd={() => {
+                    setTimeout(() => { isUserInteractingRef.current = false; }, 2500);
+                  }}
+                  onScrollBeginDrag={() => { isUserInteractingRef.current = true; }}
+                  onScrollEndDrag={() => {
+                    setTimeout(() => { isUserInteractingRef.current = false; }, 2500);
+                  }}
+                  onScroll={(e) => {
+                    const x = e.nativeEvent.contentOffset.x;
+                    const index = Math.round(x / 340);
+                    if (index >= 0 && index < PROMO_OFFERS.length && index !== activePromoIndex) {
+                      setActivePromoIndex(index);
+                    }
+                  }}
+                  scrollEventThrottle={16}
                 >
                   {PROMO_OFFERS.map((promo) => (
-                    <View
+                    <TouchableOpacity
                       key={promo.id}
-                      style={[styles.promoCardRef, { backgroundColor: promo.bg }]}
+                      activeOpacity={0.94}
+                      onPress={() => {
+                        haptics.light();
+                        if (promo.targetScreen) {
+                          (navigation.navigate as any)(promo.targetScreen, promo.targetParams);
+                        }
+                        showToast(`Opening ${promo.title}`, 'info');
+                      }}
                     >
-                      <View style={styles.promoContentLeft}>
-                        <View style={[styles.promoBadgePill, { backgroundColor: promo.color }]}>
-                          <AppText variant="caption" color="#FFFFFF" weight="700" style={{ fontSize: 9 }}>
-                            {promo.badge}
+                      <LinearGradient
+                        colors={promo.bgColors}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.promoCardRef}
+                      >
+                        {/* Left Column: Tag + Headline + Subtitle + CTA */}
+                        <View style={styles.promoContentLeft}>
+                          <View style={[styles.promoTagBadge, { backgroundColor: promo.tagBg }]}>
+                            <AppText style={[styles.promoTagBadgeText, { color: promo.tagColor }]}>
+                              {promo.tag}
+                            </AppText>
+                          </View>
+
+                          <AppText style={[styles.promoTitleText, { color: promo.textColor }]} numberOfLines={2}>
+                            {promo.title}
                           </AppText>
+
+                          <AppText style={[styles.promoSubText, { color: promo.subColor }]} numberOfLines={1}>
+                            {promo.subtitle}
+                          </AppText>
+
+                          <TouchableOpacity
+                            activeOpacity={0.85}
+                            onPress={() => {
+                              haptics.selection();
+                              if (promo.targetScreen) {
+                                (navigation.navigate as any)(promo.targetScreen, promo.targetParams);
+                              }
+                            }}
+                            style={[styles.promoCtaBtnRef, { backgroundColor: promo.btnBg }]}
+                          >
+                            <AppText style={[styles.promoCtaBtnText, { color: promo.btnColor }]}>
+                              {promo.cta}
+                            </AppText>
+                          </TouchableOpacity>
                         </View>
-                        <AppText variant="titleSmall" color="#1E1B4B" weight="700" style={{ marginTop: 6 }}>
-                          {promo.title}
-                        </AppText>
-                        <AppText variant="caption" color="#475569" style={{ marginTop: 2, fontSize: 11 }}>
-                          {promo.subtitle}
-                        </AppText>
-                        <AppText variant="caption" color={promo.color} weight="600" style={{ marginTop: 2, fontSize: 10 }}>
-                          Code: {promo.code}
-                        </AppText>
 
-                        <TouchableOpacity
-                          activeOpacity={0.85}
-                          onPress={() => showToast(`Offer applied: ${promo.code}!`, 'success')}
-                          style={[styles.promoCtaBtnRef, { backgroundColor: promo.color }]}
-                        >
-                          <AppText variant="caption" color="#FFFFFF" weight="700" style={{ fontSize: 11 }}>
-                            Order Now →
-                          </AppText>
-                        </TouchableOpacity>
-                      </View>
-
-                      <View style={styles.promoIllustrationRight}>
-                        <Ionicons name={promo.icon as any} size={48} color={promo.color} style={{ opacity: 0.85 }} />
-                      </View>
-                    </View>
+                        {/* Right Column: Visual Process/Offer Badge Box */}
+                        <View style={styles.promoRightVisualCol}>
+                          {promo.processCue ? (
+                            <View style={styles.processCueBadge}>
+                              <Ionicons name={(promo.iconName || 'sparkles') as any} size={22} color="#FFFFFF" style={{ marginBottom: 4 }} />
+                              <AppText style={styles.processCueText}>
+                                {promo.processCue}
+                              </AppText>
+                            </View>
+                          ) : (
+                            <View style={[styles.badgeBoxRight, { backgroundColor: promo.badgeBoxBg }]}>
+                              <Ionicons name={(promo.iconName || 'pricetag') as any} size={18} color="#FFFFFF" style={{ marginBottom: 2 }} />
+                              <AppText style={[styles.badgeBoxNumber, { color: promo.badgeBoxText }]}>
+                                {promo.badgeText}
+                              </AppText>
+                            </View>
+                          )}
+                        </View>
+                      </LinearGradient>
+                    </TouchableOpacity>
                   ))}
                 </ScrollView>
+
+                {/* Active Carousel Pagination Indicators */}
                 <View style={styles.carouselPageDotsRow}>
-                  <View style={[styles.carouselDotRef, styles.carouselDotActiveRef]} />
-                  <View style={styles.carouselDotRef} />
-                  <View style={styles.carouselDotRef} />
+                  {PROMO_OFFERS.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.carouselDotRef,
+                        i === activePromoIndex ? [styles.carouselDotActiveRef, { backgroundColor: colors.primary }] : null,
+                      ]}
+                    />
+                  ))}
                 </View>
               </View>
-              {/* Dynamic Filter Selected Category Section (Shown when a specific category tab is selected) */}
-              {selectedFilter !== 'all' && (
-                <View style={styles.dynamicFilterSection}>
-                  <View style={styles.dynamicFilterHeaderRow}>
-                    <View style={{ flex: 1, paddingRight: 8 }}>
-                      <View style={styles.dynamicTitleBadgeRow}>
-                        <Ionicons
-                          name={(selectedTabInfo.activeIcon || selectedTabInfo.icon) as any}
-                          size={18}
-                          color={colors.primary}
-                          style={{ marginRight: 6 }}
-                        />
-                        <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                          {selectedTabInfo.title}
+              {/* Localized Category Content Section with Horizontal Slide Transition */}
+              <Animated.View
+                style={{
+                  transform: [{ translateX: categorySlideAnim }],
+                  opacity: categoryFadeAnim,
+                }}
+              >
+                {/* Dynamic Filter Selected Category Section (Shown when a specific category tab is selected) */}
+                {selectedFilter !== 'all' && (
+                  <View style={styles.dynamicFilterSection}>
+                    <View style={styles.dynamicFilterHeaderRow}>
+                      <View style={{ flex: 1, paddingRight: 8 }}>
+                        <View style={styles.dynamicTitleBadgeRow}>
+                          <Ionicons
+                            name={(selectedTabInfo.activeIcon || selectedTabInfo.icon) as any}
+                            size={18}
+                            color={colors.primary}
+                            style={{ marginRight: 6 }}
+                          />
+                          <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                            {selectedTabInfo.title}
+                          </AppText>
+                        </View>
+                        <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                          {selectedTabInfo.subtitle}
                         </AppText>
                       </View>
-                      <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-                        {selectedTabInfo.subtitle}
-                      </AppText>
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigation.navigate('CategoryListing', {
+                            categorySlug: selectedTabInfo.slug === 'all' ? 'pain-relief' : selectedTabInfo.slug,
+                            categoryName: selectedTabInfo.title,
+                          })
+                        }
+                      >
+                        <AppText variant="bodySmall" color={colors.primary} weight="600">
+                          View All →
+                        </AppText>
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate('CategoryListing', {
-                          categorySlug: selectedTabInfo.slug === 'all' ? 'pain-relief' : selectedTabInfo.slug,
-                          categoryName: selectedTabInfo.title,
-                        })
-                      }
-                    >
-                      <AppText variant="bodySmall" color={colors.primary} weight="600">
-                        View All →
-                      </AppText>
-                    </TouchableOpacity>
+
+                    {renderTwoRowHorizontal(dynamicCategoryMedicines, (med) => renderMedicineCard(med))}
                   </View>
+                )}
 
-                  {renderTwoRowHorizontal(dynamicCategoryMedicines, (med) => renderMedicineCard(med))}
-                </View>
-              )}
-
-              {/* 3RD SECTION (when category selected): Nearby Pharmacies */}
-              {selectedFilter !== 'all' && (
-                <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
-                  <View style={styles.sectionHeaderRow}>
-                    <View>
-                      <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                        Nearby Pharmacies
-                      </AppText>
-                      <AppText variant="caption" color={colors.textSecondary}>
-                        Verified licensed chemist shops fulfilling orders
-                      </AppText>
-                    </View>
-                    <TouchableOpacity onPress={() => setActiveMode('stores')}>
-                      <AppText variant="bodySmall" color={colors.primary} weight="600">
-                        View all →
-                      </AppText>
-                    </TouchableOpacity>
-                  </View>
-
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-                    {nearbyPharmacies.map((pharmacy) => (
-                      <View key={pharmacy.id} style={{ width: 310, marginRight: SPACING.md }}>
-                        {renderPharmacyCard(pharmacy)}
+                {/* 3RD SECTION (when category selected): Nearby Pharmacies */}
+                {selectedFilter !== 'all' && (
+                  <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
+                    <View style={styles.sectionHeaderRow}>
+                      <View>
+                        <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                          Nearby Pharmacies
+                        </AppText>
+                        <AppText variant="caption" color={colors.textSecondary}>
+                          Verified licensed chemist shops fulfilling orders
+                        </AppText>
                       </View>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
+                      <TouchableOpacity onPress={() => setActiveMode('stores')}>
+                        <AppText variant="bodySmall" color={colors.primary} weight="600">
+                          View all →
+                        </AppText>
+                      </TouchableOpacity>
+                    </View>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+                      {nearbyPharmacies.map((pharmacy) => (
+                        <View key={pharmacy.id} style={{ width: 310, marginRight: SPACING.md }}>
+                          {renderPharmacyCard(pharmacy)}
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+              </Animated.View>
 
               {/* Popular Medicines */}
               <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
@@ -998,14 +1311,12 @@ export const HomeScreen: React.FC = () => {
                 {renderTwoRowHorizontal(popularMedicines, (med) => renderMedicineCard(med))}
               </View>
 
-              {/* Shop by Category (Exact Reference UI — 2-row horizontal grid with image cards) */}
+              {/* Shop by Category (Static 4-Column Grid — No Carousel) */}
               <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <View>
-                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                      Shop by Category
-                    </AppText>
-                  </View>
+                  <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                    Shop by Category
+                  </AppText>
                   <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <AppText variant="bodySmall" color={colors.primary} weight="600">
                       View all →
@@ -1013,81 +1324,50 @@ export const HomeScreen: React.FC = () => {
                   </TouchableOpacity>
                 </View>
 
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: SPACING.md }}
-                >
-                  {/* Build 6 columns × 2 rows */}
-                  {Array.from({ length: Math.ceil(SHOP_BY_CATEGORIES.length / 2) }).map((_, colIdx) => {
-                    const topItem = SHOP_BY_CATEGORIES[colIdx * 2];
-                    const bottomItem = SHOP_BY_CATEGORIES[colIdx * 2 + 1];
-                    return (
-                      <View key={colIdx} style={{ marginRight: 10 }}>
-                        {/* Top card */}
-                        <TouchableOpacity
-                          activeOpacity={0.85}
-                          onPress={() =>
-                            navigation.navigate('CategoryListing', {
-                              categorySlug: topItem.slug,
-                              categoryName: topItem.name,
-                            })
-                          }
-                          style={styles.shopByCatCard}
-                        >
-                          <AppText style={styles.shopByCatCardName} numberOfLines={2}>
-                            {topItem.name}
-                          </AppText>
-                          <Image
-                            source={{ uri: topItem.image }}
-                            style={styles.shopByCatCardImage}
-                            resizeMode="cover"
-                          />
-                        </TouchableOpacity>
-
-                        {/* Bottom card */}
-                        {bottomItem && (
-                          <TouchableOpacity
-                            activeOpacity={0.85}
-                            onPress={() =>
-                              navigation.navigate('CategoryListing', {
-                                categorySlug: bottomItem.slug,
-                                categoryName: bottomItem.name,
-                              })
-                            }
-                            style={[styles.shopByCatCard, { marginTop: 10 }]}
-                          >
-                            <AppText style={styles.shopByCatCardName} numberOfLines={2}>
-                              {bottomItem.name}
-                            </AppText>
-                            <Image
-                              source={{ uri: bottomItem.image }}
-                              style={styles.shopByCatCardImage}
-                              resizeMode="cover"
-                            />
-                          </TouchableOpacity>
-                        )}
+                <View style={styles.categoryStaticGrid}>
+                  {CATEGORIES.map((cat) => (
+                    <TouchableOpacity
+                      key={cat.id}
+                      activeOpacity={0.82}
+                      onPress={() =>
+                        navigation.navigate('CategoryListing', {
+                          categorySlug: cat.slug,
+                          categoryName: cat.name,
+                        })
+                      }
+                      style={[
+                        styles.catGridCard,
+                        {
+                          backgroundColor: isDark ? '#1E1B4B' : '#FFFFFF',
+                          borderColor: isDark ? '#312E81' : '#ECE9F6',
+                        },
+                      ]}
+                    >
+                      <View style={[styles.catIconCircle, { backgroundColor: cat.bg }]}>
+                        <Ionicons name={cat.icon as any} size={22} color={cat.color} />
                       </View>
-                    );
-                  })}
-                </ScrollView>
+                      <AppText style={[styles.catGridName, { color: colors.textPrimary }]} numberOfLines={2}>
+                        {cat.name}
+                      </AppText>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
 
               {/* 2ND SECTION (or 1st when 'All'): Shop by Brand */}
               <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <View>
-                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                      Shop by Brand
+                  <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                    Shop by Brand
+                  </AppText>
+                  <TouchableOpacity
+                    style={styles.seeAllBrandBtn}
+                    onPress={() => navigation.navigate('Search')}
+                  >
+                    <AppText style={styles.seeAllBrandText}>
+                      See all
                     </AppText>
-                    <AppText variant="caption" color={colors.textSecondary}>
-                      Trusted certified pharmaceutical companies
-                    </AppText>
-                  </View>
-                  <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all →
-                    </AppText>
+                    <Ionicons name="chevron-forward" size={13} color="#6D28D9" style={{ marginLeft: 2 }} />
                   </TouchableOpacity>
                 </View>
 
@@ -1095,34 +1375,27 @@ export const HomeScreen: React.FC = () => {
                   {TOP_BRANDS.map((brand) => (
                     <TouchableOpacity
                       key={brand.id}
-                      activeOpacity={0.88}
+                      activeOpacity={0.85}
                       onPress={() =>
                         navigation.navigate('BrandDetail', {
                           brandId: brand.id,
                           brandName: brand.name,
-                          brandQuery: brand.brandQuery || brand.name.replace('\n', ' '),
+                          brandQuery: brand.brandQuery || brand.name,
                           brandBg: brand.bg,
                           brandImage: brand.image,
                           brandCount: brand.count,
                         })
                       }
-                      style={[styles.brandCardNew, { backgroundColor: brand.bg }, SHADOWS.card]}
+                      style={[
+                        styles.brandCardRef,
+                        {
+                          backgroundColor: isDark ? '#1E1B4B' : '#FFFFFF',
+                          borderColor: isDark ? '#312E81' : '#ECE9F6',
+                        },
+                      ]}
                     >
-                      <View style={styles.brandCardHeader}>
-                        <AppText style={styles.brandCardTitle} numberOfLines={2}>
-                          {brand.name}
-                        </AppText>
-                        <AppText style={styles.brandCardCount}>
-                          {brand.count}
-                        </AppText>
-                      </View>
-
-                      <View style={styles.brandCardImageWrapper}>
-                        <Image
-                          source={{ uri: brand.image }}
-                          style={styles.brandCardImage}
-                          resizeMode="cover"
-                        />
+                      <View style={styles.brandLogoBox}>
+                        {renderBrandLogoContent(brand)}
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -1451,21 +1724,20 @@ export const HomeScreen: React.FC = () => {
                 {nearbyPharmacies.map((pharmacy) => renderLargeStoreCard(pharmacy))}
               </View>
 
-              {/* 2ND SECTION IN STORE MODE: Shop by Brand (Exact same 3D dark cards carousel) */}
+              {/* 2ND SECTION IN STORE MODE: Shop by Brand */}
               <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <View>
-                    <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                      Shop by Brand
+                  <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                    Shop by Brand
+                  </AppText>
+                  <TouchableOpacity
+                    style={styles.seeAllBrandBtn}
+                    onPress={() => navigation.navigate('Search')}
+                  >
+                    <AppText style={styles.seeAllBrandText}>
+                      See all
                     </AppText>
-                    <AppText variant="caption" color={colors.textSecondary}>
-                      Trusted certified pharmaceutical companies
-                    </AppText>
-                  </View>
-                  <TouchableOpacity onPress={() => navigation.navigate('Search')}>
-                    <AppText variant="bodySmall" color={colors.primary} weight="600">
-                      View all →
-                    </AppText>
+                    <Ionicons name="chevron-forward" size={13} color="#6D28D9" style={{ marginLeft: 2 }} />
                   </TouchableOpacity>
                 </View>
 
@@ -1473,29 +1745,27 @@ export const HomeScreen: React.FC = () => {
                   {TOP_BRANDS.map((brand) => (
                     <TouchableOpacity
                       key={brand.id}
-                      activeOpacity={0.88}
+                      activeOpacity={0.85}
                       onPress={() =>
-                        navigation.navigate('Search', {
-                          initialQuery: brand.brandQuery || brand.name.replace('\n', ' '),
+                        navigation.navigate('BrandDetail', {
+                          brandId: brand.id,
+                          brandName: brand.name,
+                          brandQuery: brand.brandQuery || brand.name,
+                          brandBg: brand.bg,
+                          brandImage: brand.image,
+                          brandCount: brand.count,
                         })
                       }
-                      style={[styles.brandCardNew, { backgroundColor: brand.bg }, SHADOWS.card]}
+                      style={[
+                        styles.brandCardRef,
+                        {
+                          backgroundColor: isDark ? '#1E1B4B' : '#FFFFFF',
+                          borderColor: isDark ? '#312E81' : '#ECE9F6',
+                        },
+                      ]}
                     >
-                      <View style={styles.brandCardHeader}>
-                        <AppText style={styles.brandCardTitle} numberOfLines={2}>
-                          {brand.name}
-                        </AppText>
-                        <AppText style={styles.brandCardCount}>
-                          {brand.count}
-                        </AppText>
-                      </View>
-
-                      <View style={styles.brandCardImageWrapper}>
-                        <Image
-                          source={{ uri: brand.image }}
-                          style={styles.brandCardImage}
-                          resizeMode="cover"
-                        />
+                      <View style={styles.brandLogoBox}>
+                        {renderBrandLogoContent(brand)}
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -1624,7 +1894,7 @@ const styles = StyleSheet.create({
   gradientHeader: {
     paddingTop: Platform.OS === 'android' ? 8 : 12,
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 8,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
@@ -1659,27 +1929,35 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 3,
     alignItems: 'center',
+    shadowColor: '#3A2986',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   togglePillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   togglePillBtnActive: {
-    backgroundColor: '#351682',
+    backgroundColor: '#3A2986',
   },
   togglePillText: {
     fontSize: 12,
+    fontFamily: 'LexendDeca_600SemiBold',
   },
   togglePillTextActive: {
     color: '#FFFFFF',
     fontWeight: '700',
+    fontFamily: 'LexendDeca_700Bold',
   },
   togglePillTextInactive: {
-    color: '#351682',
+    color: '#3A2986',
     fontWeight: '600',
+    fontFamily: 'LexendDeca_600SemiBold',
   },
   searchRow: {
     flexDirection: 'row',
@@ -1726,8 +2004,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   quickFilterSection: {
-    paddingVertical: 6,
-    marginTop: 4,
+    marginTop: 6,
+    marginBottom: 0,
   },
   dynamicFilterSection: {
     marginTop: 14,
@@ -1744,9 +2022,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quickFilterBar: {
-    flexDirection: 'row',
+    paddingHorizontal: SPACING.md,
     alignItems: 'center',
-    paddingHorizontal: 4,
   },
   quickFilterItemContainer: {
     alignItems: 'center',
@@ -2195,6 +2472,51 @@ const styles = StyleSheet.create({
     marginTop: 4,
     borderWidth: 1,
     borderColor: '#E8E8EE',
+  },
+  seeAllBrandBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+  },
+  seeAllBrandText: {
+    fontSize: 13,
+    fontFamily: 'LexendDeca_600SemiBold',
+    fontWeight: '600',
+    color: '#6D28D9',
+  },
+  brandCardRef: {
+    width: 104,
+    height: 72,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#3A2986',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  brandHeartIcon: {
+    position: 'absolute',
+    top: 5,
+    right: 7,
+    zIndex: 5,
+  },
+  brandLogoBox: {
+    width: '85%',
+    height: '75%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  brandLogoImg: {
+    width: '100%',
+    height: '100%',
   },
   brandCardNew: {
     width: 125,
@@ -2854,6 +3176,36 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'LexendDeca_700Bold',
   },
+
+  quickFilterTabItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 22,
+    paddingTop: 6,
+    paddingBottom: 2,
+  },
+  quickFilterTabText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  quickFilterTabTextActive: {
+    fontFamily: 'LexendDeca_700Bold',
+    fontWeight: '700',
+    color: '#FFFFFF',
+    opacity: 1,
+  },
+  quickFilterTabTextInactive: {
+    fontFamily: 'LexendDeca_500Medium',
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
+  activeIndicatorPill: {
+    height: 3.5,
+    width: 26,
+    borderRadius: 2,
+    marginTop: 5,
+  },
   quickFilterCardRef: {
     width: 74,
     height: 82,
@@ -2883,44 +3235,124 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 4,
   },
-  quickFilterCardRefText: {
-    fontSize: 10,
-    textAlign: 'center',
-    fontFamily: 'LexendDeca_500Medium',
+  offersSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    marginTop: 14,
+    marginBottom: 6,
   },
   promoCarouselSectionRef: {
-    marginTop: 14,
-    marginBottom: 10,
+    marginTop: 6,
+    marginBottom: 6,
   },
   promoCardRef: {
-    width: 310,
-    height: 145,
-    borderRadius: 20,
-    padding: 14,
+    width: 328,
+    height: 168,
+    borderRadius: 22,
+    padding: 16,
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginRight: 12,
+    overflow: 'hidden',
+    shadowColor: '#3A2986',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   promoContentLeft: {
     flex: 1,
+    height: '100%',
     justifyContent: 'space-between',
+    paddingRight: 10,
   },
-  promoBadgePill: {
+  promoTagBadge: {
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
+  promoTagBadgeText: {
+    fontSize: 8.5,
+    fontFamily: 'LexendDeca_700Bold',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  promoTitleText: {
+    fontSize: 16.5,
+    fontFamily: 'LexendDeca_700Bold',
+    fontWeight: '800',
+    lineHeight: 21,
+    letterSpacing: -0.2,
+  },
+  promoSubText: {
+    fontSize: 11,
+    fontFamily: 'LexendDeca_500Medium',
+    opacity: 0.92,
+  },
   promoCtaBtnRef: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     paddingVertical: 6,
-    borderRadius: 14,
-    marginTop: 8,
+    borderRadius: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  promoIllustrationRight: {
-    width: 70,
+  promoCtaBtnText: {
+    fontSize: 11.5,
+    fontFamily: 'LexendDeca_700Bold',
+    fontWeight: '700',
+  },
+  promoRightVisualCol: {
+    width: 92,
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  badgeBoxRight: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 6,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  badgeBoxNumber: {
+    fontSize: 13,
+    fontFamily: 'LexendDeca_700Bold',
+    fontWeight: '800',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  processCueBadge: {
+    width: 82,
+    height: 82,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  processCueText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: 'LexendDeca_700Bold',
+    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 13,
   },
   carouselPageDotsRow: {
     flexDirection: 'row',
@@ -2932,15 +3364,55 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#CBD5E1',
-    marginHorizontal: 3,
+    backgroundColor: 'rgba(0, 0, 0, 0.18)',
+    marginHorizontal: 3.5,
   },
   carouselDotActiveRef: {
-    width: 16,
+    width: 20,
+    borderRadius: 4,
     backgroundColor: '#3A2986',
   },
 
-  // Shop by Category — Reference UI matching cards
+  // Shop by Category — Static Grid styles
+  categoryStaticGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    marginTop: 8,
+  },
+  catGridCard: {
+    width: '23.5%',
+    height: 88,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 6,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#3A2986',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  catIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 5,
+  },
+  catGridName: {
+    fontSize: 10.5,
+    fontFamily: 'LexendDeca_600SemiBold',
+    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 13,
+  },
+
+  // Shop by Category — Legacy styles
   shopByCatCard: {
     width: 142,
     height: 92,

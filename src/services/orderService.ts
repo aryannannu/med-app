@@ -16,9 +16,9 @@ export class OrderService {
         id: 'ord-101',
         orderNumber: 'DW-8924',
         createdAt: Date.now() - 45 * 60 * 1000,
-        status: 'out_for_delivery',
-        statusText: 'Out for Delivery',
-        statusDescription: 'Your rider Ramesh is on the way to deliver your order.',
+        status: 'delivered',
+        statusText: 'Delivered',
+        statusDescription: 'Order delivered successfully to your doorstep.',
         items: [
           {
             medicineId: 'med-1',

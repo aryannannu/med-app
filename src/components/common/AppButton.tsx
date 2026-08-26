@@ -11,6 +11,8 @@ import { SPACING, BORDER_RADIUS } from '../../theme';
 import { useAppTheme } from '../../store/ThemeContext';
 import { AppText } from './AppText';
 
+import { haptics } from '../../services/hapticService';
+
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -26,6 +28,7 @@ export interface AppButtonProps {
   style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle;
   fullWidth?: boolean;
+  hapticType?: 'light' | 'medium' | 'heavy' | 'success' | 'none';
 }
 
 export const AppButton: React.FC<AppButtonProps> = ({
@@ -40,8 +43,22 @@ export const AppButton: React.FC<AppButtonProps> = ({
   style,
   textStyle,
   fullWidth = true,
+  hapticType,
 }) => {
   const { colors } = useAppTheme();
+
+  const handlePress = () => {
+    if (hapticType === 'none') {
+      // Skip haptic
+    } else if (hapticType) {
+      haptics[hapticType]();
+    } else if (variant === 'primary' || variant === 'danger') {
+      haptics.medium();
+    } else {
+      haptics.light();
+    }
+    onPress();
+  };
 
   const getContainerStyle = (): ViewStyle => {
     let bg: string = colors.primary;
@@ -117,7 +134,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
   return (
     <TouchableOpacity
       activeOpacity={0.75}
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled || loading}
       style={[getContainerStyle(), style]}
     >

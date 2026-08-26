@@ -13,6 +13,8 @@ import { useOrders } from '../store/OrderContext';
 import { useTabBarScroll } from '../store/TabBarScrollContext';
 import { useAppTheme } from '../store/ThemeContext';
 
+import { FloatingOrderTracker } from '../components/orders/FloatingOrderTracker';
+
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 interface TabItemConfig {
@@ -76,6 +78,7 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({
         style={styles.bottomGradientOverlay}
         pointerEvents="none"
       />
+      <FloatingOrderTracker />
       <View style={[styles.tabCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;

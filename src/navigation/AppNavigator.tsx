@@ -36,6 +36,7 @@ import { LegalDocumentScreen } from '../screens/profile/LegalDocumentScreen';
 import { DeleteAccountScreen } from '../screens/profile/DeleteAccountScreen';
 import { SearchScreen } from '../screens/search/SearchScreen';
 import { HeaderShowcaseScreen } from '../screens/dev/HeaderShowcaseScreen';
+import { ProductCardShowcaseScreen } from '../screens/dev/ProductCardShowcaseScreen';
 import { BrandDetailScreen } from '../screens/brands/BrandDetailScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -96,6 +97,7 @@ export const AppNavigator: React.FC = () => {
 
       {/* Dev / Design System Routes */}
       <Stack.Screen name="HeaderShowcase" component={HeaderShowcaseScreen} />
+      <Stack.Screen name="ProductCardShowcase" component={ProductCardShowcaseScreen} />
       <Stack.Screen name="BrandDetail" component={BrandDetailScreen} />
 
       {/* Profile Module Sub-Routes */}

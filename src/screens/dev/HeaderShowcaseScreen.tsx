@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -427,6 +427,8 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     backgroundColor: '#F8F8FC',
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
     alignItems: 'center',
     justifyContent: 'center',
   },

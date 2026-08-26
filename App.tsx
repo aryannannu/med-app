@@ -29,15 +29,22 @@ import { SavedPharmaciesProvider } from './src/store/SavedPharmaciesContext';
 import { ThemeProvider, useAppTheme } from './src/store/ThemeContext';
 import { SupportProvider } from './src/store/SupportContext';
 
-// Navigation
+// Navigation & Splash
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { SplashScreen } from './src/screens/splash/SplashScreen';
 
 const AppContent: React.FC = () => {
   const { isDark } = useAppTheme();
+  const [showSplash, setShowSplash] = React.useState(true);
+
   return (
     <>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <RootNavigator />
+      <StatusBar style={showSplash ? 'light' : isDark ? 'light' : 'dark'} />
+      {showSplash ? (
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      ) : (
+        <RootNavigator />
+      )}
     </>
   );
 };

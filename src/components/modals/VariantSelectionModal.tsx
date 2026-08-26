@@ -14,6 +14,7 @@ import { useToast } from '../../store/ToastContext';
 import { AppText } from '../common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '../../utils/currency';
+import { haptics } from '../../services/hapticService';
 
 export interface VariantSelectionModalProps {
   visible: boolean;
@@ -54,6 +55,7 @@ export const VariantSelectionModal: React.FC<VariantSelectionModalProps> = ({
     if (!selectedVariant) return;
 
     if (!selectedVariant.inStock) {
+      haptics.error();
       showToast('Selected variant is currently out of stock', 'error');
       return;
     }
@@ -67,6 +69,7 @@ export const VariantSelectionModal: React.FC<VariantSelectionModalProps> = ({
     );
 
     if (added) {
+      haptics.selection();
       showToast(
         `Added ${selectedVariant.label || selectedVariant.packSize} to cart!`,
         'success'
@@ -78,6 +81,7 @@ export const VariantSelectionModal: React.FC<VariantSelectionModalProps> = ({
       }
       onClose();
     } else {
+      haptics.warning();
       showToast('Maximum quantity limit (10) reached for this medicine', 'warning');
     }
   };
@@ -148,7 +152,10 @@ export const VariantSelectionModal: React.FC<VariantSelectionModalProps> = ({
                       key={variant.id}
                       activeOpacity={isAvailable ? 0.85 : 1}
                       onPress={() => {
-                        if (isAvailable) setSelectedVariant(variant);
+                        if (isAvailable) {
+                          haptics.selection();
+                          setSelectedVariant(variant);
+                        }
                       }}
                       style={[
                         styles.variantCard,

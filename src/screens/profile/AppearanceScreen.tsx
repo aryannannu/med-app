@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   View,
   ScrollView,
@@ -14,6 +14,7 @@ import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme, ThemeMode } from '../../store/ThemeContext';
 import { useToast } from '../../store/ToastContext';
+import { haptics } from '../../services/hapticService';
 
 export const AppearanceScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -21,6 +22,7 @@ export const AppearanceScreen: React.FC = () => {
   const { showToast } = useToast();
 
   const handleSelectTheme = (mode: ThemeMode) => {
+    haptics.selection();
     setThemeMode(mode);
     showToast(`Appearance updated to ${mode === 'system' ? 'System Default' : mode.charAt(0).toUpperCase() + mode.slice(1)}`, 'info');
   };
@@ -148,8 +150,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   backBtn: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F8F8FC',
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
     alignItems: 'center',
     justifyContent: 'center',
   },

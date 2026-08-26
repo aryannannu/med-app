@@ -429,6 +429,55 @@ export const ProfileScreen: React.FC = () => {
         </View>
 
         {/* =========================================================================
+            DESIGN SYSTEM & SHOWCASES
+           ========================================================================= */}
+        <AppText variant="caption" color={colors.textSecondary} weight="600" style={styles.sectionHeading}>
+          DESIGN SYSTEM & SHOWCASES
+        </AppText>
+
+        <View style={[styles.menuCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('ProductCardShowcase')}
+            style={styles.menuRow}
+          >
+            <View style={[styles.menuIconCircle, { backgroundColor: '#EEF2FF' }]}>
+              <Ionicons name="cube-outline" size={20} color="#6366F1" />
+            </View>
+            <View style={styles.menuTextCol}>
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
+                Product Cards Showcase
+              </AppText>
+              <AppText variant="caption" color={colors.textSecondary}>
+                Pixel-perfect match to reference design
+              </AppText>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('HeaderShowcase')}
+            style={styles.menuRow}
+          >
+            <View style={[styles.menuIconCircle, { backgroundColor: '#F3E8FF' }]}>
+              <Ionicons name="layers-outline" size={20} color={colors.primary} />
+            </View>
+            <View style={styles.menuTextCol}>
+              <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
+                Universal Header Showcase
+              </AppText>
+              <AppText variant="caption" color={colors.textSecondary}>
+                20 master adaptive header variants
+              </AppText>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* =========================================================================
             8. BOTTOM ACTIONS (LOG OUT)
            ========================================================================= */}
         <TouchableOpacity
