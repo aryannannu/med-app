@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, SafeAreaView, Animated, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -92,25 +92,32 @@ export const FindingPharmaciesScreen: React.FC = () => {
     if (hasRunRef.current) return;
     hasRunRef.current = true;
 
-    startFindingPharmacies(cartId, items, selectedAddress).then((results) => {
-      setIsCompleted(true);
-      // Automatically navigate to Offer Comparison after a short delay so user sees step 4 completed
-      setTimeout(() => {
-        navigation.replace('OfferComparison', { cartId });
-      }, 700);
-    });
+    startFindingPharmacies(cartId, items, selectedAddress)
+      .then((results) => {
+        setIsCompleted(true);
+        // Automatically navigate to Offer Comparison after a short delay so user sees step 4 completed
+        setTimeout(() => {
+          navigation.navigate('OfferComparison', { cartId });
+        }, 700);
+      })
+      .catch(() => {
+        setIsCompleted(true);
+        setTimeout(() => {
+          navigation.navigate('OfferComparison', { cartId });
+        }, 700);
+      });
 
     // Fallback safety timer: ensure user is never stuck beyond 4 seconds
     const safetyTimer = setTimeout(() => {
       setIsCompleted(true);
-      navigation.replace('OfferComparison', { cartId });
+      navigation.navigate('OfferComparison', { cartId });
     }, 4000);
 
     return () => clearTimeout(safetyTimer);
   }, [cartId, items, selectedAddress, startFindingPharmacies, navigation]);
 
   const handleManualProceed = () => {
-    navigation.replace('OfferComparison', { cartId });
+    navigation.navigate('OfferComparison', { cartId });
   };
 
   return (

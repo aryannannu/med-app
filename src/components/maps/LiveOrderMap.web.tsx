@@ -89,17 +89,14 @@ export const LiveOrderMap: React.FC<LiveOrderMapProps> = ({
         </View>
       </View>
 
-      {/* Expand Map Control Button (Upper Right) */}
+      {/* Expand Map Control Button (Upper Right - Icon Only) */}
       {onExpandMap && (
         <TouchableOpacity
           activeOpacity={0.88}
           onPress={onExpandMap}
           style={styles.expandMapBtn}
         >
-          <Ionicons name={isExpanded ? 'contract-outline' : 'expand-outline'} size={18} color="#3A2986" />
-          <AppText style={styles.expandMapText}>
-            {isExpanded ? 'Collapse' : 'Expand map'}
-          </AppText>
+          <Ionicons name={isExpanded ? 'contract-outline' : 'expand-outline'} size={20} color="#3A2986" />
         </TouchableOpacity>
       )}
     </View>
@@ -281,26 +278,19 @@ const styles = StyleSheet.create({
   },
   expandMapBtn: {
     position: 'absolute',
-    top: 90,
+    top: 96,
     right: 16,
-    flexDirection: 'column',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
     elevation: 5,
     zIndex: 30,
-  },
-  expandMapText: {
-    fontSize: 9.5,
-    fontFamily: 'LexendDeca_600SemiBold',
-    color: '#3A2986',
-    marginTop: 2,
   },
 });

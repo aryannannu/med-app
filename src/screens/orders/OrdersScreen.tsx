@@ -18,6 +18,7 @@ import { useOrders } from '../../store/OrderContext';
 import { useToast } from '../../store/ToastContext';
 import { useTabBarScroll } from '../../store/TabBarScrollContext';
 import { useAppTheme } from '../../store/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
 import { Order } from '../../types/order';
 
 export const OrdersScreen: React.FC = () => {
@@ -53,8 +54,17 @@ export const OrdersScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <AppText variant="titleLarge" color={colors.textPrimary} weight="600">
-          My Medicine Orders
+        {navigation.canGoBack() && (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={styles.backBtn}
+          >
+            <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          </TouchableOpacity>
+        )}
+        <AppText variant="titleMedium" color={colors.textPrimary} weight="700" style={{ marginLeft: navigation.canGoBack() ? 10 : 0 }}>
+          My Orders
         </AppText>
       </View>
 
@@ -144,11 +154,20 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabsRow: {
     flexDirection: 'row',

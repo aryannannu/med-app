@@ -43,7 +43,7 @@ const INITIAL_CARDS: SavedCard[] = [
     expiryMonth: '08',
     expiryYear: '28',
     brand: 'visa',
-    isDefault: true,
+    isDefault: false,
     addedAt: Date.now() - 1000 * 60 * 60 * 24 * 60,
   },
   {
@@ -118,6 +118,7 @@ export const PaymentMethodsProvider: React.FC<{ children: React.ReactNode }> = (
 
   const setDefaultUPI = useCallback((id: string) => {
     setUpiList((prev) => prev.map((u) => ({ ...u, isDefault: u.id === id })));
+    setCardsList((prev) => prev.map((c) => ({ ...c, isDefault: false })));
   }, []);
 
   const addCard = useCallback(
@@ -171,6 +172,7 @@ export const PaymentMethodsProvider: React.FC<{ children: React.ReactNode }> = (
 
   const setDefaultCard = useCallback((id: string) => {
     setCardsList((prev) => prev.map((c) => ({ ...c, isDefault: c.id === id })));
+    setUpiList((prev) => prev.map((u) => ({ ...u, isDefault: false })));
   }, []);
 
   return (

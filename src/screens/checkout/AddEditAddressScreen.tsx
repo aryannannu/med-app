@@ -21,6 +21,8 @@ import { useToast } from '../../store/ToastContext';
 import { useAppTheme } from '../../store/ThemeContext';
 import { isValidPincode, isValidIndianPhoneNumber } from '../../utils/validators';
 
+import { shareAddressViaApp } from '../../utils/addressShareUtils';
+
 export const AddEditAddressScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'AddEditAddress'>>();
@@ -95,7 +97,17 @@ export const AddEditAddressScreen: React.FC = () => {
         <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
           {existing ? 'Edit Address' : 'Add New Address'}
         </AppText>
-        <View style={{ width: 40 }} />
+        {existing ? (
+          <TouchableOpacity
+            onPress={() => shareAddressViaApp(existing)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Ionicons name="share-social-outline" size={22} color={colors.primary} />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 40 }} />
+        )}
       </View>
 
       <KeyboardAvoidingView

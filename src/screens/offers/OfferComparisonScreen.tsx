@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   Image,
+  BackHandler,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,6 +15,7 @@ import { AppStackParamList } from '../../types/navigation';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../../components/common/AppText';
 import { AppButton } from '../../components/common/AppButton';
+import { ConfirmationModal } from '../../components/modals/ConfirmationModal';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { Ionicons } from '@expo/vector-icons';
 import { useOffers } from '../../store/OfferContext';
@@ -55,6 +57,31 @@ export const OfferComparisonScreen: React.FC = () => {
   const [inspectingOffer, setInspectingOffer] = useState<PharmacyOffer | null>(null);
   const [partialOfferPending, setPartialOfferPending] = useState<PharmacyOffer | null>(null);
   const [newOfferBannerVisible, setNewOfferBannerVisible] = useState(false);
+  const [discardModalVisible, setDiscardModalVisible] = useState(false);
+
+  // Intercept Hardware and Gesture Back Navigation
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // Allow forward navigation to CheckoutReview or AddressSelection without interception
+      const actionType = e.data.action.type;
+      if (actionType === 'NAVIGATE') {
+        return;
+      }
+
+      e.preventDefault();
+      setDiscardModalVisible(true);
+    });
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      setDiscardModalVisible(true);
+      return true;
+    });
+
+    return () => {
+      unsubscribe();
+      backHandler.remove();
+    };
+  }, [navigation]);
 
   // If user lands directly on OfferComparison or after reload, ensure offers exist
   useEffect(() => {
@@ -140,7 +167,7 @@ export const OfferComparisonScreen: React.FC = () => {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('Cart')}
+          onPress={() => setDiscardModalVisible(true)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={styles.backBtn}
         >
@@ -555,6 +582,22 @@ export const OfferComparisonScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Discard Pharmacy Bids Confirmation Modal */}
+      <ConfirmationModal
+        visible={discardModalVisible}
+        title="Discard Pharmacy Offers?"
+        message="If you leave now, these live pharmacy quotes and reserved discounts will be discarded."
+        confirmText="Discard"
+        cancelText="Continue"
+        isDestructive
+        icon="alert-circle-outline"
+        onConfirm={() => {
+          setDiscardModalVisible(false);
+          navigation.navigate('MainTabs', { screen: 'HomeTab' });
+        }}
+        onCancel={() => setDiscardModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };

@@ -36,7 +36,7 @@ export const CheckoutReviewScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { items, summary, clearCart } = useCart();
   const { selectedAddress } = useAddress();
-  const { activePrescription } = usePrescription();
+  const { activePrescription, prescriptions, selectActivePrescription } = usePrescription();
   const { selectedOffer } = useOffers();
   const { createOrder } = useOrders();
   const { balance: walletBalance, deductMoney } = useWallet();
@@ -69,10 +69,14 @@ export const CheckoutReviewScreen: React.FC = () => {
     }
 
     if (summary.hasRxItems && !activePrescription) {
-      haptics.warning();
-      showToast('Please upload prescription for Rx medicines', 'warning');
-      navigation.navigate('UploadPrescription', { fromCart: true });
-      return;
+      if (prescriptions.length > 0) {
+        selectActivePrescription(prescriptions[0]);
+      } else {
+        haptics.warning();
+        showToast('Please upload prescription for Rx medicines', 'warning');
+        navigation.navigate('UploadPrescription', { fromCart: true });
+        return;
+      }
     }
 
     haptics.medium();

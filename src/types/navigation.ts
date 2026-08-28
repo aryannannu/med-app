@@ -29,7 +29,8 @@ export type AppStackParamList = {
   PharmacyListing: { categorySlug?: string };
   PharmacyDetail: { pharmacyId: string; pharmacy?: Pharmacy };
   Cart: undefined;
-  UploadPrescription: { fromCart?: boolean };
+  UploadPrescription: { fromCart?: boolean; initialStep?: 'scan' | 'list' | 'review'; prescriptionId?: string } | undefined;
+  SavedPrescriptionDetail: { prescriptionId: string };
   AddressSelection: { isSelectingForCheckout?: boolean };
   AddEditAddress: { address?: Address };
   CheckoutReview: undefined;
@@ -39,6 +40,7 @@ export type AppStackParamList = {
   Notifications: undefined;
   Search: { initialQuery?: string; categorySlug?: string } | undefined;
   Profile: undefined;
+  Orders: undefined;
 
   // Profile Module Routes
   EditProfile: undefined;
@@ -47,6 +49,8 @@ export type AppStackParamList = {
   WalletTransactionDetails: { transactionId: string; transaction: WalletTransaction };
   PaymentMethods: undefined;
   SavedPharmacies: undefined;
+  SavedMedicines: undefined;
+  SavedBrands: undefined;
   Appearance: undefined;
   NotificationPreferences: undefined;
   PrivacySecurity: undefined;
@@ -68,6 +72,10 @@ export type AppStackParamList = {
     brandBg?: string;
     brandImage?: string;
     brandCount?: string;
+  };
+  StoreAvailability: {
+    medicineId: string;
+    medicine?: Medicine;
   };
 };
 

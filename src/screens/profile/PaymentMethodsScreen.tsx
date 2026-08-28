@@ -244,21 +244,6 @@ export const PaymentMethodsScreen: React.FC = () => {
             ))}
           </View>
         </View>
-
-        {/* Section 3: Cash on Delivery Note */}
-        <View style={[styles.codCard, SHADOWS.subtle]}>
-          <View style={styles.codIconBox}>
-            <Ionicons name="cash-outline" size={20} color="#15803D" />
-          </View>
-          <View style={styles.codTextCol}>
-            <AppText variant="titleSmall" color={colors.textPrimary} weight="600">
-              Cash on Delivery (COD)
-            </AppText>
-            <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-              Available directly during checkout for all serviceable addresses.
-            </AppText>
-          </View>
-        </View>
       </ScrollView>
 
       {/* Add UPI Modal */}
@@ -505,27 +490,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#E8E8EE',
     marginHorizontal: SPACING.md,
-  },
-  codCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: '#E8E8EE',
-  },
-  codIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#DCFCE7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  codTextCol: {
-    flex: 1,
-    marginLeft: SPACING.md,
   },
   modalOverlay: {
     flex: 1,

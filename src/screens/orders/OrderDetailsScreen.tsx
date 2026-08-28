@@ -310,6 +310,30 @@ export const OrderDetailsScreen: React.FC = () => {
   const itemCount = order?.items?.length || 3;
   const isCancelEligible = timelineStep < 2;
 
+  const orderTimeStr = order?.createdAt
+    ? new Date(order.createdAt).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : '10:44 AM';
+
+  const confirmedTimeStr = order?.createdAt
+    ? new Date(order.createdAt + 2 * 60 * 1000).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : '10:46 AM';
+
+  const timelineStepsData = [
+    { id: 0, label: 'Order\nplaced', time: orderTimeStr },
+    { id: 1, label: 'Pharmacy\nconfirmed', time: confirmedTimeStr },
+    { id: 2, label: 'Preparing\norder', time: null },
+    { id: 3, label: 'Out for\ndelivery', time: null },
+    { id: 4, label: 'Delivered', time: null },
+  ];
+
   return (
     <View style={styles.screenContainer}>
       {/* 1. Full Screen Live Map Background */}
@@ -342,7 +366,7 @@ export const OrderDetailsScreen: React.FC = () => {
             </View>
           </View>
           <AppText style={styles.headerSubtext}>
-            Order placed at 10:44 AM • {itemCount} medicines
+            Order placed at {orderTimeStr} • {itemCount} medicines
           </AppText>
         </View>
 
@@ -402,76 +426,97 @@ export const OrderDetailsScreen: React.FC = () => {
               </View>
             </View>
 
-            {/* Horizontal Timeline Progress Step Indicator */}
+            {/* Horizontal Timeline Progress Step Indicator - Perfectly Equal Spacing */}
             <View style={styles.timelineProgressSection}>
-              <View style={styles.timelineTrackRow}>
-                <View style={[styles.timelineTrackLine, { backgroundColor: isDark ? '#334155' : '#E2E8F0' }]} />
-                <View
-                  style={[
-                    styles.timelineTrackActiveLine,
-                    {
-                      width: `${(timelineStep / 4) * 100}%`,
-                      backgroundColor: '#3A2986',
-                    },
-                  ]}
-                />
-                <View style={styles.timelineNodesContainer}>
-                  {[0, 1, 2, 3, 4].map((stepIdx) => {
-                    const isDone = stepIdx < timelineStep;
-                    const isCurrent = stepIdx === timelineStep;
+              <View style={styles.equalStepperRow}>
+                {timelineStepsData.map((step, idx) => {
+                  const isDone = idx < timelineStep;
+                  const isCurrent = idx === timelineStep;
+                  const isPast = idx <= timelineStep;
 
-                    return (
-                      <View key={stepIdx} style={styles.timelineNodeBox}>
-                        {isDone ? (
-                          <View style={styles.timelineDoneNode}>
-                            <Ionicons name="checkmark" size={11} color="#FFFFFF" />
-                          </View>
-                        ) : isCurrent ? (
-                          <View style={styles.timelineCurrentNode}>
-                            <View style={styles.timelineCurrentInnerDot} />
-                          </View>
-                        ) : (
-                          <View style={styles.timelineUpcomingNode} />
+                  return (
+                    <View key={step.id} style={styles.equalStepCol}>
+                      {/* Line & Dot Segment */}
+                      <View style={styles.stepTrackSegment}>
+                        {/* Left Connector Line (hidden for first step) */}
+                        {idx > 0 && (
+                          <View
+                            style={[
+                              styles.stepConnectorLineLeft,
+                              {
+                                backgroundColor: isPast
+                                  ? '#3A2986'
+                                  : isDark
+                                  ? '#334155'
+                                  : '#E2E8F0',
+                              },
+                            ]}
+                          />
                         )}
+
+                        {/* Right Connector Line (hidden for last step) */}
+                        {idx < timelineStepsData.length - 1 && (
+                          <View
+                            style={[
+                              styles.stepConnectorLineRight,
+                              {
+                                backgroundColor: idx < timelineStep
+                                  ? '#3A2986'
+                                  : isDark
+                                  ? '#334155'
+                                  : '#E2E8F0',
+                              },
+                            ]}
+                          />
+                        )}
+
+                        {/* Step Node */}
+                        <View
+                          style={[
+                            styles.stepNodeAnchor,
+                            { backgroundColor: isDark ? '#1E1B4B' : '#FFFFFF' },
+                          ]}
+                        >
+                          {isDone ? (
+                            <View style={styles.timelineDoneNode}>
+                              <Ionicons name="checkmark" size={11} color="#FFFFFF" />
+                            </View>
+                          ) : isCurrent ? (
+                            <View
+                              style={[
+                                styles.timelineCurrentNode,
+                                { backgroundColor: isDark ? '#1E1B4B' : '#FFFFFF' },
+                              ]}
+                            >
+                              <View style={styles.timelineCurrentInnerDot} />
+                            </View>
+                          ) : (
+                            <View style={styles.timelineUpcomingNode} />
+                          )}
+                        </View>
                       </View>
-                    );
-                  })}
-                </View>
-              </View>
 
-              {/* Timeline Labels Row */}
-              <View style={styles.timelineLabelsRow}>
-                <View style={styles.timelineLabelCol}>
-                  <AppText style={timelineStep >= 0 ? styles.timelineLabelActive : styles.timelineLabelMuted}>
-                    Order{'\n'}placed
-                  </AppText>
-                  <AppText style={styles.timelineTimeText}>10:44 AM</AppText>
-                </View>
+                      {/* Step Label (Equal & Centered directly under the dot) */}
+                      <AppText
+                        style={[
+                          isPast
+                            ? [styles.timelineLabelActive, { color: isDark ? '#FFFFFF' : '#1E1B4B' }]
+                            : styles.timelineLabelMuted,
+                          styles.equalLabelText,
+                        ]}
+                      >
+                        {step.label}
+                      </AppText>
 
-                <View style={styles.timelineLabelCol}>
-                  <AppText style={timelineStep >= 1 ? styles.timelineLabelActive : styles.timelineLabelMuted}>
-                    Pharmacy{'\n'}confirmed
-                  </AppText>
-                  <AppText style={styles.timelineTimeText}>10:46 AM</AppText>
-                </View>
-
-                <View style={styles.timelineLabelCol}>
-                  <AppText style={timelineStep >= 2 ? styles.timelineLabelActive : styles.timelineLabelMuted}>
-                    Preparing{'\n'}order
-                  </AppText>
-                </View>
-
-                <View style={styles.timelineLabelCol}>
-                  <AppText style={timelineStep >= 3 ? styles.timelineLabelActive : styles.timelineLabelMuted}>
-                    Out for{'\n'}delivery
-                  </AppText>
-                </View>
-
-                <View style={styles.timelineLabelCol}>
-                  <AppText style={timelineStep >= 4 ? styles.timelineLabelActive : styles.timelineLabelMuted}>
-                    Delivered
-                  </AppText>
-                </View>
+                      {/* Step Timestamp */}
+                      {step.time ? (
+                        <AppText style={styles.timelineTimeText}>{step.time}</AppText>
+                      ) : (
+                        <View style={{ height: 14 }} />
+                      )}
+                    </View>
+                  );
+                })}
               </View>
             </View>
 
@@ -1019,18 +1064,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'LexendDeca_400Regular',
     lineHeight: 16,
-    marginTop: 4,
   },
-
-  // Prominent Right ETA Block Box
   etaBlockBox: {
-    width: 68,
-    height: 68,
+    minWidth: 72,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderRadius: 18,
     backgroundColor: '#3A2986',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
     shadowColor: '#3A2986',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
@@ -1042,54 +1084,74 @@ const styles = StyleSheet.create({
     fontFamily: 'LexendDeca_700Bold',
     fontWeight: '800',
     color: '#FFFFFF',
-    lineHeight: 24,
+    lineHeight: 25,
+    textAlign: 'center',
   },
   etaMinsText: {
     fontSize: 11,
     fontFamily: 'LexendDeca_600SemiBold',
+    fontWeight: '600',
     color: '#FFFFFF',
-    marginTop: -2,
+    marginTop: 2,
+    textAlign: 'center',
   },
   etaSubtext: {
-    fontSize: 8.5,
-    fontFamily: 'LexendDeca_500Medium',
+    fontSize: 9,
+    fontFamily: 'LexendDeca_700Bold',
+    fontWeight: '700',
     color: 'rgba(255, 255, 255, 0.75)',
-    marginTop: 1,
+    marginTop: 2,
+    letterSpacing: 0.8,
+    textAlign: 'center',
   },
 
-  // Horizontal Timeline Progress Step Indicator
+  // Horizontal Timeline Progress Step Indicator - Equal Spacing
   timelineProgressSection: {
     marginTop: 18,
     marginBottom: 14,
+    width: '100%',
   },
-  timelineTrackRow: {
-    position: 'relative',
-    height: 18,
-    justifyContent: 'center',
-  },
-  timelineTrackLine: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    height: 2,
-  },
-  timelineTrackActiveLine: {
-    position: 'absolute',
-    left: 12,
-    height: 2.5,
-  },
-  timelineNodesContainer: {
+  equalStepperRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 4,
+    alignItems: 'flex-start',
+    width: '100%',
   },
-  timelineNodeBox: {
-    width: 18,
-    height: 18,
+  equalStepCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  stepTrackSegment: {
+    width: '100%',
+    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    position: 'relative',
+    marginBottom: 6,
+  },
+  stepConnectorLineLeft: {
+    position: 'absolute',
+    left: 0,
+    right: '50%',
+    height: 2.5,
+    top: '50%',
+    marginTop: -1.25,
+    zIndex: 1,
+  },
+  stepConnectorLineRight: {
+    position: 'absolute',
+    left: '50%',
+    right: 0,
+    height: 2.5,
+    top: '50%',
+    marginTop: -1.25,
+    zIndex: 1,
+  },
+  stepNodeAnchor: {
+    width: 22,
+    height: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
   },
   timelineDoneNode: {
     width: 18,
@@ -1103,9 +1165,8 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    borderWidth: 2,
+    borderWidth: 2.5,
     borderColor: '#3A2986',
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1116,33 +1177,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A2986',
   },
   timelineUpcomingNode: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#CBD5E1',
   },
-  timelineLabelsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  timelineLabelCol: {
-    width: '19%',
-    alignItems: 'center',
+  equalLabelText: {
+    textAlign: 'center',
+    minHeight: 26,
   },
   timelineLabelActive: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontFamily: 'LexendDeca_600SemiBold',
     fontWeight: '600',
-    color: '#1E1B4B',
-    textAlign: 'center',
     lineHeight: 12,
   },
   timelineLabelMuted: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontFamily: 'LexendDeca_500Medium',
     color: '#94A3B8',
-    textAlign: 'center',
     lineHeight: 12,
   },
   timelineTimeText: {
@@ -1150,6 +1203,7 @@ const styles = StyleSheet.create({
     fontFamily: 'LexendDeca_400Regular',
     color: '#64748B',
     marginTop: 2,
+    textAlign: 'center',
   },
 
   // Delivery Details Action Row

@@ -94,10 +94,10 @@ export const WalletScreen: React.FC = () => {
         {/* Add Money CTA Button */}
         <AppButton
           title="Add Money to Wallet"
-          variant="primary"
+          variant="secondary"
           size="lg"
           onPress={() => navigation.navigate('AddMoney')}
-          leftIcon={<Ionicons name="add-circle" size={20} color="#FFFFFF" />}
+          leftIcon={<Ionicons name="add-circle" size={20} color={colors.primary} />}
           style={styles.addMoneyBtn}
         />
 

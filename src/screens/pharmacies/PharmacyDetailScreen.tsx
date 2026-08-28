@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   ScrollView,
   Image,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Animated,
+  StatusBar,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../types/navigation';
@@ -21,6 +24,13 @@ import { Medicine } from '../../types/medicine';
 import { useCart } from '../../store/CartContext';
 import { useToast } from '../../store/ToastContext';
 import { useAppTheme } from '../../store/ThemeContext';
+import { MedicineCard } from '../../components/cards/MedicineCard';
+import { VariantSelectionModal } from '../../components/modals/VariantSelectionModal';
+import { FloatingCart } from '../../components/common/FloatingCart';
+import { Dimensions } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const PRODUCT_CARD_WIDTH = (SCREEN_WIDTH - 32 - 12) / 2;
 
 export const PharmacyDetailScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -33,10 +43,26 @@ export const PharmacyDetailScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'rx' | 'otc' | 'supplements'>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedMedicineForVariant, setSelectedMedicineForVariant] = useState<Medicine | null>(null);
 
-  const { totalItemCount, addToCart, getItemQuantity } = useCart();
+  const { totalItemCount, addToCart, removeFromCart, getItemQuantity, updateQuantity, undoRemove } = useCart();
   const { showToast } = useToast();
   const { colors, isDark } = useAppTheme();
+  const insets = useSafeAreaInsets();
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const headerBgOpacity = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const headerTitleOpacity = scrollY.interpolate({
+    inputRange: [25, 80],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
 
   useEffect(() => {
     PharmacyService.getPharmacyInventory(pharmacyId).then((res) => {
@@ -108,32 +134,104 @@ export const PharmacyDetailScreen: React.FC = () => {
     showToast(med.name + ' added to cart from ' + pharmacy.name, 'success');
   };
 
+  const renderStoreMedicineCard = (med: Medicine, index: number, isHorizontal = false) => {
+    return (
+      <MedicineCard
+        key={med.id}
+        medicine={med}
+        onPress={() => navigation.navigate('MedicineDetails', { medicineId: med.id, medicine: med })}
+        onOpenVariantModal={(m) => setSelectedMedicineForVariant(m)}
+        onAddToCart={() => {
+          const added = addToCart(med, 1, undefined, pharmacy.id, pharmacy.name);
+          if (added) {
+            showToast(`Added ${med.name} to cart!`, 'success');
+            if (med.rxRequired) {
+              setTimeout(() => {
+                showToast('Prescription will be required before placing order', 'info', 3500);
+              }, 800);
+            }
+          } else {
+            showToast('Maximum quantity limit (10) reached', 'warning');
+          }
+        }}
+        onIncrement={() => {
+          const currentQty = getItemQuantity(med.id);
+          if (currentQty >= 10) {
+            showToast('Maximum quantity limit (10) reached', 'warning');
+          } else {
+            updateQuantity(med.id, currentQty + 1);
+          }
+        }}
+        onDecrement={() => {
+          const q = getItemQuantity(med.id);
+          if (q === 1) {
+            removeFromCart(med.id);
+            showToast(`${med.name} removed from cart`, 'info', 4000, 'Undo', () => undoRemove());
+          } else {
+            updateQuantity(med.id, q - 1);
+          }
+        }}
+        cartQuantity={getItemQuantity(med.id)}
+        storeAttribution={pharmacy.name}
+        style={
+          isHorizontal
+            ? { marginRight: SPACING.md }
+            : { width: PRODUCT_CARD_WIDTH, marginBottom: SPACING.md, marginRight: index % 2 === 0 ? 12 : 0 }
+        }
+      />
+    );
+  };
+
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      {/* Header Bar */}
-      <View style={[styles.headerBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+      {/* 1. TOP STICKY ANIMATED HEADER BAR */}
+      <Animated.View
+        style={[
+          styles.stickyHeaderBar,
+          {
+            paddingTop: insets.top + (Platform.OS === 'android' ? 6 : 2),
+            backgroundColor: colors.surface,
+            borderBottomColor: colors.border,
+            opacity: headerBgOpacity,
+          },
+          SHADOWS.subtle,
+        ]}
+      >
+        <Animated.View style={[styles.stickyHeaderCenter, { opacity: headerTitleOpacity }]}>
+          <AppText variant="titleSmall" color={colors.textPrimary} weight="700" numberOfLines={1}>
+            {pharmacy.name}
+          </AppText>
+          <AppText variant="caption" color={colors.textSecondary} numberOfLines={1} style={{ fontSize: 10 }}>
+            {pharmacy.isVerified ? '✓ Verified Partner' : 'Partner Store'}
+          </AppText>
+        </Animated.View>
+      </Animated.View>
+
+      {/* FLOATING ACTION BUTTONS (Back & Cart) */}
+      <View
+        style={[
+          styles.floatingHeaderRow,
+          {
+            top: insets.top + (Platform.OS === 'android' ? 6 : 4),
+          },
+        ]}
+        pointerEvents="box-none"
+      >
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={styles.backBtn}
+          style={styles.floatingIconButton}
         >
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
         </TouchableOpacity>
-        
-        <View style={styles.headerTitleContainer}>
-          <AppText variant="titleMedium" color={colors.textPrimary} weight="600" numberOfLines={1}>
-            {pharmacy.name}
-          </AppText>
-          <AppText variant="caption" color={colors.textSecondary}>
-            {pharmacy.isVerified ? '✓ Verified Partner Pharmacy' : 'Partner Store'}
-          </AppText>
-        </View>
 
         <TouchableOpacity
           onPress={() => navigation.navigate('Cart')}
-          style={styles.cartIconContainer}
+          style={styles.floatingIconButton}
         >
-          <Ionicons name="cart-outline" size={24} color={colors.textPrimary} />
+          <Ionicons name="cart-outline" size={20} color="#FFFFFF" />
           {totalItemCount > 0 && (
             <View style={[styles.cartBadgeCircle, { backgroundColor: colors.primary }]}>
               <AppText variant="caption" color="#FFFFFF" weight="700" style={{ fontSize: 9 }}>
@@ -144,11 +242,18 @@ export const PharmacyDetailScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <Animated.ScrollView
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+          useNativeDriver: true,
+        })}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* =========================================================================
             1. TOP BANNER BACKGROUND & OVERLAPPING CIRCLE LOGO
            ========================================================================= */}
-        <View style={[styles.topGradientBanner, { backgroundColor: isDark ? '#1C1917' : '#3A2986' }]} />
+        <View style={[styles.topGradientBanner, { backgroundColor: isDark ? '#1C1917' : '#3A2986', paddingTop: insets.top }]} />
         
         <View style={[styles.logoWrapper, SHADOWS.card, { backgroundColor: colors.surface }]}>
           <Image source={{ uri: pharmacy.logo }} style={styles.logoImage} resizeMode="contain" />
@@ -329,58 +434,16 @@ export const PharmacyDetailScreen: React.FC = () => {
            ========================================================================= */}
         {topPicks.length > 0 && (
           <View style={styles.topPicksSection}>
-            <AppText variant="titleMedium" color={colors.textPrimary} weight="700" style={{ marginBottom: 12 }}>
+            <AppText variant="titleMedium" color={colors.textPrimary} weight="700" style={{ marginBottom: 12, paddingHorizontal: 16 }}>
               Top Picks &amp; Bestsellers
             </AppText>
 
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.topPicksScroll}
+              contentContainerStyle={{ paddingHorizontal: 16 }}
             >
-              {topPicks.map((item) => {
-                const qty = getItemQuantity(item.medicine.id);
-                return (
-                  <View
-                    key={item.medicine.id}
-                    style={[styles.topPickCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
-                  >
-                    <Image source={{ uri: item.medicine.image }} style={styles.topPickImage} resizeMode="contain" />
-                    
-                    <View style={styles.topPickDetails}>
-                      {item.medicine.rxRequired && (
-                        <View style={styles.rxBadgeTiny}>
-                          <AppText variant="caption" color="#DC2626" weight="800" style={{ fontSize: 8 }}>Rx</AppText>
-                        </View>
-                      )}
-                      
-                      <AppText variant="titleSmall" color={colors.textPrimary} weight="600" numberOfLines={1} style={styles.topPickName}>
-                        {item.medicine.name}
-                      </AppText>
-                      
-                      <AppText variant="caption" color={colors.textSecondary} numberOfLines={1}>
-                        {item.medicine.packForm}
-                      </AppText>
-
-                      <View style={styles.topPickPriceRow}>
-                        <AppText variant="titleMedium" color={colors.primary} weight="700">
-                          {formatPrice(item.medicine.discountPrice || item.medicine.mrp)}
-                        </AppText>
-                        
-                        <TouchableOpacity
-                          activeOpacity={0.8}
-                          onPress={() => handleAddOne(item.medicine)}
-                          style={[styles.quickAddBtn, { backgroundColor: colors.primaryMuted, borderColor: colors.primary }]}
-                        >
-                          <AppText variant="caption" color={colors.primary} weight="700">
-                            {qty > 0 ? qty + ' ADDED' : '+ ADD'}
-                          </AppText>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                );
-              })}
+              {topPicks.map((item, idx) => renderStoreMedicineCard(item.medicine, idx, true))}
             </ScrollView>
           </View>
         )}
@@ -401,58 +464,9 @@ export const PharmacyDetailScreen: React.FC = () => {
               </AppText>
             </View>
 
-            {prescriptionMeds.map((item) => {
-              const qty = getItemQuantity(item.medicine.id);
-              return (
-                <View
-                  key={item.medicine.id}
-                  style={[styles.medListItem, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
-                >
-                  <Image source={{ uri: item.medicine.image }} style={styles.medListImage} resizeMode="contain" />
-                  
-                  <View style={styles.medListDetails}>
-                    <View style={styles.medNameBadgeRow}>
-                      <AppText variant="titleMedium" color={colors.textPrimary} weight="600" style={{ flex: 1 }}>
-                        {item.medicine.name}
-                      </AppText>
-                      <View style={styles.rxBadgeText}>
-                        <AppText variant="caption" color="#DC2626" weight="800" style={{ fontSize: 9 }}>Rx REQUIRED</AppText>
-                      </View>
-                    </View>
-
-                    <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-                      {'Salt: ' + item.medicine.saltComposition}
-                    </AppText>
-                    <AppText variant="caption" color={colors.textMuted} style={{ marginTop: 2 }}>
-                      {'Dosage: ' + item.medicine.packForm}
-                    </AppText>
-
-                    <View style={styles.medListPriceAddRow}>
-                      <View style={styles.priceColumn}>
-                        <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                          {formatPrice(item.medicine.discountPrice || item.medicine.mrp)}
-                        </AppText>
-                        {item.medicine.mrp > (item.medicine.discountPrice || 0) && (
-                          <AppText variant="caption" color={colors.textMuted} style={styles.strikeMrp}>
-                            {'MRP ' + formatPrice(item.medicine.mrp)}
-                          </AppText>
-                        )}
-                      </View>
-
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => handleAddOne(item.medicine)}
-                        style={[styles.listItemAddBtn, { backgroundColor: colors.primaryMuted, borderColor: colors.primary }]}
-                      >
-                        <AppText variant="bodySmall" color={colors.primary} weight="700">
-                          {qty > 0 ? qty + ' in Cart' : '+ ADD TO CART'}
-                        </AppText>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
+            <View style={styles.gridContainer}>
+              {prescriptionMeds.map((item, idx) => renderStoreMedicineCard(item.medicine, idx, false))}
+            </View>
           </View>
         )}
 
@@ -468,53 +482,9 @@ export const PharmacyDetailScreen: React.FC = () => {
               </AppText>
             </View>
 
-            {otcMeds.map((item) => {
-              const qty = getItemQuantity(item.medicine.id);
-              return (
-                <View
-                  key={item.medicine.id}
-                  style={[styles.medListItem, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
-                >
-                  <Image source={{ uri: item.medicine.image }} style={styles.medListImage} resizeMode="contain" />
-                  
-                  <View style={styles.medListDetails}>
-                    <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
-                      {item.medicine.name}
-                    </AppText>
-
-                    <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-                      {'Category: ' + (item.medicine.category || 'Pain Relief / Cold')}
-                    </AppText>
-                    <AppText variant="caption" color={colors.textMuted} style={{ marginTop: 2 }}>
-                      {'Dosage: ' + item.medicine.packForm}
-                    </AppText>
-
-                    <View style={styles.medListPriceAddRow}>
-                      <View style={styles.priceColumn}>
-                        <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                          {formatPrice(item.medicine.discountPrice || item.medicine.mrp)}
-                        </AppText>
-                        {item.medicine.mrp > (item.medicine.discountPrice || 0) && (
-                          <AppText variant="caption" color={colors.textMuted} style={styles.strikeMrp}>
-                            {'MRP ' + formatPrice(item.medicine.mrp)}
-                          </AppText>
-                        )}
-                      </View>
-
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => handleAddOne(item.medicine)}
-                        style={[styles.listItemAddBtn, { backgroundColor: colors.primaryMuted, borderColor: colors.primary }]}
-                      >
-                        <AppText variant="bodySmall" color={colors.primary} weight="700">
-                          {qty > 0 ? qty + ' in Cart' : '+ ADD TO CART'}
-                        </AppText>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
+            <View style={styles.gridContainer}>
+              {otcMeds.map((item, idx) => renderStoreMedicineCard(item.medicine, idx, false))}
+            </View>
           </View>
         )}
 
@@ -530,59 +500,25 @@ export const PharmacyDetailScreen: React.FC = () => {
               </AppText>
             </View>
 
-            {supplementMeds.map((item) => {
-              const qty = getItemQuantity(item.medicine.id);
-              return (
-                <View
-                  key={item.medicine.id}
-                  style={[styles.medListItem, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.subtle]}
-                >
-                  <Image source={{ uri: item.medicine.image }} style={styles.medListImage} resizeMode="contain" />
-                  
-                  <View style={styles.medListDetails}>
-                    <AppText variant="titleMedium" color={colors.textPrimary} weight="600">
-                      {item.medicine.name}
-                    </AppText>
-
-                    <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
-                      Category: Vitamins &amp; Wellness Supplements
-                    </AppText>
-                    <AppText variant="caption" color={colors.textMuted} style={{ marginTop: 2 }}>
-                      {'Form: ' + item.medicine.packForm}
-                    </AppText>
-
-                    <View style={styles.medListPriceAddRow}>
-                      <View style={styles.priceColumn}>
-                        <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
-                          {formatPrice(item.medicine.discountPrice || item.medicine.mrp)}
-                        </AppText>
-                        {item.medicine.mrp > (item.medicine.discountPrice || 0) && (
-                          <AppText variant="caption" color={colors.textMuted} style={styles.strikeMrp}>
-                            {'MRP ' + formatPrice(item.medicine.mrp)}
-                          </AppText>
-                        )}
-                      </View>
-
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => handleAddOne(item.medicine)}
-                        style={[styles.listItemAddBtn, { backgroundColor: colors.primaryMuted, borderColor: colors.primary }]}
-                      >
-                        <AppText variant="bodySmall" color={colors.primary} weight="700">
-                          {qty > 0 ? qty + ' in Cart' : '+ ADD TO CART'}
-                        </AppText>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
+            <View style={styles.gridContainer}>
+              {supplementMeds.map((item, idx) => renderStoreMedicineCard(item.medicine, idx, false))}
+            </View>
           </View>
         )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </SafeAreaView>
+        <View style={{ height: 120 }} />
+      </Animated.ScrollView>
+
+      {/* Floating Cart */}
+      <FloatingCart onPressViewCart={() => navigation.navigate('Cart')} />
+
+      {/* Variant Selection Modal */}
+      <VariantSelectionModal
+        visible={!!selectedMedicineForVariant}
+        medicine={selectedMedicineForVariant}
+        onClose={() => setSelectedMedicineForVariant(null)}
+      />
+    </View>
   );
 };
 
@@ -590,47 +526,54 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
   loaderContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
+  stickyHeaderBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 20,
     borderBottomWidth: 1,
   },
-  backBtn: {
+  stickyHeaderCenter: {
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 70,
+  },
+  floatingHeaderRow: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    zIndex: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 48,
+  },
+  floatingIconButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#F8F8FC',
-    borderWidth: 1,
-    borderColor: '#E8E8EE',
+    backgroundColor: 'rgba(0,0,0,0.32)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerTitleContainer: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  cartIconContainer: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#F8F8FC',
-    borderWidth: 1,
-    borderColor: '#E8E8EE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
   },
   cartBadgeCircle: {
     position: 'absolute',
-    top: 2,
-    right: 2,
+    top: -2,
+    right: -2,
     width: 16,
     height: 16,
     borderRadius: 8,
@@ -641,7 +584,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   topGradientBanner: {
-    height: 110,
+    height: 130,
     width: '100%',
   },
   logoWrapper: {

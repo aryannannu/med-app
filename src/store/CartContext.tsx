@@ -24,6 +24,13 @@ interface CartContextType {
   getCartItemsForMedicine: (medicineId: string) => CartItem[];
   undoRemove: () => boolean;
   clearCart: () => void;
+  setCartFromMedicines: (
+    medicines: Array<{
+      medicine: Medicine;
+      quantity: number;
+      rxRequired?: boolean;
+    }>
+  ) => { cartId: string; newItems: CartItem[] };
   registerOfferInvalidationCallback: (cb: () => void) => void;
 }
 
@@ -233,6 +240,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     triggerInvalidation();
   }, [triggerInvalidation]);
 
+  const setCartFromMedicines = useCallback(
+    (
+      medicines: Array<{
+        medicine: Medicine;
+        quantity: number;
+        rxRequired?: boolean;
+      }>
+    ) => {
+      const newCartId = `cart-${Date.now()}`;
+      const newItems: CartItem[] = medicines.map((m, idx) => ({
+        id: `${m.medicine.id}-rx-${Date.now()}-${idx}`,
+        medicineId: m.medicine.id,
+        medicine: m.medicine,
+        quantity: m.quantity,
+        rxRequired: m.rxRequired ?? m.medicine.rxRequired ?? false,
+        addedAt: Date.now(),
+      }));
+
+      setItems(newItems);
+      setCartId(newCartId);
+      setLastRemovedItem(null);
+      haptics.medium();
+      triggerInvalidation();
+      return { cartId: newCartId, newItems };
+    },
+    [triggerInvalidation]
+  );
+
   return (
     <CartContext.Provider
       value={{
@@ -249,6 +284,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getCartItemsForMedicine,
         undoRemove,
         clearCart,
+        setCartFromMedicines,
         registerOfferInvalidationCallback,
       }}
     >

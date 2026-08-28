@@ -9,7 +9,6 @@ import {
   StatusBar,
   Dimensions,
   ActivityIndicator,
-  FlatList,
   Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -25,11 +24,10 @@ import { useToast } from '../../store/ToastContext';
 import { useAppTheme } from '../../store/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { formatCurrency } from '../../utils/currency';
+import { MedicineCard } from '../../components/cards/MedicineCard';
+import { VariantSelectionModal } from '../../components/modals/VariantSelectionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HERO_HEIGHT = 230;
-const PRODUCT_CARD_WIDTH = (SCREEN_WIDTH - SPACING.lg * 2 - 12) / 2;
 
 // Brand metadata with descriptions, taglines, certifications etc.
 const BRAND_META: Record<string, {
@@ -39,6 +37,8 @@ const BRAND_META: Record<string, {
   hq: string;
   certifications: string[];
   specialties: string[];
+  buildingImage: string;
+  logoTextColor: string;
 }> = {
   cipla: {
     tagline: 'Caring for Life',
@@ -47,6 +47,8 @@ const BRAND_META: Record<string, {
     hq: 'Mumbai, India',
     certifications: ['WHO-GMP', 'US-FDA', 'EU-GMP', 'ISO 14001'],
     specialties: ['Respiratory', 'Anti-Retroviral', 'Cardiology', 'Oncology'],
+    buildingImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&q=80',
+    logoTextColor: '#004B93',
   },
   sun: {
     tagline: 'Quality. Affordable. Life.',
@@ -55,14 +57,18 @@ const BRAND_META: Record<string, {
     hq: 'Mumbai, India',
     certifications: ['US-FDA', 'WHO-GMP', 'MHRA UK', 'TGA Australia'],
     specialties: ['Dermatology', 'Psychiatry', 'Neurology', 'Cardiology'],
+    buildingImage: 'https://images.unsplash.com/photo-1541888946425-d0fbb186f5f8?w=400&q=80',
+    logoTextColor: '#E35205',
   },
   abbott: {
     tagline: 'Life. To the Fullest.',
-    description: 'Abbott is a global healthcare leader creating breakthrough science to advance people\'s health. Their nutrition, diagnostics, and branded generic pharmaceuticals serve millions.',
+    description: 'Abbott is a global healthcare leader creating breakthrough science to advance people\'s health with branded generic pharmaceuticals serving millions.',
     founded: '1888',
     hq: 'Chicago, USA',
     certifications: ['US-FDA', 'WHO-GMP', 'CE Mark', 'ISO 13485'],
     specialties: ['Nutrition', 'Diagnostics', 'Gastroenterology', 'Women\'s Health'],
+    buildingImage: 'https://images.unsplash.com/photo-1554469384-e58fac16e23a?w=400&q=80',
+    logoTextColor: '#0072CE',
   },
   drreddy: {
     tagline: 'Good Health Can\'t Wait',
@@ -71,6 +77,8 @@ const BRAND_META: Record<string, {
     hq: 'Hyderabad, India',
     certifications: ['US-FDA', 'WHO-GMP', 'EU-GMP', 'PMDA Japan'],
     specialties: ['Oncology', 'Neurology', 'Cardiology', 'Pain Management'],
+    buildingImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80',
+    logoTextColor: '#4B286D',
   },
   himalaya: {
     tagline: 'Wellness Through Nature',
@@ -79,6 +87,8 @@ const BRAND_META: Record<string, {
     hq: 'Bengaluru, India',
     certifications: ['WHO-GMP', 'ISO 9001', 'USDA Organic', 'Halal Certified'],
     specialties: ['Herbal Care', 'Personal Care', 'Baby Care', 'Animal Health'],
+    buildingImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80',
+    logoTextColor: '#00833E',
   },
   mankind: {
     tagline: 'Serving Life',
@@ -87,18 +97,28 @@ const BRAND_META: Record<string, {
     hq: 'New Delhi, India',
     certifications: ['WHO-GMP', 'ISO 9001', 'US-FDA', 'NABL'],
     specialties: ['Anti-infective', 'Cardiovascular', 'Gastrointestinal', 'Dermatology'],
+    buildingImage: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&q=80',
+    logoTextColor: '#0A4D9C',
+  },
+  micro: {
+    tagline: 'Committed to Health',
+    description: 'Micro Labs is a multi-faceted healthcare organization with state-of-the-art manufacturing and presence in prescription pharmaceuticals including Dolo.',
+    founded: '1973',
+    hq: 'Bengaluru, India',
+    certifications: ['WHO-GMP', 'US-FDA', 'UK-MHRA', 'ISO 9001'],
+    specialties: ['Cardiology', 'Diabetes', 'Pain Management', 'Ophthalmology'],
+    buildingImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&q=80',
+    logoTextColor: '#1E3A8A',
   },
 };
 
 export const BrandDetailScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'BrandDetail'>>();
-  const { brandId, brandName, brandQuery, brandBg, brandImage, brandCount } = route.params;
-  const safeBg = brandBg || '#2C1D54';
-  const safeImage = brandImage || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80';
+  const { brandId, brandName, brandQuery, brandCount } = route.params;
 
   const { colors, isDark } = useAppTheme();
-  const { addToCart, getItemQuantity, updateQuantity } = useCart();
+  const { addToCart, removeFromCart, getItemQuantity, updateQuantity, undoRemove } = useCart();
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
 
@@ -106,8 +126,26 @@ export const BrandDetailScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
   const [scrollY] = useState(new Animated.Value(0));
+  const [selectedMedicineForVariant, setSelectedMedicineForVariant] = useState<Medicine | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  const meta = BRAND_META[brandId] || BRAND_META.cipla;
+  const cleanBrandName = brandName.replace('\n', ' ').trim();
+  const brandKey = (brandId || '').toLowerCase();
+  const meta =
+    BRAND_META[brandKey] ||
+    (brandKey.includes('sun')
+      ? BRAND_META.sun
+      : brandKey.includes('abbott')
+      ? BRAND_META.abbott
+      : brandKey.includes('reddy')
+      ? BRAND_META.drreddy
+      : brandKey.includes('mankind')
+      ? BRAND_META.mankind
+      : brandKey.includes('himalaya')
+      ? BRAND_META.himalaya
+      : brandKey.includes('micro')
+      ? BRAND_META.micro
+      : BRAND_META.cipla);
 
   useEffect(() => {
     MedicineService.getMedicinesByBrand(brandQuery).then((meds) => {
@@ -149,203 +187,69 @@ export const BrandDetailScreen: React.FC = () => {
     [products],
   );
 
-  // Best deals = highest discount
-  const bestDeals = useMemo(
-    () =>
-      products
-        .filter((p) => p.discountPercentage > 0)
-        .sort((a, b) => b.discountPercentage - a.discountPercentage)
-        .slice(0, 8),
-    [products],
-  );
-
-  // Rx Required products
-  const rxProducts = useMemo(
-    () => products.filter((p) => p.rxRequired).slice(0, 8),
-    [products],
-  );
-
-  const handleAddToCart = useCallback(
-    (medicine: Medicine) => {
-      addToCart(medicine, undefined, undefined, medicine.sourcePharmacyId);
-      showToast(`${medicine.brandName} added to cart`, 'success');
-    },
-    [addToCart, showToast],
-  );
-
-  // Animated header opacity
+  // Animated sticky header
   const headerBgOpacity = scrollY.interpolate({
-    inputRange: [0, HERO_HEIGHT - 80],
+    inputRange: [0, 160],
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
 
   const renderProductCard = useCallback(
     (item: Medicine, index: number, isHorizontal = false) => {
-      const qty = getItemQuantity(item.id);
-      const cardWidth = isHorizontal ? 160 : PRODUCT_CARD_WIDTH;
-
       return (
-        <TouchableOpacity
+        <MedicineCard
           key={item.id}
-          activeOpacity={0.88}
-          onPress={() => navigation.navigate('MedicineDetails', { medicineId: item.id, medicine: item })}
-          style={[
-            styles.productCard,
-            {
-              width: cardWidth,
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              marginRight: isHorizontal ? 12 : index % 2 === 0 ? 12 : 0,
-            },
-            SHADOWS.subtle,
-          ]}
-        >
-          {/* Discount badge */}
-          {item.discountPercentage > 0 && (
-            <View style={[styles.discountBadge, { backgroundColor: colors.success }]}>
-              <AppText variant="caption" color="#FFF" weight="700" style={{ fontSize: 9 }}>
-                {item.discountPercentage}% OFF
-              </AppText>
-            </View>
-          )}
-
-          {/* Rx Badge */}
-          {item.rxRequired && (
-            <View style={[styles.rxBadge, { backgroundColor: colors.rxRedLight, borderColor: colors.rxRedBorder }]}>
-              <AppText variant="caption" color={colors.rxRed} weight="700" style={{ fontSize: 8 }}>
-                Rx
-              </AppText>
-            </View>
-          )}
-
-          {/* Image */}
-          <View style={[styles.productImageContainer, { backgroundColor: isDark ? colors.surfaceElevated : '#F8F8FC' }]}>
-            <Image source={{ uri: item.image }} style={styles.productImage} resizeMode="contain" />
-          </View>
-
-          {/* Info */}
-          <View style={styles.productInfo}>
-            <AppText variant="caption" color={colors.textSecondary} weight="500" numberOfLines={1} style={{ fontSize: 10 }}>
-              {item.packForm}
-            </AppText>
-            <AppText variant="bodySmall" color={colors.textPrimary} weight="600" numberOfLines={2} style={styles.productName}>
-              {item.name}
-            </AppText>
-
-            {/* Price row */}
-            <View style={styles.priceRow}>
-              <AppText variant="titleSmall" color={colors.textPrimary} weight="700">
-                {formatCurrency(item.discountPrice)}
-              </AppText>
-              {item.mrp > item.discountPrice && (
-                <AppText variant="caption" color={colors.textMuted} style={styles.mrpText}>
-                  {formatCurrency(item.mrp)}
-                </AppText>
-              )}
-            </View>
-
-            {/* Rating */}
-            {item.rating && (
-              <View style={styles.ratingRow}>
-                <Ionicons name="star" size={10} color={colors.starGold} />
-                <AppText variant="caption" color={colors.textSecondary} weight="600" style={{ marginLeft: 2, fontSize: 10 }}>
-                  {item.rating}
-                </AppText>
-                {item.reviewCount && (
-                  <AppText variant="caption" color={colors.textMuted} style={{ fontSize: 9, marginLeft: 2 }}>
-                    ({item.reviewCount})
-                  </AppText>
-                )}
-              </View>
-            )}
-          </View>
-
-          {/* Add / Qty Button */}
-          <View style={styles.cartBtnContainer}>
-            {qty > 0 ? (
-              <View style={[styles.qtyRow, { backgroundColor: colors.primary }]}>
-                <TouchableOpacity onPress={() => updateQuantity(item.id, qty - 1)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons name="remove" size={14} color="#FFF" />
-                </TouchableOpacity>
-                <AppText variant="caption" color="#FFF" weight="700" style={{ marginHorizontal: 8 }}>
-                  {qty}
-                </AppText>
-                <TouchableOpacity onPress={() => updateQuantity(item.id, qty + 1)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons name="add" size={14} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity
-                onPress={() => handleAddToCart(item)}
-                style={[styles.addBtn, { borderColor: colors.primary }]}
-              >
-                <AppText variant="caption" color={colors.primary} weight="700" style={{ fontSize: 11 }}>
-                  ADD
-                </AppText>
-              </TouchableOpacity>
-            )}
-          </View>
-        </TouchableOpacity>
+          medicine={item}
+          onPress={() => navigation.push('MedicineDetails', { medicineId: item.id, medicine: item })}
+          onOpenVariantModal={(m) => setSelectedMedicineForVariant(m)}
+          onAddToCart={() => {
+            const added = addToCart(item, 1);
+            if (added) {
+              showToast(`Added ${item.name} to cart!`, 'success');
+              if (item.rxRequired) {
+                setTimeout(() => {
+                  showToast('Prescription will be required before placing order', 'info', 3500);
+                }, 800);
+              }
+            } else {
+              showToast('Maximum quantity limit (10) reached', 'warning');
+            }
+          }}
+          onIncrement={() => {
+            const currentQty = getItemQuantity(item.id);
+            if (currentQty >= 10) {
+              showToast('Maximum quantity limit (10) reached', 'warning');
+            } else {
+              updateQuantity(item.id, currentQty + 1);
+            }
+          }}
+          onDecrement={() => {
+            const q = getItemQuantity(item.id);
+            if (q === 1) {
+              removeFromCart(item.id);
+              showToast(`${item.name} removed from cart`, 'info', 4000, 'Undo', () => undoRemove());
+            } else {
+              updateQuantity(item.id, q - 1);
+            }
+          }}
+          cartQuantity={getItemQuantity(item.id)}
+          style={
+            isHorizontal
+              ? { marginRight: 12, width: 165 }
+              : { marginRight: index % 2 === 0 ? 12 : 0, marginBottom: 14 }
+          }
+        />
       );
     },
-    [colors, isDark, navigation, getItemQuantity, handleAddToCart, updateQuantity],
+    [navigation, addToCart, removeFromCart, getItemQuantity, updateQuantity, undoRemove, showToast],
   );
-
-  // Section component
-  const renderSection = (
-    title: string,
-    subtitle: string,
-    icon: string,
-    data: Medicine[],
-    isHorizontal = true,
-  ) => {
-    if (data.length === 0) return null;
-    return (
-      <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
-        <View style={styles.sectionHeaderRow}>
-          <View style={styles.sectionHeaderLeft}>
-            <View style={[styles.sectionIconBg, { backgroundColor: isDark ? colors.primaryMuted : colors.primarySubtle }]}>
-              <Ionicons name={icon as any} size={16} color={colors.primary} />
-            </View>
-            <View style={{ marginLeft: 10, flex: 1 }}>
-              <AppText variant="titleSmall" color={colors.textPrimary} weight="700">
-                {title}
-              </AppText>
-              <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 10, marginTop: 1 }}>
-                {subtitle}
-              </AppText>
-            </View>
-          </View>
-          <AppText variant="caption" color={colors.primary} weight="600">
-            {data.length} items
-          </AppText>
-        </View>
-
-        {isHorizontal ? (
-          <FlatList
-            data={data}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: SPACING.lg, paddingBottom: 4 }}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item, index }) => renderProductCard(item, index, true)}
-          />
-        ) : (
-          <View style={styles.gridContainer}>
-            {data.map((item, idx) => renderProductCard(item, idx, false))}
-          </View>
-        )}
-      </View>
-    );
-  };
 
   if (isLoading) {
     return (
       <View style={[styles.loaderContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
         <AppText variant="bodyMedium" color={colors.textSecondary} style={{ marginTop: 12 }}>
-          Loading {brandName.replace('\n', ' ')} products...
+          Loading {cleanBrandName} products...
         </AppText>
       </View>
     );
@@ -355,12 +259,12 @@ export const BrandDetailScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      {/* Animated sticky header */}
+      {/* Floating Animated Header on Scroll */}
       <Animated.View
         style={[
           styles.stickyHeader,
           {
-            paddingTop: insets.top,
+            paddingTop: insets.top + (Platform.OS === 'android' ? 6 : 2),
             backgroundColor: colors.surface,
             opacity: headerBgOpacity,
             borderBottomColor: colors.border,
@@ -369,19 +273,33 @@ export const BrandDetailScreen: React.FC = () => {
       >
         <View style={styles.stickyHeaderInner}>
           <AppText variant="titleSmall" color={colors.textPrimary} weight="700" numberOfLines={1}>
-            {brandName.replace('\n', ' ')}
+            {cleanBrandName}
           </AppText>
         </View>
       </Animated.View>
 
-      {/* Back button (always visible) */}
+      {/* Floating Back Button */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        style={[styles.backBtn, { top: insets.top + 8 }]}
+        style={[styles.floatingIconBtn, { top: insets.top + (Platform.OS === 'android' ? 6 : 4), left: 16 }]}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <View style={[styles.backBtnCircle, { backgroundColor: 'rgba(0,0,0,0.35)' }]}>
-          <Ionicons name="arrow-back" size={20} color="#FFF" />
+        <View style={styles.floatingIconCircle}>
+          <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+        </View>
+      </TouchableOpacity>
+
+      {/* Floating Wishlist Button */}
+      <TouchableOpacity
+        onPress={() => {
+          setIsFavorite(!isFavorite);
+          showToast(isFavorite ? 'Removed from favorites' : 'Brand saved to favorites!', 'info');
+        }}
+        style={[styles.floatingIconBtn, { top: insets.top + (Platform.OS === 'android' ? 6 : 4), right: 16 }]}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <View style={styles.floatingIconCircle}>
+          <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={20} color={isFavorite ? '#EF4444' : '#FFFFFF'} />
         </View>
       </TouchableOpacity>
 
@@ -392,42 +310,52 @@ export const BrandDetailScreen: React.FC = () => {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        {/* ─── HERO BANNER ─── */}
-        <View style={[styles.heroBanner, { backgroundColor: safeBg }]}>
+        {/* ─── 1. TOP HERO BRAND BANNER (Dark Indigo with Building Overlay) ─── */}
+        <View style={[styles.heroBanner, { paddingTop: insets.top + 52 }]}>
+          <Image
+            source={{ uri: meta.buildingImage }}
+            style={styles.heroBgImage}
+            resizeMode="cover"
+          />
           <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.65)']}
+            colors={['rgba(26,16,61,0.72)', 'rgba(30,18,66,0.92)', '#1A0F38']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFillObject}
           />
-          <Image
-            source={{ uri: safeImage }}
-            style={styles.heroImage}
-            resizeMode="cover"
-            blurRadius={Platform.OS === 'android' ? 2 : 4}
-          />
-          <LinearGradient
-            colors={['transparent', safeBg + 'EE', safeBg]}
-            locations={[0, 0.6, 1]}
-            style={styles.heroOverlay}
-          />
 
-          <View style={[styles.heroContent, { paddingTop: insets.top + 40 }]}>
+          {/* Brand Identity Row: Large Round Logo + Name + Tagline + Pills */}
+          <View style={styles.heroContentRow}>
+            {/* Round Brand Logo Circle */}
+            <View style={[styles.brandLogoCircle, SHADOWS.card]}>
+              <AppText style={[styles.brandLogoText, { color: meta.logoTextColor }]}>
+                {cleanBrandName}
+              </AppText>
+            </View>
+
+            {/* Brand Titles Column */}
             <View style={styles.heroTextCol}>
-              <AppText style={[styles.heroTitle, { color: '#FFFFFF' }]} numberOfLines={2}>
-                {brandName.replace('\n', ' ')}
+              <AppText style={styles.heroTitle} numberOfLines={1}>
+                {cleanBrandName}
               </AppText>
-              <AppText style={[styles.heroTagline, { color: 'rgba(255,255,255,0.8)' }]}>
-                {meta.tagline}
-              </AppText>
-              <View style={styles.heroCountRow}>
-                <View style={styles.heroCountPill}>
-                  <Ionicons name="cube-outline" size={12} color="#FFF" />
-                  <AppText variant="caption" color="#FFF" weight="700" style={{ marginLeft: 4, fontSize: 11 }}>
-                    {brandCount}
+              <View style={styles.taglineRow}>
+                <AppText style={styles.heroTagline} numberOfLines={1}>
+                  {meta.tagline}
+                </AppText>
+                <Ionicons name="checkmark-circle" size={14} color="#FFFFFF" style={{ marginLeft: 4 }} />
+              </View>
+
+              {/* Discovery Pills */}
+              <View style={styles.heroPillsRow}>
+                <View style={styles.heroPill}>
+                  <Ionicons name="cube-outline" size={11} color="#FFFFFF" style={{ marginRight: 4 }} />
+                  <AppText style={styles.heroPillText}>
+                    {brandCount || `${Math.max(products.length, 12)}+ Products`}
                   </AppText>
                 </View>
-                <View style={[styles.heroCountPill, { marginLeft: 8 }]}>
-                  <Ionicons name="shield-checkmark-outline" size={12} color="#FFF" />
-                  <AppText variant="caption" color="#FFF" weight="700" style={{ marginLeft: 4, fontSize: 11 }}>
+                <View style={[styles.heroPill, { marginLeft: 8 }]}>
+                  <Ionicons name="shield-checkmark" size={11} color="#FFFFFF" style={{ marginRight: 4 }} />
+                  <AppText style={styles.heroPillText}>
                     Certified
                   </AppText>
                 </View>
@@ -436,203 +364,235 @@ export const BrandDetailScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* ─── BRAND INFO CARD ─── */}
-        <View style={[styles.brandInfoCard, { backgroundColor: colors.surface, borderColor: colors.border }, SHADOWS.card]}>
-          <AppText variant="bodySmall" color={colors.textSecondary} style={styles.brandDesc}>
-            {meta.description}
-          </AppText>
+        {/* ─── 2. WHITE CONTENT CONTAINER (Curves over Hero) ─── */}
+        <View style={[styles.whiteContentContainer, { backgroundColor: colors.background }]}>
+          {/* Company Description Card with Corporate Building Image */}
+          <View style={[styles.descriptionCard, { backgroundColor: isDark ? colors.surfaceElevated : '#F8F9FD', borderColor: isDark ? colors.border : '#EBF0F8' }]}>
+            <View style={styles.descTextCol}>
+              <AppText variant="bodySmall" color={colors.textSecondary} style={styles.descParagraph}>
+                {meta.description}
+              </AppText>
+            </View>
+            <Image
+              source={{ uri: meta.buildingImage }}
+              style={styles.buildingThumbnail}
+              resizeMode="cover"
+            />
+          </View>
 
-          {/* Stats Row */}
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <View style={[styles.statIconBg, { backgroundColor: isDark ? colors.primaryMuted : colors.primarySubtle }]}>
-                <Ionicons name="calendar-outline" size={16} color={colors.primary} />
+          {/* Key Metrics Row (3 Equal Cards: Founded, Headquarters, Products) */}
+          <View style={styles.metricsRow}>
+            {/* Founded */}
+            <View style={[styles.metricCard, { backgroundColor: isDark ? colors.surfaceElevated : '#F8F9FD', borderColor: isDark ? colors.border : '#EBF0F8' }]}>
+              <View style={[styles.metricIconBox, { backgroundColor: '#EDE9FE' }]}>
+                <Ionicons name="calendar-outline" size={16} color="#7C3AED" />
               </View>
-              <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 10 }}>
+              <AppText variant="caption" color={colors.textMuted} style={styles.metricLabel}>
                 Founded
               </AppText>
-              <AppText variant="bodySmall" color={colors.textPrimary} weight="700">
+              <AppText variant="bodySmall" color={colors.textPrimary} weight="700" style={styles.metricValue}>
                 {meta.founded}
               </AppText>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-            <View style={styles.statItem}>
-              <View style={[styles.statIconBg, { backgroundColor: isDark ? colors.primaryMuted : colors.primarySubtle }]}>
-                <Ionicons name="location-outline" size={16} color={colors.primary} />
+
+            {/* Headquarters */}
+            <View style={[styles.metricCard, { backgroundColor: isDark ? colors.surfaceElevated : '#F8F9FD', borderColor: isDark ? colors.border : '#EBF0F8' }]}>
+              <View style={[styles.metricIconBox, { backgroundColor: '#E0F2FE' }]}>
+                <Ionicons name="location-outline" size={16} color="#0284C7" />
               </View>
-              <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 10 }}>
+              <AppText variant="caption" color={colors.textMuted} style={styles.metricLabel}>
                 Headquarters
               </AppText>
-              <AppText variant="bodySmall" color={colors.textPrimary} weight="700" numberOfLines={1}>
+              <AppText variant="bodySmall" color={colors.textPrimary} weight="700" style={styles.metricValue} numberOfLines={1}>
                 {meta.hq}
               </AppText>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-            <View style={styles.statItem}>
-              <View style={[styles.statIconBg, { backgroundColor: isDark ? colors.primaryMuted : colors.primarySubtle }]}>
-                <Ionicons name="medkit-outline" size={16} color={colors.primary} />
+
+            {/* Products */}
+            <View style={[styles.metricCard, { backgroundColor: isDark ? colors.surfaceElevated : '#F8F9FD', borderColor: isDark ? colors.border : '#EBF0F8' }]}>
+              <View style={[styles.metricIconBox, { backgroundColor: '#EDE9FE' }]}>
+                <Ionicons name="briefcase-outline" size={16} color="#7C3AED" />
               </View>
-              <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 10 }}>
+              <AppText variant="caption" color={colors.textMuted} style={styles.metricLabel}>
                 Products
               </AppText>
-              <AppText variant="bodySmall" color={colors.textPrimary} weight="700">
-                {products.length}
+              <AppText variant="bodySmall" color={colors.textPrimary} weight="700" style={styles.metricValue}>
+                {products.length || 6}
               </AppText>
             </View>
           </View>
 
-          {/* Certifications */}
-          <View style={styles.certRow}>
-            {meta.certifications.map((cert) => (
-              <View
-                key={cert}
-                style={[styles.certChip, { backgroundColor: isDark ? colors.surfaceElevated : colors.primarySubtle, borderColor: isDark ? colors.primaryBorder : colors.primaryBorder }]}
-              >
-                <Ionicons name="checkmark-circle" size={10} color={colors.success} />
-                <AppText variant="caption" color={colors.textSecondary} weight="600" style={{ fontSize: 9, marginLeft: 3 }}>
-                  {cert}
-                </AppText>
-              </View>
+          {/* Certifications Row (WHO-GMP, US-FDA, EU-GMP, ISO 14001) */}
+          <View style={[styles.certificationsBox, { backgroundColor: isDark ? colors.surfaceElevated : '#F8F9FD', borderColor: isDark ? colors.border : '#EBF0F8' }]}>
+            {meta.certifications.map((cert, index) => (
+              <React.Fragment key={cert}>
+                {index > 0 && <View style={[styles.certDivider, { backgroundColor: isDark ? colors.border : '#E2E8F0' }]} />}
+                <View style={styles.certItem}>
+                  <Ionicons name="checkmark-circle" size={14} color="#16A34A" style={{ marginRight: 4 }} />
+                  <AppText variant="caption" color={colors.textPrimary} weight="700" style={{ fontSize: 11 }}>
+                    {cert}
+                  </AppText>
+                </View>
+              </React.Fragment>
             ))}
           </View>
 
-          {/* Specialties */}
-          <View style={styles.specialtiesRow}>
-            <AppText variant="caption" color={colors.textMuted} weight="600" style={{ fontSize: 10, marginRight: 6 }}>
-              SPECIALTIES
+          {/* Specialties Section */}
+          <View style={styles.specialtiesSection}>
+            <AppText variant="titleSmall" color={colors.textPrimary} weight="700" style={styles.specialtiesTitle}>
+              Specialties
             </AppText>
-            {meta.specialties.map((s) => (
-              <View
-                key={s}
-                style={[styles.specialtyChip, { backgroundColor: isDark ? colors.surfaceElevated : '#F0EDFF', borderColor: isDark ? colors.primaryBorder : '#DCD5F0' }]}
-              >
-                <AppText variant="caption" color={colors.primary} weight="600" style={{ fontSize: 10 }}>
-                  {s}
-                </AppText>
-              </View>
-            ))}
+            <View style={styles.specialtiesPillsRow}>
+              {meta.specialties.map((s) => (
+                <View key={s} style={[styles.specialtyPill, { backgroundColor: isDark ? colors.surfaceElevated : '#F0EDFC' }]}>
+                  <AppText style={[styles.specialtyPillText, { color: colors.primary }]}>
+                    {s}
+                  </AppText>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
 
-        {/* ─── CATEGORY FILTER CHIPS ─── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipScrollContainer}
-          style={styles.chipScroll}
-        >
-          {categories.map((cat) => {
-            const isActive = activeCategory === cat.slug;
-            return (
-              <TouchableOpacity
-                key={cat.slug}
-                activeOpacity={0.8}
-                onPress={() => setActiveCategory(cat.slug)}
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: isActive
-                      ? colors.primary
-                      : isDark ? colors.surfaceElevated : colors.surface,
-                    borderColor: isActive ? colors.primary : colors.border,
-                  },
-                  isActive && SHADOWS.subtle,
-                ]}
-              >
-                <AppText
-                  variant="caption"
-                  color={isActive ? '#FFF' : colors.textSecondary}
-                  weight={isActive ? '700' : '500'}
-                  style={{ fontSize: 12 }}
-                >
-                  {cat.name}
-                </AppText>
-                <View
+          {/* ─── 3. CATEGORY FILTER CHIPS ROW (Screenshot Matching) ─── */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterTabsScroll}
+            style={{ marginTop: 16, marginBottom: 8 }}
+          >
+            {categories.map((cat) => {
+              const isActive = activeCategory === cat.slug;
+              return (
+                <TouchableOpacity
+                  key={cat.slug}
+                  activeOpacity={0.8}
+                  onPress={() => setActiveCategory(cat.slug)}
                   style={[
-                    styles.chipCountBadge,
+                    styles.categoryFilterChip,
                     {
-                      backgroundColor: isActive
-                        ? 'rgba(255,255,255,0.25)'
-                        : isDark ? colors.surfaceMuted : colors.primarySubtle,
+                      backgroundColor: isActive ? '#3A2986' : isDark ? colors.surfaceElevated : '#FFFFFF',
+                      borderColor: isActive ? '#3A2986' : isDark ? colors.border : '#E5E7EB',
                     },
+                    isActive && SHADOWS.subtle,
                   ]}
                 >
                   <AppText
-                    variant="caption"
-                    color={isActive ? '#FFF' : colors.textMuted}
-                    weight="700"
-                    style={{ fontSize: 9 }}
+                    style={[
+                      styles.categoryFilterText,
+                      { color: isActive ? '#FFFFFF' : colors.textPrimary },
+                    ]}
                   >
-                    {cat.count}
+                    {cat.name}
                   </AppText>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+                  <View
+                    style={[
+                      styles.categoryFilterBadge,
+                      { backgroundColor: isActive ? '#5223C7' : isDark ? colors.surfaceMuted : '#F1F3F9' },
+                    ]}
+                  >
+                    <AppText
+                      style={[
+                        styles.categoryFilterBadgeText,
+                        { color: isActive ? '#FFFFFF' : colors.textSecondary },
+                      ]}
+                    >
+                      {cat.count}
+                    </AppText>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
 
-        {/* ─── FEATURED PRODUCTS (horizontal) ─── */}
-        {activeCategory === 'all' && renderSection(
-          'Featured Products',
-          `Top-rated from ${brandName.replace('\n', ' ')}`,
-          'star-outline',
-          featuredProducts,
-          true,
-        )}
+          {/* ─── 4. ACTIVE FILTER HEADING & PRODUCT GRID ─── */}
+          <View style={styles.allProductsSection}>
+            <View style={styles.activeFilterTitleRow}>
+              <AppText variant="titleMedium" color={colors.textPrimary} weight="700">
+                {activeCategory === 'all' ? 'All Products' : categories.find((c) => c.slug === activeCategory)?.name || 'Products'}
+              </AppText>
+              <AppText variant="bodySmall" color={colors.primary} weight="700">
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
+              </AppText>
+            </View>
 
-        {/* ─── BEST DEALS (horizontal) ─── */}
-        {activeCategory === 'all' && renderSection(
-          'Best Deals',
-          'Maximum savings on these products',
-          'pricetag-outline',
-          bestDeals,
-          true,
-        )}
-
-        {/* ─── PRESCRIPTION MEDICINES (horizontal, shown if exists) ─── */}
-        {activeCategory === 'all' && rxProducts.length > 0 && renderSection(
-          'Prescription Medicines',
-          'Requires valid Rx from licensed doctor',
-          'document-text-outline',
-          rxProducts,
-          true,
-        )}
-
-        {/* ─── ALL PRODUCTS (grid) ─── */}
-        <View style={[styles.sectionContainer, { backgroundColor: colors.background }]}>
-          <View style={styles.sectionHeaderRow}>
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIconBg, { backgroundColor: isDark ? colors.primaryMuted : colors.primarySubtle }]}>
-                <Ionicons name="grid-outline" size={16} color={colors.primary} />
-              </View>
-              <View style={{ marginLeft: 10, flex: 1 }}>
-                <AppText variant="titleSmall" color={colors.textPrimary} weight="700">
-                  {activeCategory === 'all' ? 'All Products' : categories.find((c) => c.slug === activeCategory)?.name || 'Products'}
-                </AppText>
-                <AppText variant="caption" color={colors.textSecondary} style={{ fontSize: 10, marginTop: 1 }}>
-                  {filteredProducts.length} products available
+            {filteredProducts.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="search-outline" size={44} color={colors.textMuted} />
+                <AppText variant="bodyMedium" color={colors.textSecondary} style={{ marginTop: 12 }}>
+                  No products found in this category
                 </AppText>
               </View>
+            ) : (
+              <View style={styles.gridContainer}>
+                {filteredProducts.map((item, idx) => renderProductCard(item, idx, false))}
+              </View>
+            )}
+          </View>
+
+          {/* ─── 6. BOTTOM TRUST PILLARS (Screenshot Matching) ─── */}
+          <View style={[styles.trustPillarsCard, { backgroundColor: isDark ? colors.surfaceElevated : '#FFFFFF', borderColor: isDark ? colors.border : '#EBF0F8' }, SHADOWS.subtle]}>
+            {/* Pillar 1 */}
+            <View style={styles.trustPillarCol}>
+              <Ionicons name="shield-checkmark-outline" size={20} color="#5A31F4" style={{ marginBottom: 4 }} />
+              <AppText variant="caption" color={colors.textPrimary} weight="700" style={styles.pillarTitle}>
+                Trusted Quality
+              </AppText>
+              <AppText variant="caption" color={colors.textMuted} style={styles.pillarSubtitle}>
+                50+ Years of Trust
+              </AppText>
+            </View>
+
+            <View style={[styles.pillarDivider, { backgroundColor: isDark ? colors.border : '#F0F2F8' }]} />
+
+            {/* Pillar 2 */}
+            <View style={styles.trustPillarCol}>
+              <Ionicons name="flask-outline" size={20} color="#5A31F4" style={{ marginBottom: 4 }} />
+              <AppText variant="caption" color={colors.textPrimary} weight="700" style={styles.pillarTitle}>
+                Science Driven
+              </AppText>
+              <AppText variant="caption" color={colors.textMuted} style={styles.pillarSubtitle}>
+                Innovative Solutions
+              </AppText>
+            </View>
+
+            <View style={[styles.pillarDivider, { backgroundColor: isDark ? colors.border : '#F0F2F8' }]} />
+
+            {/* Pillar 3 */}
+            <View style={styles.trustPillarCol}>
+              <Ionicons name="globe-outline" size={20} color="#5A31F4" style={{ marginBottom: 4 }} />
+              <AppText variant="caption" color={colors.textPrimary} weight="700" style={styles.pillarTitle}>
+                Global Presence
+              </AppText>
+              <AppText variant="caption" color={colors.textMuted} style={styles.pillarSubtitle}>
+                150+ Countries
+              </AppText>
+            </View>
+
+            <View style={[styles.pillarDivider, { backgroundColor: isDark ? colors.border : '#F0F2F8' }]} />
+
+            {/* Pillar 4 */}
+            <View style={styles.trustPillarCol}>
+              <Ionicons name="people-outline" size={20} color="#5A31F4" style={{ marginBottom: 4 }} />
+              <AppText variant="caption" color={colors.textPrimary} weight="700" style={styles.pillarTitle}>
+                Patient Centric
+              </AppText>
+              <AppText variant="caption" color={colors.textMuted} style={styles.pillarSubtitle}>
+                Care for Life
+              </AppText>
             </View>
           </View>
 
-          {filteredProducts.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-              <AppText variant="bodyMedium" color={colors.textSecondary} style={{ marginTop: 12 }}>
-                No products found in this category
-              </AppText>
-            </View>
-          ) : (
-            <View style={styles.gridContainer}>
-              {filteredProducts.map((item, idx) => renderProductCard(item, idx, false))}
-            </View>
-          )}
+          {/* Bottom spacer */}
+          <View style={{ height: 90 }} />
         </View>
-
-        {/* Bottom spacer */}
-        <View style={{ height: 100 }} />
       </Animated.ScrollView>
+
+      {/* Variant Selection Modal */}
+      <VariantSelectionModal
+        visible={!!selectedMedicineForVariant}
+        medicine={selectedMedicineForVariant}
+        onClose={() => setSelectedMedicineForVariant(null)}
+      />
     </View>
   );
 };
@@ -647,7 +607,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // ─── Sticky Header ───
+  // Floating Header
   stickyHeader: {
     position: 'absolute',
     top: 0,
@@ -662,275 +622,317 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 56,
   },
-  backBtn: {
+  floatingIconBtn: {
     position: 'absolute',
-    left: 16,
     zIndex: 30,
   },
-  backBtnCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  floatingIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  // ─── Hero ───
+  // 1. Hero Brand Area
   heroBanner: {
-    height: HERO_HEIGHT,
-    overflow: 'hidden',
+    minHeight: 235,
     position: 'relative',
+    overflow: 'hidden',
+    paddingBottom: 36,
   },
-  heroImage: {
+  heroBgImage: {
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
     opacity: 0.35,
   },
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  heroContent: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: 20,
-  },
-  heroTextCol: {},
-  heroTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    lineHeight: 32,
-  },
-  heroTagline: {
-    fontSize: 13,
-    fontStyle: 'italic',
-    marginTop: 2,
-    letterSpacing: 0.3,
-  },
-  heroCountRow: {
+  heroContentRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 18,
     marginTop: 10,
   },
-  heroCountPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-  },
-
-  // ─── Brand Info Card ───
-  brandInfoCard: {
-    marginHorizontal: SPACING.lg,
-    marginTop: -24,
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    zIndex: 5,
-  },
-  brandDesc: {
-    lineHeight: 18,
-    fontSize: 12,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 14,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.06)',
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statIconBg: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+  brandLogoCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.4)',
+    marginRight: 14,
   },
-  statDivider: {
-    width: 1,
-    height: 40,
-    marginHorizontal: 4,
+  brandLogoText: {
+    fontSize: 18,
+    fontWeight: '800',
+    fontFamily: 'LexendDeca_700Bold',
   },
-  certRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 12,
-    gap: 6,
+  heroTextCol: {
+    flex: 1,
   },
-  certChip: {
+  heroTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    fontFamily: 'LexendDeca_700Bold',
+  },
+  taglineRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
+    marginTop: 2,
   },
-  specialtiesRow: {
+  heroTagline: {
+    fontSize: 12.5,
+    color: 'rgba(255,255,255,0.85)',
+    fontFamily: 'LexendDeca_500Medium',
+  },
+  heroPillsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    marginTop: 10,
-    gap: 6,
+    marginTop: 8,
   },
-  specialtyChip: {
-    paddingHorizontal: 10,
+  heroPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    paddingHorizontal: 9,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  heroPillText: {
+    color: '#FFFFFF',
+    fontSize: 10.5,
+    fontWeight: '700',
+    fontFamily: 'LexendDeca_600SemiBold',
   },
 
-  // ─── Category Chips ───
-  chipScroll: {
-    marginTop: 16,
+  // 2. White Sheet Body
+  whiteContentContainer: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -22,
+    paddingTop: 16,
   },
-  chipScrollContainer: {
-    paddingHorizontal: SPACING.lg,
-    gap: 8,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1.5,
-  },
-  chipCountBadge: {
-    marginLeft: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 8,
-  },
-
-  // ─── Section ───
-  sectionContainer: {
-    marginTop: 20,
-    paddingBottom: 4,
-  },
-  sectionHeaderRow: {
+  descriptionCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    marginBottom: 12,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
   },
-  sectionHeaderLeft: {
+  descTextCol: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  descParagraph: {
+    fontSize: 11.5,
+    lineHeight: 17,
+  },
+  buildingThumbnail: {
+    width: 90,
+    height: 72,
+    borderRadius: 12,
+  },
+
+  // Key Metrics
+  metricsRow: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginTop: 12,
+    gap: 8,
+  },
+  metricCard: {
+    flex: 1,
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    alignItems: 'flex-start',
+  },
+  metricIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  metricLabel: {
+    fontSize: 9.5,
+  },
+  metricValue: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+
+  // Certifications
+  certificationsBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'space-around',
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderWidth: 1,
   },
-  sectionIconBg: {
+  certItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  certDivider: {
+    width: 1,
+    height: 16,
+  },
+
+  // Specialties
+  specialtiesSection: {
+    marginHorizontal: 16,
+    marginTop: 14,
+  },
+  specialtiesTitle: {
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  specialtiesPillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 7,
+  },
+  specialtyPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 16,
+  },
+  specialtyPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    fontFamily: 'LexendDeca_600SemiBold',
+  },
+
+  // 3. Filter Tabs
+  filterTabsScroll: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  categoryFilterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  categoryFilterText: {
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: 'LexendDeca_600SemiBold',
+  },
+  categoryFilterBadge: {
+    marginLeft: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 10,
+  },
+  categoryFilterBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    fontFamily: 'LexendDeca_700Bold',
+  },
+
+  // 4. Featured Section
+  featuredSectionContainer: {
+    marginTop: 10,
+  },
+  featuredSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
+  featuredHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  starIconBox: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // ─── Product Card ───
-  productCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  discountBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    zIndex: 2,
-  },
-  rxBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    borderRadius: 4,
-    borderWidth: 1,
-    zIndex: 2,
-  },
-  productImageContainer: {
-    height: 110,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  productImage: {
-    width: '65%',
-    height: '75%',
-  },
-  productInfo: {
-    padding: 10,
+  horizontalProductsScroll: {
+    paddingHorizontal: 16,
     paddingBottom: 6,
   },
-  productName: {
-    fontSize: 12,
-    lineHeight: 16,
-    marginTop: 2,
-    minHeight: 32,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  mrpText: {
-    fontSize: 10,
-    textDecorationLine: 'line-through',
-    marginLeft: 6,
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 3,
-  },
-  cartBtnContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
-  },
-  addBtn: {
-    borderWidth: 1.5,
-    borderRadius: 8,
-    paddingVertical: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  qtyRow: {
-    flexDirection: 'row',
-    borderRadius: 8,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 
-  // ─── Grid ───
+  allProductsSection: {
+    marginTop: 14,
+    paddingHorizontal: 16,
+  },
+  activeFilterTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  allProductsHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  gridIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: SPACING.lg,
+    justifyContent: 'space-between',
   },
-
-  // ─── Empty ───
   emptyState: {
+    paddingVertical: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 40,
+  },
+
+  // 6. Trust Pillars
+  trustPillarsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
+    marginTop: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  trustPillarCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  pillarTitle: {
+    fontSize: 9.5,
+    textAlign: 'center',
+  },
+  pillarSubtitle: {
+    fontSize: 8,
+    marginTop: 1,
+    textAlign: 'center',
+  },
+  pillarDivider: {
+    width: 1,
+    height: 28,
   },
 });

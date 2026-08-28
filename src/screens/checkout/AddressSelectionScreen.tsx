@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,12 +17,15 @@ import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
 import { AppText } from '../../components/common/AppText';
 import { Ionicons } from '@expo/vector-icons';
 import { useAddress } from '../../store/AddressContext';
+import { useToast } from '../../store/ToastContext';
 import { useAppTheme } from '../../store/ThemeContext';
 import { Address } from '../../types/user';
+import { shareAddressViaApp } from '../../utils/addressShareUtils';
 
 export const AddressSelectionScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { colors, isDark } = useAppTheme();
+  const { showToast } = useToast();
   const route = useRoute<RouteProp<AppStackParamList, 'AddressSelection'>>();
   const isSelectingForCheckout = route.params?.isSelectingForCheckout || false;
 
@@ -78,9 +82,13 @@ export const AddressSelectionScreen: React.FC = () => {
 
   const handleOptionsMenu = (address: Address) => {
     Alert.alert(
-      'Manage Address',
-      `${address.recipientName}\n${address.houseFlatNumber}, ${address.streetAddress}`,
+      address.recipientName,
+      `${address.houseFlatNumber}, ${address.streetAddress}${address.landmark ? `, Near ${address.landmark}` : ''}, ${address.city}`,
       [
+        {
+          text: 'Share Address 📲',
+          onPress: () => shareAddressViaApp(address),
+        },
         {
           text: 'Edit Address',
           onPress: () => navigation.navigate('AddEditAddress', { address }),
@@ -99,6 +107,7 @@ export const AddressSelectionScreen: React.FC = () => {
                   style: 'destructive',
                   onPress: async () => {
                     await deleteAddress(address.id);
+                    showToast('Address deleted', 'info');
                   },
                 },
               ]
@@ -273,9 +282,12 @@ export const AddressSelectionScreen: React.FC = () => {
                     </AppText>
                   </View>
 
-                  {/* Right Column: Options Dots */}
+                  {/* Right Column: Meatballs / 3-dots Menu (Includes Share, Edit, Delete) */}
                   <TouchableOpacity
-                    onPress={() => handleOptionsMenu(address)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleOptionsMenu(address);
+                    }}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     style={styles.optionsBtn}
                   >
